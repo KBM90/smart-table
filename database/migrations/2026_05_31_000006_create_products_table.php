@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->cascadeOnDelete()->index();
+            $table->unsignedBigInteger('tenant_id');
             $table->string('name');
             $table->text('description')->nullable();
             $table->integer('price_cents');
@@ -21,8 +21,13 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->index('tenant_id', 'products_tenant_id_idx');
             $table->index(['tenant_id', 'is_active', 'sort_order']);
             $table->unique(['tenant_id', 'name']);
+            $table->foreign('tenant_id', 'products_tenant_id_foreign')
+                ->references('id')
+                ->on('tenants')
+                ->cascadeOnDelete();
         });
     }
 
