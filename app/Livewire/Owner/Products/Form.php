@@ -1,0 +1,161 @@
+<?php
+
+namespace App\Livewire\Owner\Products;
+
+use App\Models\Product;
+use App\Services\ProductImageService;
+use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\Response;
+use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
+
+class Form extends Component
+{
+    use WithFileUploads;
+
+    public ?int $productId = null;
+
+    public string $name = '';
+
+    public string $description = '';
+
+    public string $price = '';
+
+    public bool $isActive = true;
+
+    public int $sortOrder = 0;
+
+    public string $imageSource = Product::IMAGE_SOURCE_NONE;
+
+    public ?TemporaryUploadedFile $upload = null;
+
+    public ?string $selectedLibraryImage = null;
+
+    public function mount(?int $productId = null): void
+    {
+        $this->productId = $productId;
+
+        if ($productId === null) {
+            $this->authorize('create', Product::class);
+            return;
+        }
+
+        $product = Product::query()->find($productId);
+        abort_if($product === null, Response::HTTP_NOT_FOUND);
+        $this->authorize('update', $product);
+
+        $this->name = $product->name;
+        $this->description = (string) $product->description;
+        $this->price = $product->priceFormatted();
+        $this->isActive = $product->is_active;
+        $this->sortOrder = $product->sort_order;
+        $this->imageSource = $product->image_source;
+        $this->selectedLibraryImage = $product->image_source === Product::IMAGE_SOURCE_LIBRARY
+            ? $product->image_path
+            : null;
+    }
+
+    public function updatedImageSource(string $value): void
+    {
+        if ($value !== Product::IMAGE_SOURCE_UPLOAD) {
+            $this->upload = null;
+        }
+
+        if ($value !== Product::IMAGE_SOURCE_LIBRARY) {
+            $this->selectedLibraryImage = null;
+        }
+    }
+
+    public function save(ProductImageService $productImageService): void
+    {
+        if ($this->productId === null) {
+            $this->authorize('create', Product::class);
+        }
+
+        $validated = $this->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('products', 'name')
+                    ->where(fn ($query) => $query->where('tenant_id', auth()->user()->tenant_id)->whereNull('deleted_at'))
+                    ->ignore($this->productId),
+            ],
+            'description' => ['nullable', 'string'],
+            'price' => ['required', 'regex:/^\d{1,6}(\.\d{1,2})?$/'],
+            'isActive' => ['required', 'boolean'],
+            'sortOrder' => ['required', 'integer', 'min:0', 'max:9999'],
+            'imageSource' => ['required', Rule::in([
+                Product::IMAGE_SOURCE_NONE,
+                Product::IMAGE_SOURCE_UPLOAD,
+                Product::IMAGE_SOURCE_LIBRARY,
+            ])],
+            'selectedLibraryImage' => ['nullable', 'string'],
+        ], [
+            'price.regex' => 'Price must be a valid amount like 12.50.',
+        ]);
+
+        $product = $this->productId === null
+            ? new Product(['tenant_id' => auth()->user()->tenant_id])
+            : Product::query()->find($this->productId);
+
+        abort_if($product === null, Response::HTTP_NOT_FOUND);
+
+        $product->setRelation('tenant', auth()->user()->tenant);
+
+        if ($this->productId !== null) {
+            $this->authorize('update', $product);
+        }
+
+        $product->forceFill([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?: null,
+            'price_cents' => (int) round(((float) $validated['price']) * 100),
+            'is_active' => $validated['isActive'],
+            'sort_order' => $validated['sortOrder'],
+        ]);
+
+        $productImageService->applyToProduct(
+            $product,
+            $validated['imageSource'],
+            $validated['selectedLibraryImage'],
+            $this->upload
+        );
+
+        $product->save();
+
+        $this->dispatch('product-saved', productId: $product->id);
+    }
+
+    public function render()
+    {
+        $existingProduct = $this->productId ? Product::query()->find($this->productId) : null;
+
+        return view('livewire.owner.products.form', [
+            'libraryImages' => config('image_library'),
+            'previewUrl' => $this->previewUrl($existingProduct),
+        ]);
+    }
+
+    protected function previewUrl(?Product $existingProduct): string
+    {
+        if ($this->imageSource === Product::IMAGE_SOURCE_UPLOAD && $this->upload !== null) {
+            if (str_starts_with((string) $this->upload->getMimeType(), 'image/')) {
+                return $this->upload->temporaryUrl();
+            }
+
+            return asset('img/library/_placeholder.png');
+        }
+
+        if ($this->imageSource === Product::IMAGE_SOURCE_LIBRARY && $this->selectedLibraryImage !== null) {
+            return asset('img/library/'.basename($this->selectedLibraryImage));
+        }
+
+        if ($existingProduct !== null) {
+            return $existingProduct->imageUrl();
+        }
+
+        return asset('img/library/_placeholder.png');
+    }
+}
