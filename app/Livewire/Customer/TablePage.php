@@ -74,6 +74,21 @@ class TablePage extends Component
         // Mark the table occupied now that a customer has actively engaged
         $session->table()->withoutGlobalScopes()->first()?->markOccupied();
 
+        // Resolve any old pending/accepted requests for this table (across all sessions)
+        // so only the latest request stays active
+        ServiceRequest::withoutGlobalScopes()
+            ->whereHas('tableSession', function ($query) {
+                $query->where('table_id', $this->tableId);
+            })
+            ->whereIn('status', [
+                ServiceRequest::STATUS_PENDING,
+                ServiceRequest::STATUS_ACCEPTED,
+            ])
+            ->update([
+                'status' => ServiceRequest::STATUS_RESOLVED,
+                'resolved_at' => now(),
+            ]);
+
         $request = ServiceRequest::withoutGlobalScopes()->create([
             'tenant_id' => $session->tenant_id,
             'table_session_id' => $session->getKey(),

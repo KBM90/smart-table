@@ -29,18 +29,34 @@
     @elseif ($activeRequest)
         <section 
             @if (config('services.supabase.url') && config('services.supabase.realtime_anon_enabled')) wire:poll.10s="refreshRequestStatus" @else wire:poll.3s="refreshRequestStatus" @endif 
-            class="rounded-3xl border border-amber-500/40 bg-gradient-to-br from-amber-600/25 to-amber-950/30 p-8 shadow-2xl shadow-amber-950/30 backdrop-blur-md transition-all duration-500"
+            @class([
+                'rounded-3xl border p-8 shadow-2xl backdrop-blur-md transition-all duration-500',
+                'border-emerald-500/40 bg-gradient-to-br from-emerald-600/25 to-emerald-950/30 shadow-emerald-950/30' => $activeRequest->status === \App\Models\ServiceRequest::STATUS_ACCEPTED,
+                'border-amber-500/40 bg-gradient-to-br from-amber-600/25 to-amber-950/30 shadow-amber-950/30' => $activeRequest->status !== \App\Models\ServiceRequest::STATUS_ACCEPTED,
+            ])
         >
-            <p class="text-sm font-medium uppercase tracking-[0.3em] text-amber-400">Smart Table</p>
+            <p @class([
+                'text-sm font-medium uppercase tracking-[0.3em]',
+                'text-emerald-400' => $activeRequest->status === \App\Models\ServiceRequest::STATUS_ACCEPTED,
+                'text-amber-400' => $activeRequest->status !== \App\Models\ServiceRequest::STATUS_ACCEPTED,
+            ])>Smart Table</p>
             <h1 class="mt-4 text-3xl font-semibold text-white">{{ $tenantName }} — Table {{ $tableName }}</h1>
             
             <div class="mt-6 space-y-6">
-                <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6">
-                    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-amber-300">Request status</p>
+                <div @class([
+                    'rounded-2xl border p-6',
+                    'border-emerald-500/30 bg-emerald-500/10' => $activeRequest->status === \App\Models\ServiceRequest::STATUS_ACCEPTED,
+                    'border-amber-500/30 bg-amber-500/10' => $activeRequest->status !== \App\Models\ServiceRequest::STATUS_ACCEPTED,
+                ])>
+                    <p @class([
+                        'text-xs font-semibold uppercase tracking-[0.25em]',
+                        'text-emerald-300' => $activeRequest->status === \App\Models\ServiceRequest::STATUS_ACCEPTED,
+                        'text-amber-300' => $activeRequest->status !== \App\Models\ServiceRequest::STATUS_ACCEPTED,
+                    ])>Request status</p>
 
                     <div
                         class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
-                        x-data="{ elapsed: {{ now()->diffInSeconds($activeRequest->created_at) }}, timer: null, init() { this.timer = setInterval(() => this.elapsed++, 1000) }, destroy() { clearInterval(this.timer) } }"
+                        x-data="{ elapsed: {{ intval(now()->diffInSeconds($activeRequest->created_at)) }}, timer: null, init() { this.timer = setInterval(() => this.elapsed++, 1000) }, destroy() { clearInterval(this.timer) }, formatTime(seconds) { const m = Math.floor(seconds / 60); const s = seconds % 60; return m > 0 ? m + 'm ' + s + 's' : s + 's'; } }"
                     >
                         <div>
                             <p class="text-2xl font-semibold text-white">
@@ -50,17 +66,19 @@
                                     Waiting for a waiter… Please wait.
                                 @endif
                             </p>
-                            <p class="mt-2 text-sm text-amber-200/80">
-                                Time waiting: 
-                                <span class="font-mono text-base font-bold text-white bg-amber-500/20 px-2 py-0.5 rounded">
-                                    <span x-text="Math.floor(elapsed / 60)"></span>m <span x-text="elapsed % 60"></span>s
-                                </span>
-                            </p>
+                            @if ($activeRequest->status !== \App\Models\ServiceRequest::STATUS_ACCEPTED)
+                                <p class="mt-2 text-sm text-amber-200/80">
+                                    Time waiting:
+                                    <span class="font-mono text-base font-bold text-white bg-amber-500/20 px-2 py-0.5 rounded" x-text="formatTime(elapsed)"></span>
+                                </p>
+                            @endif
                         </div>
 
-                        <button wire:click="cancelRequest" type="button" class="rounded-xl border border-rose-500/40 bg-rose-950/20 px-5 py-3 text-sm font-semibold text-rose-100 transition hover:border-rose-400 hover:bg-rose-950/40 hover:text-white">
-                            Cancel request
-                        </button>
+                        @if ($activeRequest->status !== \App\Models\ServiceRequest::STATUS_ACCEPTED)
+                            <button wire:click="cancelRequest" type="button" class="rounded-xl border border-rose-500/40 bg-rose-950/20 px-5 py-3 text-sm font-semibold text-rose-100 transition hover:border-rose-400 hover:bg-rose-950/40 hover:text-white">
+                                Cancel request
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -74,8 +92,9 @@
                 <p class="text-sm text-slate-300">Need help? Call a waiter from your table session.</p>
 
                 <div class="flex flex-col gap-3">
-                    <button wire:click="callWaiter" type="button" class="inline-flex justify-center rounded-xl bg-amber-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 shadow-lg shadow-amber-500/20 active:scale-95">
-                        Call Waiter
+                    <button wire:click="callWaiter" wire:loading.attr="disabled" wire:target="callWaiter" type="button" class="inline-flex items-center justify-center rounded-xl bg-amber-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="callWaiter">Call Waiter</span>
+                        <span wire:loading wire:target="callWaiter">Calling…</span>
                     </button>
                 </div>
             </div>
