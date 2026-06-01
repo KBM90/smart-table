@@ -12,7 +12,7 @@ class CustomerSessionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_free_table_route_creates_session_sets_cookie_and_marks_table_occupied(): void
+    public function test_free_table_route_creates_session_sets_cookie_and_does_not_mark_table_occupied(): void
     {
         $table = Table::factory()->create([
             'name' => 'Deck 7',
@@ -31,7 +31,7 @@ class CustomerSessionTest extends TestCase
         $this->assertSame(TableSession::STATUS_ACTIVE, $session->status);
         $this->assertDatabaseHas('tables', [
             'id' => $table->id,
-            'status' => Table::STATUS_OCCUPIED,
+            'status' => Table::STATUS_FREE,
         ]);
     }
 
@@ -57,6 +57,8 @@ class CustomerSessionTest extends TestCase
         $table = Table::factory()->create();
 
         $this->get('/t/'.$table->qr_token)->assertOk();
+
+        $table->markOccupied();
 
         $this->get('/t/'.$table->qr_token)
             ->assertOk()

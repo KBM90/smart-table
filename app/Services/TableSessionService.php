@@ -23,23 +23,34 @@ class TableSessionService
                 ->first();
 
             if ($activeSession !== null) {
-                // If the table status is free but a session is still marked active,
-                // it is an orphaned/stale session (e.g. customer left without the owner
-                // explicitly closing it). Close it silently and start a new one.
+                // If it is the same customer (matching cookie), always resume the session,
+                // regardless of whether the table is currently free or occupied.
+                $matches = $sessionTokenFromCookie !== null
+                    && hash_equals($activeSession->session_token, $sessionTokenFromCookie);
+
+                if ($matches) {
+                    return [
+                        'session' => $activeSession,
+                        'isNew'   => false,
+                        'blocked' => false,
+                    ];
+                }
+
+                // If the cookie does not match:
                 if ($lockedTable->status === Table::STATUS_FREE) {
+                    // Since the table is free, the active session is orphaned/stale
+                    // (e.g. previous customer scanned but never called a waiter and left).
+                    // Close it silently so we can start a new one.
                     $activeSession->forceFill([
                         'status'   => TableSession::STATUS_CLOSED,
                         'ended_at' => now(),
                     ])->save();
                 } else {
-                    // Table is genuinely occupied — only the same customer (matching cookie) may resume
-                    $matches = $sessionTokenFromCookie !== null
-                        && hash_equals($activeSession->session_token, $sessionTokenFromCookie);
-
+                    // Table is genuinely occupied by another device. Block the new device.
                     return [
                         'session' => $activeSession,
                         'isNew'   => false,
-                        'blocked' => ! $matches,
+                        'blocked' => true,
                     ];
                 }
             }
