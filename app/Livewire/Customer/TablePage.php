@@ -71,6 +71,9 @@ class TablePage extends Component
             return;
         }
 
+        // Mark the table occupied now that a customer has actively engaged
+        $session->table()->withoutGlobalScopes()->first()?->markOccupied();
+
         $request = ServiceRequest::withoutGlobalScopes()->create([
             'tenant_id' => $session->tenant_id,
             'table_session_id' => $session->getKey(),

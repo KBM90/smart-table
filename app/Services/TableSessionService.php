@@ -40,8 +40,6 @@ class TableSessionService
                 'started_at' => now(),
             ]);
 
-            $lockedTable->markOccupied();
-
             return [
                 'session' => $session,
                 'isNew' => true,
