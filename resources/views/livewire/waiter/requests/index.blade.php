@@ -2,17 +2,21 @@
     x-data="{
         handle: null,
         init() {
-            this.handle = window.AppRealtime.onRequestChange(
-                { tenantId: {{ auth()->user()->tenant_id }} },
-                (payload) => {
-                    if (window.AppRealtimeFilters.shouldRefreshWaiterList(payload)) {
-                        window.dispatchEvent(new CustomEvent('waiter-requests-refresh'));
-                    }
-                },
-            );
+            if (window.AppRealtime && typeof window.AppRealtime.onRequestChange === 'function') {
+                this.handle = window.AppRealtime.onRequestChange(
+                    { tenantId: {{ auth()->user()->tenant_id }} },
+                    (payload) => {
+                        if (window.AppRealtimeFilters && typeof window.AppRealtimeFilters.shouldRefreshWaiterList === 'function' && window.AppRealtimeFilters.shouldRefreshWaiterList(payload)) {
+                            window.dispatchEvent(new CustomEvent('waiter-requests-refresh'));
+                        }
+                    },
+                );
+            }
         },
         destroy() {
-            window.AppRealtime.unsubscribe(this.handle);
+            if (this.handle && window.AppRealtime && typeof window.AppRealtime.unsubscribe === 'function') {
+                window.AppRealtime.unsubscribe(this.handle);
+            }
         },
     }"
     x-on:waiter-requests-refresh.window="$wire.dispatch('refresh')"

@@ -2,13 +2,17 @@
     x-data="{
         handle: null,
         init() {
-            this.handle = window.AppRealtime.onRequestChange(
-                { tableSessionId: {{ $sessionId }} },
-                () => window.dispatchEvent(new CustomEvent('customer-request-status-refresh')),
-            );
+            if (window.AppRealtime && typeof window.AppRealtime.onRequestChange === 'function') {
+                this.handle = window.AppRealtime.onRequestChange(
+                    { tableSessionId: {{ $sessionId }} },
+                    () => window.dispatchEvent(new CustomEvent('customer-request-status-refresh')),
+                );
+            }
         },
         destroy() {
-            window.AppRealtime.unsubscribe(this.handle);
+            if (this.handle && window.AppRealtime && typeof window.AppRealtime.unsubscribe === 'function') {
+                window.AppRealtime.unsubscribe(this.handle);
+            }
         },
     }"
     x-on:customer-request-status-refresh.window="$wire.dispatch('refresh-status')"

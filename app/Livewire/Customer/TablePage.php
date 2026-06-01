@@ -198,7 +198,7 @@ class TablePage extends Component
             '/',
             null,
             null,
-            true,
+            config('session.secure', false),
             false,
             'lax'
         );

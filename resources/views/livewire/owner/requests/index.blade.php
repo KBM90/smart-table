@@ -2,13 +2,17 @@
     x-data="{
         handle: null,
         init() {
-            this.handle = window.AppRealtime.onRequestChange(
-                { tenantId: {{ auth()->user()->tenant_id }} },
-                () => window.dispatchEvent(new CustomEvent('owner-requests-refresh')),
-            );
+            if (window.AppRealtime && typeof window.AppRealtime.onRequestChange === 'function') {
+                this.handle = window.AppRealtime.onRequestChange(
+                    { tenantId: {{ auth()->user()->tenant_id }} },
+                    () => window.dispatchEvent(new CustomEvent('owner-requests-refresh')),
+                );
+            }
         },
         destroy() {
-            window.AppRealtime.unsubscribe(this.handle);
+            if (this.handle && window.AppRealtime && typeof window.AppRealtime.unsubscribe === 'function') {
+                window.AppRealtime.unsubscribe(this.handle);
+            }
         },
     }"
     x-on:owner-requests-refresh.window="$wire.dispatch('refresh')"
