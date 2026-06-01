@@ -1,5 +1,26 @@
 <?php
 
+$supabaseS3CaBundle = env('SUPABASE_S3_CA_BUNDLE');
+$supabaseS3Endpoint = env('SUPABASE_S3_ENDPOINT');
+
+if (is_string($supabaseS3Endpoint) && preg_match('#^https://([a-z0-9-]+)\.supabase\.co/storage/v1/s3/?$#i', $supabaseS3Endpoint, $matches) === 1) {
+    $supabaseS3Endpoint = 'https://'.$matches[1].'.storage.supabase.co/storage/v1/s3';
+}
+
+if (! $supabaseS3CaBundle) {
+    foreach ([
+        'C:\\Program Files\\Git\\mingw64\\ssl\\certs\\ca-bundle.crt',
+        'C:\\Program Files\\Git\\usr\\ssl\\certs\\ca-bundle.crt',
+        'C:\\Program Files\\Git\\mingw64\\bin\\curl-ca-bundle.crt',
+        'C:\\xampp\\apache\\bin\\curl-ca-bundle.crt',
+    ] as $candidate) {
+        if (is_file($candidate)) {
+            $supabaseS3CaBundle = $candidate;
+            break;
+        }
+    }
+}
+
 return [
 
     /*
@@ -70,8 +91,14 @@ return [
             'secret' => env('SUPABASE_S3_SECRET'),
             'region' => env('SUPABASE_REGION', config('services.supabase.region', 'us-east-1')),
             'bucket' => env('SUPABASE_BUCKET'),
-            'endpoint' => env('SUPABASE_S3_ENDPOINT'),
+            'endpoint' => $supabaseS3Endpoint,
+            'url' => env('SUPABASE_URL') && env('SUPABASE_BUCKET')
+                ? rtrim(env('SUPABASE_URL'), '/').'/storage/v1/object/public/'.env('SUPABASE_BUCKET')
+                : null,
             'use_path_style_endpoint' => true,
+            'http' => [
+                'verify' => $supabaseS3CaBundle ?: true,
+            ],
             'throw' => false,
             'report' => false,
         ],
