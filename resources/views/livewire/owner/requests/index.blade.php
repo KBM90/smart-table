@@ -44,7 +44,26 @@
                                 {{ ucfirst($request->status) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm text-slate-300">{{ $request->created_at->diffForHumans(null, true) }}</td>
+                        <td 
+                            class="px-6 py-4 text-sm text-slate-300 font-mono"
+                            x-data="{ 
+                                elapsed: {{ now()->diffInSeconds($request->created_at) }},
+                                timer: null,
+                                init() { 
+                                    this.timer = setInterval(() => this.elapsed++, 1000); 
+                                },
+                                destroy() { 
+                                    clearInterval(this.timer); 
+                                },
+                                formatTime(seconds) {
+                                    const m = Math.floor(seconds / 60);
+                                    const s = seconds % 60;
+                                    return `${m}m ${s}s`;
+                                }
+                            }"
+                        >
+                            <span x-text="formatTime(elapsed)"></span>
+                        </td>
                         <td class="px-6 py-4 text-xs text-slate-400" title="Session {{ $request->tableSession->id }}">
                             View session
                         </td>

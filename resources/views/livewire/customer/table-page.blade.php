@@ -43,7 +43,7 @@
                                 @if ($activeRequest->status === \App\Models\ServiceRequest::STATUS_ACCEPTED)
                                     Accepted by {{ $activeRequest->acceptedBy?->name ?? 'a waiter' }}
                                 @else
-                                    Please wait, a waiter has been called…
+                                    Waiting for a waiter… Please wait.
                                 @endif
                             </p>
                             <p class="mt-2 text-sm text-amber-200/80">
