@@ -14,10 +14,6 @@
     x-on:customer-request-status-refresh.window="$wire.dispatch('refresh-status')"
     class="space-y-6"
 >
-    <section class="rounded-3xl border border-slate-800 bg-slate-900 p-8 shadow-2xl shadow-slate-950/50">
-        <p class="text-sm font-medium uppercase tracking-[0.3em] text-amber-400">Smart Table</p>
-        <h1 class="mt-4 text-3xl font-semibold text-white">{{ $tenantName }} — Table {{ $tableName }}</h1>
-
     @if ($blocked)
         <section class="rounded-3xl border border-rose-500/30 bg-rose-500/10 p-8 shadow-2xl shadow-rose-950/20">
             <p class="text-sm font-medium uppercase tracking-[0.3em] text-rose-400">Smart Table</p>
@@ -97,5 +93,4 @@
             </div>
         </section>
     @endif
-    </section>
 </div>
