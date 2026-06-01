@@ -23,14 +23,25 @@ class TableSessionService
                 ->first();
 
             if ($activeSession !== null) {
-                $matches = $sessionTokenFromCookie !== null
-                    && hash_equals($activeSession->session_token, $sessionTokenFromCookie);
+                // If the table status is free but a session is still marked active,
+                // it is an orphaned/stale session (e.g. customer left without the owner
+                // explicitly closing it). Close it silently and start a new one.
+                if ($lockedTable->status === Table::STATUS_FREE) {
+                    $activeSession->forceFill([
+                        'status'   => TableSession::STATUS_CLOSED,
+                        'ended_at' => now(),
+                    ])->save();
+                } else {
+                    // Table is genuinely occupied — only the same customer (matching cookie) may resume
+                    $matches = $sessionTokenFromCookie !== null
+                        && hash_equals($activeSession->session_token, $sessionTokenFromCookie);
 
-                return [
-                    'session' => $activeSession,
-                    'isNew' => false,
-                    'blocked' => ! $matches,
-                ];
+                    return [
+                        'session' => $activeSession,
+                        'isNew'   => false,
+                        'blocked' => ! $matches,
+                    ];
+                }
             }
 
             $session = TableSession::withoutGlobalScopes()->create([
