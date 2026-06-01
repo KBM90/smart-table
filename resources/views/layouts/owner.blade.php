@@ -21,7 +21,7 @@
                     <div class="flex items-center gap-8">
                         <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">Owner</p>
-                        <p class="mt-1 text-lg font-semibold">{{ auth()->user()->tenant?->name }}</p>
+                        <p class="mt-1 text-lg font-semibold">{{ app(\App\Support\CurrentTenant::class)->tenant()?->name }}</p>
                         </div>
 
                         <nav class="flex items-center gap-3 text-sm">

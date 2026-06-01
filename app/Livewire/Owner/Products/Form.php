@@ -4,6 +4,7 @@ namespace App\Livewire\Owner\Products;
 
 use App\Models\Product;
 use App\Services\ProductImageService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 use Livewire\Component;
@@ -123,7 +124,13 @@ class Form extends Component
             $this->upload
         );
 
-        $product->save();
+        try {
+            $product->save();
+        } catch (UniqueConstraintViolationException) {
+            $this->addError('name', 'A product with this name already exists for your restaurant.');
+
+            return;
+        }
 
         $this->dispatch('product-saved', productId: $product->id);
     }

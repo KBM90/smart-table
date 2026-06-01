@@ -16,18 +16,26 @@ class CurrentTenant
 
     public function tenant(): ?Tenant
     {
+        if ($this->tenant === null) {
+            $this->resolveFromAuth();
+        }
+
         return $this->tenant;
     }
 
     public function id(): ?int
     {
+        if ($this->tenant !== null) {
+            return $this->tenant->getKey();
+        }
+
         $user = Auth::user();
 
         if ($user !== null && method_exists($user, 'tenant')) {
             return $this->resolveFromAuth()?->getKey();
         }
 
-        return $this->tenant?->getKey();
+        return null;
     }
 
     public function clear(): void

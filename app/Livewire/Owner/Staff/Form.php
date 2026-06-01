@@ -4,6 +4,8 @@ namespace App\Livewire\Owner\Staff;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
 
@@ -28,19 +30,32 @@ class Form extends Component
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')
+                    ->where(fn ($query) => $query->where('tenant_id', auth()->user()->tenant_id)->whereNull('deleted_at')),
+            ],
             'password' => ['required', 'confirmed', Password::min(8)],
             'password_confirmation' => ['required', 'string'],
         ]);
 
-        User::create([
-            'tenant_id' => auth()->user()->tenant_id,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => $validated['password'],
-            'role' => UserRole::Waiter->value,
-            'email_verified_at' => now(),
-        ]);
+        try {
+            User::create([
+                'tenant_id' => auth()->user()->tenant_id,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+                'role' => UserRole::Waiter->value,
+                'email_verified_at' => now(),
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            $this->addError('email', 'A user with this email already exists.');
+
+            return;
+        }
 
         $this->reset(['name', 'email', 'password', 'password_confirmation']);
 

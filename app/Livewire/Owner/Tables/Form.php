@@ -3,6 +3,7 @@
 namespace App\Livewire\Owner\Tables;
 
 use App\Models\Table;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 use Livewire\Component;
@@ -49,18 +50,24 @@ class Form extends Component
             ],
         ]);
 
-        if ($this->tableId === null) {
-            $table = Table::query()->create([
-                'name' => $validated['name'],
-                'status' => Table::STATUS_FREE,
-            ]);
-        } else {
-            $table = Table::query()->find($this->tableId);
-            abort_if($table === null, Response::HTTP_NOT_FOUND);
-            $this->authorize('update', $table);
-            $table->update([
-                'name' => $validated['name'],
-            ]);
+        try {
+            if ($this->tableId === null) {
+                $table = Table::query()->create([
+                    'name' => $validated['name'],
+                    'status' => Table::STATUS_FREE,
+                ]);
+            } else {
+                $table = Table::query()->find($this->tableId);
+                abort_if($table === null, Response::HTTP_NOT_FOUND);
+                $this->authorize('update', $table);
+                $table->update([
+                    'name' => $validated['name'],
+                ]);
+            }
+        } catch (UniqueConstraintViolationException) {
+            $this->addError('name', 'A table with this name already exists for your restaurant.');
+
+            return;
         }
 
         $this->dispatch('table-saved', tableId: $table->id);
