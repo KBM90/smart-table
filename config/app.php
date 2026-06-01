@@ -99,7 +99,15 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    'key' => env('APP_KEY'),
+    'key' => value(function (): ?string {
+        $key = env('APP_KEY');
+
+        if (! is_string($key)) {
+            return $key;
+        }
+
+        return trim(strtok($key, '#') ?: '');
+    }),
 
     'previous_keys' => [
         ...array_filter(
