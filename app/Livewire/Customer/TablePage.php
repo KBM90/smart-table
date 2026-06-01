@@ -52,7 +52,7 @@ class TablePage extends Component
         $this->tenantName = $table->tenant->name;
         $this->blocked = $result['blocked'];
 
-        if (! $this->blocked) {
+        if (!$this->blocked) {
             Cookie::queue($this->sessionCookie($session->session_token));
             $this->syncActiveRequest();
         }
@@ -137,23 +137,37 @@ class TablePage extends Component
     public function render()
     {
         $activeRequest = null;
+        $requestsAhead = 0; // Track the queue position
 
         if ($this->activeRequestId !== null) {
             $activeRequest = ServiceRequest::withoutGlobalScopes()
                 ->with('acceptedBy')
                 ->find($this->activeRequestId);
 
-            if ($activeRequest !== null && in_array($activeRequest->status, [
-                ServiceRequest::STATUS_RESOLVED,
-                ServiceRequest::STATUS_CANCELLED,
-            ], true)) {
+            if (
+                $activeRequest !== null && in_array($activeRequest->status, [
+                    ServiceRequest::STATUS_RESOLVED,
+                    ServiceRequest::STATUS_CANCELLED,
+                ], true)
+            ) {
                 $activeRequest = null;
                 $this->activeRequestId = null;
+            } else if ($activeRequest !== null) {
+                // Calculate how many pending/accepted requests were created BEFORE this one
+                $requestsAhead = ServiceRequest::withoutGlobalScopes()
+                    ->where('tenant_id', $activeRequest->tenant_id)
+                    ->whereIn('status', [
+                        ServiceRequest::STATUS_PENDING,
+                        ServiceRequest::STATUS_ACCEPTED,
+                    ])
+                    ->where('created_at', '<', $activeRequest->created_at)
+                    ->count();
             }
         }
 
         return view('livewire.customer.table-page', [
             'activeRequest' => $activeRequest,
+            'requestsAhead' => $requestsAhead,
         ]);
     }
 
@@ -161,7 +175,7 @@ class TablePage extends Component
     {
         $session = TableSession::withoutGlobalScopes()->find($this->sessionId);
 
-        if ($session === null || ! $session->isActive()) {
+        if ($session === null || !$session->isActive()) {
             $this->activeRequestId = null;
             Cookie::queue(Cookie::forget(self::SESSION_COOKIE));
 
