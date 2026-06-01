@@ -1,6 +1,5 @@
 import './bootstrap';
 
-import Alpine from 'alpinejs';
 import {
     onRequestChange,
     onSessionChange,
@@ -8,7 +7,7 @@ import {
     unsubscribe,
 } from './realtime';
 
-window.Alpine = Alpine;
+
 window.AppRealtime = {
     onRequestChange,
     onSessionChange,
@@ -18,4 +17,4 @@ window.AppRealtimeFilters = {
     shouldRefreshWaiterList,
 };
 
-Alpine.start();
+
