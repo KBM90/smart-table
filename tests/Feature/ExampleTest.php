@@ -13,6 +13,11 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertRedirect('/login');
+        $response
+            ->assertOk()
+            ->assertSee('Smart Table')
+            ->assertSee('Get started')
+            ->assertSee('Features')
+            ->assertSee('How it works');
     }
 }

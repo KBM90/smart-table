@@ -1,0 +1,26 @@
+﻿HTTP/1.1 302 Found
+Host: 127.0.0.1:8000
+Date: Mon, 01 Jun 2026 01:25:45 GMT
+Connection: close
+X-Powered-By: PHP/8.2.6
+Cache-Control: no-cache, private
+Date: Mon, 01 Jun 2026 01:25:44 GMT
+Location: http://127.0.0.1:8000/dashboard
+Content-Type: text/html; charset=utf-8
+X-RateLimit-Limit: 3
+X-RateLimit-Remaining: 2
+Set-Cookie: XSRF-TOKEN=eyJpdiI6Ikt3U1ExVmpOR1U0d01aaHcyak9PM3c9PSIsInZhbHVlIjoicVlSRmtBVC94bjd4VWVDRkpYaEx6Q3c5eEREVkNZVkJNRlZkdGp6YittSEdYRUZRV1BJaktOcVZPRTE1K2Nqb25TUWpudTIya3BWQkhEMHQvOVQ5VHVMbkh1aXl0eDN3R2NWOGt4UE5JSnd2R2F3MDMvRVhqUjVRcDRVWG1VSWIiLCJtYWMiOiJjOTdkZTFkMDc5NTQxNTI0ZjQ3ZGQ3Zjg2MjNmNDYzMzRkODdiNTI4YTdmMWUwZDhiZDhhZDI2NDE0MGMyYzMzIiwidGFnIjoiIn0%3D; expires=Mon, 01 Jun 2026 03:25:45 GMT; Max-Age=7200; path=/; samesite=lax
+Set-Cookie: smart-table-session=eyJpdiI6InBGYk9kT2lGNzZwV3YvSkRqN0RkNlE9PSIsInZhbHVlIjoiNDhlZG5WQVBVSlgzWVpWcjUrQkI0a3pjdm9lOU50MGlSUVFxU2E0N0RnOEdGUDJNcjNYRTBJWGFRbU41MjNMOTl0QmFOSGU3NERWLzBsMjM5cDVULzc1bEcraTBjUkExZUwwRVZuWDNpSTNzbHp1V05qZkdrL0xuWUJtamcvNTciLCJtYWMiOiI5NDQ5ZTdmNjU0YjkxM2I3NjRkN2U0NTAzMTllNzg4NDhlYjRkZjlhYTM1MmY3ZTRjZDdmZTExZGM4OWQ1NWQ0IiwidGFnIjoiIn0%3D; expires=Mon, 01 Jun 2026 03:25:45 GMT; Max-Age=7200; path=/; httponly; samesite=lax
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content="0;url='http://127.0.0.1:8000/dashboard'" />
+
+        <title>Redirecting to http://127.0.0.1:8000/dashboard</title>
+    </head>
+    <body>
+        Redirecting to <a href="http://127.0.0.1:8000/dashboard">http://127.0.0.1:8000/dashboard</a>.
+    </body>
+</html>
