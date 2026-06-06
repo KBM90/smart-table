@@ -23,35 +23,68 @@
         <header class="border-b border-slate-200/80 bg-white/70 backdrop-blur-md sticky top-0 z-50">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
                 <div class="flex items-center gap-8">
+
                     <div>
                         <p
                             class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
-                            Owner Dashboard</p>
+                            Owner Dashboard
+                        </p>
                         <p class="mt-1 text-lg font-black text-slate-900">
                             {{ app(\App\Support\CurrentTenant::class)->tenant()?->name }}
                         </p>
                     </div>
+
+                    @php
+                        $navLinks = [
+                            ['label' => 'Dashboard', 'route' => 'owner.dashboard', 'match' => 'owner.dashboard'],
+                            ['label' => 'Tables', 'route' => 'owner.tables.index', 'match' => 'owner.tables.*'],
+                            ['label' => 'Products', 'route' => 'owner.products.index', 'match' => 'owner.products.*'],
+                            ['label' => 'Staff', 'route' => 'owner.staff.index', 'match' => 'owner.staff.*'],
+                            ['label' => 'Requests', 'route' => 'owner.requests.index', 'match' => 'owner.requests.*'],
+                        ];
+                    @endphp
+
                     <nav class="hidden md:flex items-center gap-1 font-semibold text-sm">
-                        <a href="{{ route('owner.dashboard') }}"
-                            class="rounded-xl px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Dashboard</a>
-                        <a href="{{ route('owner.tables.index') }}"
-                            class="rounded-xl px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Tables</a>
-                        <a href="{{ route('owner.products.index') }}"
-                            class="rounded-xl px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Products</a>
-                        <a href="{{ route('owner.staff.index') }}"
-                            class="rounded-xl px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Staff</a>
-                        <a href="{{ route('owner.requests.index') }}"
-                            class="rounded-xl px-3 py-2 text-indigo-600 bg-indigo-50/60 border border-indigo-100/40">Requests</a>
+                        @foreach ($navLinks as $link)
+                                            <a href="{{ route($link['route']) }}" class="rounded-xl px-3 py-2 transition
+                                                          {{ request()->routeIs($link['match'])
+                            ? 'text-indigo-600 bg-indigo-50/60 border border-indigo-100/40'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                                                {{ $link['label'] }}
+                                            </a>
+                        @endforeach
                     </nav>
+
                 </div>
 
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                        class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 shadow-sm shadow-slate-100">
-                        Logout
-                    </button>
-                </form>
+                <div class="flex items-center gap-3">
+                    {{-- Mobile nav --}}
+                    <div x-data="{ open: false }" class="relative md:hidden">
+                        <button @click="open = !open" type="button"
+                            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm">
+                            Menu
+                        </button>
+                        <div x-show="open" @click.outside="open = false" x-transition
+                            class="absolute right-0 mt-2 w-44 rounded-2xl border border-slate-200 bg-white py-2 shadow-xl">
+                            @foreach ($navLinks as $link)
+                                                    <a href="{{ route($link['route']) }}" class="block px-4 py-2 text-sm font-semibold transition
+                                                                  {{ request()->routeIs($link['match'])
+                                ? 'text-indigo-600 bg-indigo-50'
+                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                                        {{ $link['label'] }}
+                                                    </a>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 shadow-sm shadow-slate-100">
+                            Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         </header>
 
@@ -62,7 +95,10 @@
                 @yield('content')
             @endisset
         </main>
+
     </div>
+
+    @livewireScripts
 </body>
 
 </html>
