@@ -85,12 +85,28 @@ class ServiceRequest extends Model
 
     public function cancel(): void
     {
-        if (! in_array($this->status, [self::STATUS_PENDING, self::STATUS_ACCEPTED], true)) {
+        if (!in_array($this->status, [self::STATUS_PENDING, self::STATUS_ACCEPTED], true)) {
             return;
         }
 
         $this->forceFill([
             'status' => self::STATUS_CANCELLED,
         ])->save();
+
+        // If no other active requests remain for this table, mark it free.
+        $session = $this->tableSession()->withoutGlobalScopes()->first();
+
+        if ($session === null) {
+            return;
+        }
+
+        $hasOtherActiveRequests = self::withoutGlobalScopes()
+            ->whereHas('tableSession', fn($q) => $q->where('table_id', $session->table_id))
+            ->whereIn('status', [self::STATUS_PENDING, self::STATUS_ACCEPTED])
+            ->exists();
+
+        if (!$hasOtherActiveRequests) {
+            $session->table()->withoutGlobalScopes()->first()?->markFreeKeepSession();
+        }
     }
 }

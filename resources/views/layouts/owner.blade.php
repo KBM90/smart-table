@@ -28,9 +28,12 @@
                             class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
                             Owner Dashboard</p>
                         <p class="mt-1 text-lg font-black text-slate-900">
-                            {{ app(\App\Support\CurrentTenant::class)->tenant()?->name }}</p>
+                            {{ app(\App\Support\CurrentTenant::class)->tenant()?->name }}
+                        </p>
                     </div>
                     <nav class="hidden md:flex items-center gap-1 font-semibold text-sm">
+                        <a href="{{ route('owner.dashboard') }}"
+                            class="rounded-xl px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Dashboard</a>
                         <a href="{{ route('owner.tables.index') }}"
                             class="rounded-xl px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Tables</a>
                         <a href="{{ route('owner.products.index') }}"

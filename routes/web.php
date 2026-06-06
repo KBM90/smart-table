@@ -3,6 +3,9 @@
 use App\Enums\UserRole;
 use App\Http\Controllers\Owner\TableQrCodeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Owner\DashboardController;
+
+
 use App\Livewire\Customer\Catalog as CustomerCatalog;
 use App\Livewire\Customer\TablePage as CustomerTablePage;
 use App\Livewire\Owner\Products\Index as OwnerProductsIndex;
@@ -19,11 +22,11 @@ Route::view('/', 'welcome')->name('welcome');
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();
 
-    if (! $user) {
+    if (!$user) {
         return redirect()->route('login');
     }
 
-    if (! $user->tenant_id || $user->role === null) {
+    if (!$user->tenant_id || $user->role === null) {
         abort(403);
     }
 
@@ -36,8 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'tenant', 'role:'.UserRole::Owner->value])->prefix('owner')->name('owner.')->group(function () {
-    Route::view('/dashboard', 'owner.dashboard')->name('dashboard');
+Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix('owner')->name('owner.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/tables', OwnerTablesIndex::class)->name('tables.index');
     Route::get('/products', OwnerProductsIndex::class)->name('products.index');
     Route::get('/staff', OwnerStaffIndex::class)->name('staff.index');
@@ -45,7 +48,7 @@ Route::middleware(['auth', 'tenant', 'role:'.UserRole::Owner->value])->prefix('o
     Route::get('/requests', OwnerRequestsIndex::class)->name('requests.index');
 });
 
-Route::middleware(['auth', 'tenant', 'role:'.UserRole::Waiter->value])->prefix('waiter')->name('waiter.')->group(function () {
+Route::middleware(['auth', 'tenant', 'role:' . UserRole::Waiter->value])->prefix('waiter')->name('waiter.')->group(function () {
     Route::get('/dashboard', WaiterRequestsIndex::class)->name('dashboard');
     Route::get('/requests', WaiterRequestsIndex::class)->name('requests.index');
 });
@@ -54,4 +57,9 @@ Route::get('/t/{qr_token}/catalog', CustomerCatalog::class)->name('customer.cata
 
 Route::get('/t/{qr_token}', CustomerTablePage::class)->name('customer.table');
 
-require __DIR__.'/auth.php';
+use App\Http\Controllers\Customers\CustomerRequestController;
+
+Route::post('/api/table/request', [CustomerRequestController::class, 'store'])->name('customer.request.store');
+Route::delete('/api/table/request/{id}', [CustomerRequestController::class, 'cancel'])->name('customer.request.cancel');
+
+require __DIR__ . '/auth.php';

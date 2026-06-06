@@ -90,6 +90,17 @@ class Table extends Model
         }
     }
 
+    /**
+     * Reset the table status to free without closing the active session.
+     * Used when a customer cancels their request but is still seated.
+     */
+    public function markFreeKeepSession(): void
+    {
+        if ($this->status !== self::STATUS_FREE) {
+            $this->forceFill(['status' => self::STATUS_FREE])->save();
+        }
+    }
+
     public function resolveRouteBindingQuery($query, $value, $field = null): Builder
     {
         return parent::resolveRouteBindingQuery($query, $value, $field)->whereNull($this->getQualifiedDeletedAtColumn());

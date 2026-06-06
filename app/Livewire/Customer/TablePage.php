@@ -137,11 +137,13 @@ class TablePage extends Component
     public function render()
     {
         $activeRequest = null;
-        $requestsAhead = 0; // Track the queue position
+        $requestsAhead = 0;
+        $status = $this->blocked ? 'blocked' : 'idle';
+        $requestId = null;
+        $elapsedSeconds = 0;
 
-        if ($this->activeRequestId !== null) {
+        if (!$this->blocked && $this->activeRequestId !== null) {
             $activeRequest = ServiceRequest::withoutGlobalScopes()
-                ->with('acceptedBy')
                 ->find($this->activeRequestId);
 
             if (
@@ -152,8 +154,7 @@ class TablePage extends Component
             ) {
                 $activeRequest = null;
                 $this->activeRequestId = null;
-            } else if ($activeRequest !== null) {
-                // Calculate how many pending/accepted requests were created BEFORE this one
+            } elseif ($activeRequest !== null) {
                 $requestsAhead = ServiceRequest::withoutGlobalScopes()
                     ->where('tenant_id', $activeRequest->tenant_id)
                     ->whereIn('status', [
@@ -162,12 +163,19 @@ class TablePage extends Component
                     ])
                     ->where('created_at', '<', $activeRequest->created_at)
                     ->count();
+
+                $status = $activeRequest->status; // 'pending' or 'accepted'
+                $requestId = $activeRequest->getKey();
+                $elapsedSeconds = (int) now()->diffInSeconds($activeRequest->created_at);
             }
         }
 
         return view('livewire.customer.table-page', [
             'activeRequest' => $activeRequest,
             'requestsAhead' => $requestsAhead,
+            'status' => $status,
+            'requestId' => $requestId,
+            'elapsedSeconds' => $elapsedSeconds,
         ]);
     }
 
