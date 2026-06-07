@@ -14,46 +14,6 @@
             class="pointer-events-none absolute left-1/3 top-1/2 h-[18rem] w-[18rem] rounded-full bg-amber-200/20 blur-[90px]">
         </div>
 
-        {{-- ── Hero / Welcome ─────────────────────────────────────────────────────── --}}
-        <section
-            class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/60 p-8 shadow-2xl shadow-indigo-100/50 backdrop-blur-xl">
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div>
-                    <div class="flex items-center gap-2.5">
-                        <span
-                            class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 border border-indigo-200 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-700 shadow-sm">
-                            <span class="relative flex h-2 w-2">
-                                <span
-                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
-                            </span>
-                            Control Center
-                        </span>
-                    </div>
-                    <h1 class="mt-5 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl drop-shadow-sm">
-                        Welcome back,
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">
-                            {{ Auth::user()->name }}
-                        </span>
-                    </h1>
-                    <p class="mt-3 text-sm leading-relaxed text-slate-600 max-w-xl font-medium">
-                        Monitor live floor activity, answer client calls instantly, and track today's turnover rates from
-                        your central hub.
-                    </p>
-                </div>
-
-                <div class="shrink-0">
-                    <a href="{{ route('owner.requests.index') }}"
-                        class="group inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-4 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300">
-                        <span>Open Live Queue</span>
-                        <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </section>
 
         {{-- ── Stat Cards ──────────────────────────────────────────────────────────── --}}
         <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -153,6 +113,9 @@
             </div>
 
         </section>
+
+        {{-- ── Live Table Requests ──────────────────────────────────────────────────── --}}
+        <livewire:owner.dashboard-requests />
 
         {{-- ── Quick Nav Cards ──────────────────────────────────────────────────────── --}}
         <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
