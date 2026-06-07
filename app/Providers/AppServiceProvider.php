@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\ServiceRequest;
 use App\Models\Table;
 use App\Models\TableSession;
 use App\Models\User;
+use App\Policies\ProductCategoryPolicy;
 use App\Policies\ProductPolicy;
 use App\Policies\ServiceRequestPolicy;
 use App\Policies\TablePolicy;
@@ -36,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Table::class, TablePolicy::class);
         Gate::policy(Product::class, ProductPolicy::class);
+        Gate::policy(ProductCategory::class, ProductCategoryPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(ServiceRequest::class, ServiceRequestPolicy::class);
         Gate::policy(TableSession::class, TableSessionPolicy::class);

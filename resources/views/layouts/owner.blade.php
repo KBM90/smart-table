@@ -39,6 +39,7 @@
                             ['label' => 'Dashboard', 'route' => 'owner.dashboard', 'match' => 'owner.dashboard'],
                             ['label' => 'Tables', 'route' => 'owner.tables.index', 'match' => 'owner.tables.*'],
                             ['label' => 'Products', 'route' => 'owner.products.index', 'match' => 'owner.products.*'],
+                            ['label' => 'Categories', 'route' => 'owner.categories.index', 'match' => 'owner.categories.*'],
                             ['label' => 'Staff', 'route' => 'owner.staff.index', 'match' => 'owner.staff.*'],
                             ['label' => 'Requests', 'route' => 'owner.requests.index', 'match' => 'owner.requests.*'],
                         ];

@@ -3,6 +3,7 @@
 namespace App\Livewire\Owner\Products;
 
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Services\ProductImageService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rule;
@@ -16,6 +17,8 @@ class Form extends Component
     use WithFileUploads;
 
     public ?int $productId = null;
+
+    public ?int $categoryId = null;
 
     public string $name = '';
 
@@ -46,12 +49,13 @@ class Form extends Component
         abort_if($product === null, Response::HTTP_NOT_FOUND);
         $this->authorize('update', $product);
 
-        $this->name = $product->name;
-        $this->description = (string) $product->description;
-        $this->price = $product->priceFormatted();
-        $this->isActive = $product->is_active;
-        $this->sortOrder = $product->sort_order;
-        $this->imageSource = $product->image_source;
+        $this->name          = $product->name;
+        $this->description   = (string) $product->description;
+        $this->price         = $product->priceFormatted();
+        $this->isActive      = $product->is_active;
+        $this->sortOrder     = $product->sort_order;
+        $this->categoryId    = $product->category_id;
+        $this->imageSource   = $product->image_source;
         $this->selectedLibraryImage = $product->image_source === Product::IMAGE_SOURCE_LIBRARY
             ? $product->image_path
             : null;
@@ -84,9 +88,10 @@ class Form extends Component
                     ->ignore($this->productId),
             ],
             'description' => ['nullable', 'string'],
-            'price' => ['required', 'regex:/^\d{1,6}(\.\d{1,2})?$/'],
-            'isActive' => ['required', 'boolean'],
-            'sortOrder' => ['required', 'integer', 'min:0', 'max:9999'],
+            'price'       => ['required', 'regex:/^\d{1,6}(\.\d{1,2})?$/'],
+            'isActive'    => ['required', 'boolean'],
+            'sortOrder'   => ['required', 'integer', 'min:0', 'max:9999'],
+            'categoryId'  => ['nullable', 'integer', 'exists:product_categories,id'],
             'imageSource' => ['required', Rule::in([
                 Product::IMAGE_SOURCE_NONE,
                 Product::IMAGE_SOURCE_UPLOAD,
@@ -110,11 +115,12 @@ class Form extends Component
         }
 
         $product->forceFill([
-            'name' => $validated['name'],
+            'name'        => $validated['name'],
             'description' => $validated['description'] ?: null,
             'price_cents' => (int) round(((float) $validated['price']) * 100),
-            'is_active' => $validated['isActive'],
-            'sort_order' => $validated['sortOrder'],
+            'is_active'   => $validated['isActive'],
+            'sort_order'  => $validated['sortOrder'],
+            'category_id' => $validated['categoryId'] ?? null,
         ]);
 
         $productImageService->applyToProduct(
@@ -138,10 +144,12 @@ class Form extends Component
     public function render()
     {
         $existingProduct = $this->productId ? Product::query()->find($this->productId) : null;
+        $categories      = ProductCategory::query()->get();
 
         return view('livewire.owner.products.form', [
             'libraryImages' => config('image_library'),
-            'previewUrl' => $this->previewUrl($existingProduct),
+            'previewUrl'    => $this->previewUrl($existingProduct),
+            'categories'    => $categories,
         ]);
     }
 
