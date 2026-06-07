@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ServiceRequest;
 use App\Models\Table;
 use App\Models\TableSession;
 use Illuminate\Support\Facades\DB;
@@ -88,6 +89,12 @@ class TableSessionService
                     'status' => TableSession::STATUS_CLOSED,
                     'ended_at' => now(),
                 ])->save();
+
+                // Cancel all unresolved requests for the closed session.
+                ServiceRequest::withoutGlobalScopes()
+                    ->where('table_session_id', $lockedSession->getKey())
+                    ->whereIn('status', [ServiceRequest::STATUS_PENDING, ServiceRequest::STATUS_ACCEPTED])
+                    ->update(['status' => ServiceRequest::STATUS_CANCELLED]);
             }
 
             if ($lockedTable !== null) {

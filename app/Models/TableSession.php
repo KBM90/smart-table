@@ -78,6 +78,11 @@ class TableSession extends Model
             'ended_at' => now(),
         ])->save();
 
+        // Cancel all unresolved requests for this session.
+        $this->requests()
+            ->whereIn('status', [ServiceRequest::STATUS_PENDING, ServiceRequest::STATUS_ACCEPTED])
+            ->update(['status' => ServiceRequest::STATUS_CANCELLED]);
+
         $this->table()->update(['status' => Table::STATUS_FREE]);
     }
 }
