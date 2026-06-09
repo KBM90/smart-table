@@ -101,7 +101,7 @@
                     <div>
                         <input wire:model.live="upload" type="file" accept="image/png,image/jpeg,image/webp"
                             class="block w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-500 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-950">
-                        <p class="mt-2 text-xs text-slate-400">Accepted: JPG, PNG, WEBP up to 4 MB and at least 256x256.</p>
+                        <p class="mt-2 text-xs text-slate-400">Accepted: JPG, PNG, WEBP up to 4 MB and at least 256×256.</p>
                         @error('upload')
                             <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
                         @enderror
@@ -110,9 +110,14 @@
                     <div>
                         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                             @foreach ($libraryImages as $image)
+                                {{--
+                                $image['url'] is resolved by the Livewire component via
+                                LibraryImage::url($image['key']) before being passed to the view.
+                                $image['key'] is stored in the database (Unsplash photo ID).
+                                --}}
                                 <button wire:click="$set('selectedLibraryImage', '{{ $image['key'] }}')" type="button"
                                     class="overflow-hidden rounded-2xl border {{ $selectedLibraryImage === $image['key'] ? 'border-amber-400' : 'border-slate-800' }}">
-                                    <img src="{{ asset('img/library/' . basename($image['key'])) }}" alt="{{ $image['label'] }}"
+                                    <img src="{{ $image['url'] }}" alt="{{ $image['label'] }}" loading="lazy"
                                         class="h-24 w-full object-cover">
                                     <span
                                         class="block px-2 py-2 text-xs font-medium text-slate-200">{{ $image['label'] }}</span>

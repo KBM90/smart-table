@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToTenant;
+use App\Support\LibraryImage;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,9 +18,7 @@ class Product extends Model
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     public const IMAGE_SOURCE_NONE = 'none';
-
     public const IMAGE_SOURCE_UPLOAD = 'upload';
-
     public const IMAGE_SOURCE_LIBRARY = 'library';
 
     protected $fillable = [
@@ -74,7 +73,11 @@ class Product extends Model
             self::IMAGE_SOURCE_UPLOAD => $this->image_path
             ? Storage::disk(config('filesystems.product_disk'))->url($this->image_path)
             : asset('img/library/_placeholder.png'),
-            self::IMAGE_SOURCE_LIBRARY => asset('img/library/' . basename((string) $this->image_path)),
+
+                // Library keys are now Unsplash photo IDs; LibraryImage::url()
+                // also handles legacy local paths transparently.
+            self::IMAGE_SOURCE_LIBRARY => LibraryImage::url($this->image_path),
+
             default => asset('img/library/_placeholder.png'),
         };
     }

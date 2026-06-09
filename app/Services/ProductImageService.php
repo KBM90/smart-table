@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\Tenant;
+use App\Support\LibraryImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -15,7 +16,7 @@ class ProductImageService
     {
         $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-        if (! in_array($file->getMimeType(), $allowedMimeTypes, true)) {
+        if (!in_array($file->getMimeType(), $allowedMimeTypes, true)) {
             throw ValidationException::withMessages([
                 'upload' => 'The upload must be a JPG, PNG, or WEBP image.',
             ]);
@@ -41,8 +42,8 @@ class ProductImageService
         $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg');
 
         return $file->storeAs(
-            'products/'.$tenant->getKey(),
-            Str::uuid()->toString().'.'.$extension,
+            'products/' . $tenant->getKey(),
+            Str::uuid()->toString() . '.' . $extension,
             config('filesystems.product_disk')
         );
     }
@@ -59,7 +60,7 @@ class ProductImageService
             : null;
 
         if ($source === Product::IMAGE_SOURCE_UPLOAD) {
-            if (! $upload instanceof UploadedFile) {
+            if (!$upload instanceof UploadedFile) {
                 throw ValidationException::withMessages([
                     'upload' => 'Please choose an image to upload.',
                 ]);
@@ -86,9 +87,10 @@ class ProductImageService
         }
 
         if ($source === Product::IMAGE_SOURCE_LIBRARY) {
-            $library = collect(config('image_library'))->pluck('label', 'key');
-
-            if (! $key || ! $library->has($key)) {
+            // Validate that the submitted key exists in the configured library.
+            // LibraryImage::exists() checks config('image_library') so it
+            // automatically works with any key format (local paths, photo IDs…).
+            if (!$key || !LibraryImage::exists($key)) {
                 throw ValidationException::withMessages([
                     'selectedLibraryImage' => 'Please choose a valid library image.',
                 ]);

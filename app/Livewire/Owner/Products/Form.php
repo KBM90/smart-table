@@ -5,6 +5,7 @@ namespace App\Livewire\Owner\Products;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\ProductImageService;
+use App\Support\LibraryImage;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,6 +57,7 @@ class Form extends Component
         $this->sortOrder = $product->sort_order;
         $this->imageSource = $product->image_source;
         $this->categoryId = $product->category_id;
+
         $this->selectedLibraryImage = $product->image_source === Product::IMAGE_SOURCE_LIBRARY
             ? $product->image_path
             : null;
@@ -98,7 +100,7 @@ class Form extends Component
                     Product::IMAGE_SOURCE_NONE,
                     Product::IMAGE_SOURCE_UPLOAD,
                     Product::IMAGE_SOURCE_LIBRARY,
-                ])
+                ]),
             ],
             'selectedLibraryImage' => ['nullable', 'string'],
         ], [
@@ -138,7 +140,6 @@ class Form extends Component
             $product->save();
         } catch (UniqueConstraintViolationException) {
             $this->addError('name', 'A product with this name already exists for your restaurant.');
-
             return;
         }
 
@@ -149,9 +150,16 @@ class Form extends Component
     {
         $existingProduct = $this->productId ? Product::query()->find($this->productId) : null;
 
+        // Enrich each library entry with a resolved display URL so the blade
+        // template never has to know how keys map to URLs.
+        $libraryImages = array_map(
+            fn(array $entry) => array_merge($entry, ['url' => LibraryImage::url($entry['key'])]),
+            LibraryImage::all(),
+        );
+
         return view('livewire.owner.products.form', [
             'categories' => Category::all(),
-            'libraryImages' => config('image_library'),
+            'libraryImages' => $libraryImages,
             'previewUrl' => $this->previewUrl($existingProduct),
         ]);
     }
@@ -167,7 +175,8 @@ class Form extends Component
         }
 
         if ($this->imageSource === Product::IMAGE_SOURCE_LIBRARY && $this->selectedLibraryImage !== null) {
-            return asset('img/library/' . basename($this->selectedLibraryImage));
+            // Resolve via LibraryImage — works for both photo IDs and legacy paths.
+            return LibraryImage::url($this->selectedLibraryImage);
         }
 
         if ($existingProduct !== null) {
