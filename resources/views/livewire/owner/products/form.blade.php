@@ -29,10 +29,8 @@
             <label for="product-price"
                 class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Price</label>
             <div class="relative">
-                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                    <span class="text-slate-400 sm:text-sm">$</span>
-                </div>
-                <input wire:model.blur="price" id="product-price" type="text" inputmode="decimal" placeholder="12.50"
+
+                <input wire:model.blur="price" id="product-price" type="text" inputmode="decimal" placeholder="12.50 DH"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-8 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
             </div>
             @error('price')
