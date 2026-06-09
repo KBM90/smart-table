@@ -55,7 +55,7 @@ class Product extends Model
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(ProductCategory::class, 'category_id');
+        return $this->belongsTo(Category::class);
     }
 
     public function scopeActive(Builder $query): Builder
@@ -72,9 +72,9 @@ class Product extends Model
     {
         return match ($this->image_source) {
             self::IMAGE_SOURCE_UPLOAD => $this->image_path
-                ? Storage::disk(config('filesystems.product_disk'))->url($this->image_path)
-                : asset('img/library/_placeholder.png'),
-            self::IMAGE_SOURCE_LIBRARY => asset('img/library/'.basename((string) $this->image_path)),
+            ? Storage::disk(config('filesystems.product_disk'))->url($this->image_path)
+            : asset('img/library/_placeholder.png'),
+            self::IMAGE_SOURCE_LIBRARY => asset('img/library/' . basename((string) $this->image_path)),
             default => asset('img/library/_placeholder.png'),
         };
     }

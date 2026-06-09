@@ -6,6 +6,8 @@ use App\Models\Table;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Database\Seeders\CategorySeeder; // ← add this
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,6 +16,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(CategorySeeder::class); // ← add this line
+
         $tenantA = Tenant::factory()->create([
             'name' => 'Smoke Cafe A',
             'slug' => 'smoke-cafe-a',
@@ -48,5 +52,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Table B1',
             'status' => Table::STATUS_FREE,
         ]);
+
+
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Owner\Products;
 
+use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductCategory;
 use App\Services\ProductImageService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rule;
@@ -17,8 +17,6 @@ class Form extends Component
     use WithFileUploads;
 
     public ?int $productId = null;
-
-    public ?int $categoryId = null;
 
     public string $name = '';
 
@@ -36,6 +34,8 @@ class Form extends Component
 
     public ?string $selectedLibraryImage = null;
 
+    public ?int $categoryId = null;
+
     public function mount(?int $productId = null): void
     {
         $this->productId = $productId;
@@ -49,13 +49,13 @@ class Form extends Component
         abort_if($product === null, Response::HTTP_NOT_FOUND);
         $this->authorize('update', $product);
 
-        $this->name          = $product->name;
-        $this->description   = (string) $product->description;
-        $this->price         = $product->priceFormatted();
-        $this->isActive      = $product->is_active;
-        $this->sortOrder     = $product->sort_order;
-        $this->categoryId    = $product->category_id;
-        $this->imageSource   = $product->image_source;
+        $this->name = $product->name;
+        $this->description = (string) $product->description;
+        $this->price = $product->priceFormatted();
+        $this->isActive = $product->is_active;
+        $this->sortOrder = $product->sort_order;
+        $this->imageSource = $product->image_source;
+        $this->categoryId = $product->category_id;
         $this->selectedLibraryImage = $product->image_source === Product::IMAGE_SOURCE_LIBRARY
             ? $product->image_path
             : null;
@@ -84,22 +84,26 @@ class Form extends Component
                 'string',
                 'max:255',
                 Rule::unique('products', 'name')
-                    ->where(fn ($query) => $query->where('tenant_id', auth()->user()->tenant_id)->whereNull('deleted_at'))
+                    ->where(fn($query) => $query->where('tenant_id', auth()->user()->tenant_id)->whereNull('deleted_at'))
                     ->ignore($this->productId),
             ],
             'description' => ['nullable', 'string'],
-            'price'       => ['required', 'regex:/^\d{1,6}(\.\d{1,2})?$/'],
-            'isActive'    => ['required', 'boolean'],
-            'sortOrder'   => ['required', 'integer', 'min:0', 'max:9999'],
-            'categoryId'  => ['nullable', 'integer', 'exists:product_categories,id'],
-            'imageSource' => ['required', Rule::in([
-                Product::IMAGE_SOURCE_NONE,
-                Product::IMAGE_SOURCE_UPLOAD,
-                Product::IMAGE_SOURCE_LIBRARY,
-            ])],
+            'price' => ['required', 'regex:/^\d{1,6}(\.\d{1,2})?$/'],
+            'isActive' => ['required', 'boolean'],
+            'sortOrder' => ['required', 'integer', 'min:0', 'max:9999'],
+            'categoryId' => ['nullable', 'integer', 'exists:categories,id'],
+            'imageSource' => [
+                'required',
+                Rule::in([
+                    Product::IMAGE_SOURCE_NONE,
+                    Product::IMAGE_SOURCE_UPLOAD,
+                    Product::IMAGE_SOURCE_LIBRARY,
+                ])
+            ],
             'selectedLibraryImage' => ['nullable', 'string'],
         ], [
             'price.regex' => 'Price must be a valid amount like 12.50.',
+            'categoryId.exists' => 'Please select a valid category.',
         ]);
 
         $product = $this->productId === null
@@ -115,12 +119,12 @@ class Form extends Component
         }
 
         $product->forceFill([
-            'name'        => $validated['name'],
+            'name' => $validated['name'],
             'description' => $validated['description'] ?: null,
             'price_cents' => (int) round(((float) $validated['price']) * 100),
-            'is_active'   => $validated['isActive'],
-            'sort_order'  => $validated['sortOrder'],
-            'category_id' => $validated['categoryId'] ?? null,
+            'is_active' => $validated['isActive'],
+            'sort_order' => $validated['sortOrder'],
+            'category_id' => $validated['categoryId'] ?: null,
         ]);
 
         $productImageService->applyToProduct(
@@ -144,12 +148,11 @@ class Form extends Component
     public function render()
     {
         $existingProduct = $this->productId ? Product::query()->find($this->productId) : null;
-        $categories      = ProductCategory::query()->get();
 
         return view('livewire.owner.products.form', [
+            'categories' => Category::all(),
             'libraryImages' => config('image_library'),
-            'previewUrl'    => $this->previewUrl($existingProduct),
-            'categories'    => $categories,
+            'previewUrl' => $this->previewUrl($existingProduct),
         ]);
     }
 
@@ -164,7 +167,7 @@ class Form extends Component
         }
 
         if ($this->imageSource === Product::IMAGE_SOURCE_LIBRARY && $this->selectedLibraryImage !== null) {
-            return asset('img/library/'.basename($this->selectedLibraryImage));
+            return asset('img/library/' . basename($this->selectedLibraryImage));
         }
 
         if ($existingProduct !== null) {
