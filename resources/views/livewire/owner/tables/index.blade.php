@@ -6,7 +6,7 @@
                     Owner Tables
                 </span>
                 <h1 class="mt-4 text-3xl font-black tracking-tight text-slate-900">Tables</h1>
-                <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 font-medium">Create tenant-scoped tables, preview their QR codes, and manage current availability.</p>
+                <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 font-medium">Create tenant-scoped tables, preview their QR codes, manage availability, and assign waiters.</p>
             </div>
 
             <button wire:click="createTable" type="button" class="shrink-0 group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300">
@@ -41,7 +41,7 @@
                 <table class="min-w-full text-left border-collapse">
                     <thead>
                         <tr class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 bg-slate-50/40">
-                            <th class="px-6 py-4">Name</th>
+                            <th class="px-6 py-4">Name & Waiters</th>
                             <th class="px-6 py-4">Status</th>
                             <th class="px-6 py-4">Public URL</th>
                             <th class="px-6 py-4 text-right">Actions</th>
@@ -50,11 +50,61 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($tables as $table)
                             <tr class="group/row transition-colors duration-200 hover:bg-slate-50/50">
-                                <td class="px-6 py-4 align-middle">
+                                {{-- Name + assigned waiters + assignment control --}}
+                                <td class="px-6 py-4 align-top min-w-[220px]">
                                     <p class="font-bold text-slate-800">{{ $table->name }}</p>
                                     <p class="mt-0.5 text-[10px] text-slate-400 font-mono">{{ $table->qr_token }}</p>
+
+                                    {{-- Assigned waiters --}}
+                                    @if ($table->assignedWaiters->isNotEmpty())
+                                        <div class="mt-2 flex flex-wrap gap-1.5">
+                                            @foreach ($table->assignedWaiters as $waiter)
+                                                <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-100 pl-2 pr-1 py-0.5 text-[10px] font-bold text-indigo-700">
+                                                    {{ $waiter->name }}
+                                                    <button
+                                                        wire:click="removeWaiter({{ $table->id }}, {{ $waiter->id }})"
+                                                        wire:confirm="Remove {{ $waiter->name }} from {{ $table->name }}?"
+                                                        type="button"
+                                                        class="flex h-4 w-4 items-center justify-center rounded-full hover:bg-indigo-200 transition-colors"
+                                                        title="Remove assignment"
+                                                    >
+                                                        <svg class="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+                                                        </svg>
+                                                    </button>
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <p class="mt-1.5 text-[10px] text-slate-400 italic">No waiters assigned</p>
+                                    @endif
+
+                                    {{-- Assign waiter control --}}
+                                    @if ($waiters->isNotEmpty())
+                                        <div class="mt-2 flex gap-1.5">
+                                            <select
+                                                wire:model="waiterSelectValues.{{ $table->id }}"
+                                                class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
+                                            >
+                                                <option value="">Add waiter…</option>
+                                                @foreach ($waiters as $waiter)
+                                                    @unless ($table->assignedWaiters->contains('id', $waiter->id))
+                                                        <option value="{{ $waiter->id }}">{{ $waiter->name }}</option>
+                                                    @endunless
+                                                @endforeach
+                                            </select>
+                                            <button
+                                                wire:click="assignWaiter({{ $table->id }})"
+                                                type="button"
+                                                class="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 transition-all"
+                                            >
+                                                Assign
+                                            </button>
+                                        </div>
+                                    @endif
                                 </td>
-                                <td class="px-6 py-4 align-middle">
+
+                                <td class="px-6 py-4 align-top">
                                     @if ($table->status === \App\Models\Table::STATUS_FREE)
                                         <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm">
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
@@ -67,10 +117,12 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 align-middle text-sm">
+
+                                <td class="px-6 py-4 align-top text-sm">
                                     <a href="{{ $table->getPublicUrl() }}" target="_blank" class="break-all text-indigo-600 hover:text-indigo-700 font-semibold hover:underline">{{ $table->getPublicUrl() }}</a>
                                 </td>
-                                <td class="px-6 py-4 align-middle">
+
+                                <td class="px-6 py-4 align-top">
                                     <div class="flex flex-wrap justify-end gap-1.5">
                                         <button wire:click="previewQr({{ $table->id }})" type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200">QR</button>
                                         <a href="{{ route('owner.tables.qr.download', $table) }}" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200">Download QR</a>

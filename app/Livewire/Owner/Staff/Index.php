@@ -65,11 +65,15 @@ class Index extends Component
         $waiters = User::query()
             ->where('tenant_id', auth()->user()->tenant_id)
             ->where('role', UserRole::Waiter->value)
+            ->with([
+                // Eager-load assigned tables so we can list them in the view.
+                'assignedTables' => fn($q) => $q->withoutGlobalScopes()->select('tables.id', 'tables.name'),
+            ])
             ->when($this->search !== '', function (Builder $query): void {
                 $query->where(function (Builder $nested): void {
                     $nested
-                        ->where('name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%');
+                        ->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('email', 'like', '%' . $this->search . '%');
                 });
             })
             ->latest('id')

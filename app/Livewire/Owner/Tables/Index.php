@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Owner\Tables;
 
+use App\Enums\UserRole;
 use App\Models\Table;
 use App\Models\TableSession;
+use App\Models\User;
 use App\Services\TableSessionService;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,6 +30,11 @@ class Index extends Component
     public bool $showForm = false;
 
     public bool $showQrPreview = false;
+
+    // ── Waiter assignment state ───────────────────────────────────────────────
+
+    /** tableId => selected waiter user_id to add (string for select binding) */
+    public array $waiterSelectValues = [];
 
     public function updatingSearch(): void
     {
@@ -108,16 +115,75 @@ class Index extends Component
         $this->showQrPreview = true;
     }
 
+    // ── Waiter assignment ─────────────────────────────────────────────────────
+
+    /**
+     * Assign the selected waiter to a table.
+     * Idempotent — pivot uses a composite primary key so duplicates are ignored.
+     */
+    public function assignWaiter(int $tableId): void
+    {
+        $table = Table::query()->find($tableId);
+        abort_if($table === null, Response::HTTP_NOT_FOUND);
+        $this->authorize('update', $table);
+
+        $waiterId = (int) ($this->waiterSelectValues[$tableId] ?? 0);
+
+        if ($waiterId === 0) {
+            return;
+        }
+
+        // Verify the waiter belongs to the same tenant.
+        $waiter = User::query()
+            ->where('id', $waiterId)
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->where('role', UserRole::Waiter->value)
+            ->first();
+
+        if ($waiter === null) {
+            return;
+        }
+
+        // syncWithoutDetaching prevents duplicates without removing existing ones.
+        $table->assignedWaiters()->syncWithoutDetaching([$waiter->getKey()]);
+
+        // Reset the select for this table.
+        $this->waiterSelectValues[$tableId] = '';
+    }
+
+    /**
+     * Remove a waiter assignment from a table.
+     */
+    public function removeWaiter(int $tableId, int $waiterId): void
+    {
+        $table = Table::query()->find($tableId);
+        abort_if($table === null, Response::HTTP_NOT_FOUND);
+        $this->authorize('update', $table);
+
+        $table->assignedWaiters()->detach($waiterId);
+    }
+
     public function render()
     {
         $tables = Table::query()
-            ->when($this->search !== '', fn (Builder $query) => $query->where('name', 'like', '%'.$this->search.'%'))
-            ->when($this->status !== '', fn (Builder $query) => $query->where('status', $this->status))
+            ->with([
+                'assignedWaiters:id,name',
+            ])
+            ->when($this->search !== '', fn(Builder $query) => $query->where('name', 'like', '%' . $this->search . '%'))
+            ->when($this->status !== '', fn(Builder $query) => $query->where('status', $this->status))
             ->latest()
             ->paginate(10);
 
+        // All waiters for this tenant — used to populate assignment dropdowns.
+        $waiters = User::query()
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->where('role', UserRole::Waiter->value)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return view('livewire.owner.tables.index', [
             'tables' => $tables,
+            'waiters' => $waiters,
             'statusOptions' => [
                 Table::STATUS_FREE => 'Free',
                 Table::STATUS_OCCUPIED => 'Occupied',

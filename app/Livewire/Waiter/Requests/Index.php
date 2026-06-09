@@ -39,15 +39,33 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.waiter.requests.index', [
-            'requests' => ServiceRequest::query()
+        $user = auth()->user();
+
+        // Check whether this waiter has any assigned tables at all.
+        $assignedTableIds = $user->assignedTables()
+            ->withoutGlobalScopes()
+            ->pluck('tables.id');
+
+        $hasAssignedTables = $assignedTableIds->isNotEmpty();
+
+        $requests = $hasAssignedTables
+            ? ServiceRequest::query()
                 ->with(['tableSession.table', 'acceptedBy'])
+                ->whereHas(
+                    'tableSession',
+                    fn($q) => $q->whereIn('table_id', $assignedTableIds)
+                )
                 ->whereIn('status', [
                     ServiceRequest::STATUS_PENDING,
                     ServiceRequest::STATUS_ACCEPTED,
                 ])
                 ->oldest('created_at')
-                ->get(),
+                ->get()
+            : collect();
+
+        return view('livewire.waiter.requests.index', [
+            'requests' => $requests,
+            'hasAssignedTables' => $hasAssignedTables,
         ]);
     }
 }
