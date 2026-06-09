@@ -67,7 +67,7 @@ class Index extends Component
         $this->authorize('update', $product);
 
         $product->forceFill([
-            'is_active' => ! $product->is_active,
+            'is_active' => !$product->is_active,
         ])->save();
     }
 
@@ -86,9 +86,12 @@ class Index extends Component
     public function render()
     {
         $products = Product::query()
-            ->when($this->search !== '', fn (Builder $query) => $query->where('name', 'like', '%'.$this->search.'%'))
-            ->when($this->activity === 'active', fn (Builder $query) => $query->where('is_active', true))
-            ->when($this->activity === 'inactive', fn (Builder $query) => $query->where('is_active', false))
+            // Only load the category relation — it's used in the table rows.
+            // Avoid loading all library/category data that belongs to the form.
+            ->with('category:id,name')
+            ->when($this->search !== '', fn(Builder $query) => $query->where('name', 'like', '%' . $this->search . '%'))
+            ->when($this->activity === 'active', fn(Builder $query) => $query->where('is_active', true))
+            ->when($this->activity === 'inactive', fn(Builder $query) => $query->where('is_active', false))
             ->paginate(10);
 
         return view('livewire.owner.products.index', [

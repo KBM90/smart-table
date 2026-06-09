@@ -1,4 +1,9 @@
-<form wire:submit="save" class="space-y-6">
+<form wire:submit="save" class="space-y-6" x-data="{
+          imageSource: @entangle('imageSource'),
+          get isUpload()  { return this.imageSource === '{{ \App\Models\Product::IMAGE_SOURCE_UPLOAD }}' },
+          get isLibrary() { return this.imageSource === '{{ \App\Models\Product::IMAGE_SOURCE_LIBRARY }}' },
+      }">
+
     <div class="grid gap-5">
         <div>
             <label for="product-name"
@@ -16,7 +21,7 @@
             <select wire:model="categoryId" id="product-category"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
                 <option value="">— No category —</option>
-                @foreach ($categories as $category)
+                @foreach ($this->categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                 @endforeach
             </select>
@@ -29,7 +34,6 @@
             <label for="product-price"
                 class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Price</label>
             <div class="relative">
-
                 <input wire:model.blur="price" id="product-price" type="text" inputmode="decimal" placeholder="12.50 DH"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-8 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
             </div>
@@ -59,9 +63,13 @@
                 @enderror
             </div>
 
+            {{--
+            No wire:model.live here — the checkbox state is purely local until save().
+            A server round-trip to toggle a boolean that only matters on submit is wasted latency.
+            --}}
             <label
                 class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition hover:bg-slate-100">
-                <input wire:model.live="isActive" type="checkbox"
+                <input wire:model="isActive" type="checkbox"
                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600">
                 <span class="text-sm font-semibold text-slate-700">Active product</span>
             </label>
@@ -72,24 +80,26 @@
         <div>
             <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Image Source</p>
             <div class="mt-2 grid gap-2 sm:grid-cols-3">
+                {{--
+                Use x-model (Alpine) on the radio group so switching panels is instant —
+                no server round-trip needed. @entangle keeps Livewire in sync so the
+                value is still available when the form submits.
+                --}}
                 <label
                     class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
-                    <input wire:model.live="imageSource" type="radio"
-                        value="{{ \App\Models\Product::IMAGE_SOURCE_NONE }}"
+                    <input x-model="imageSource" type="radio" value="{{ \App\Models\Product::IMAGE_SOURCE_NONE }}"
                         class="text-indigo-600 focus:ring-indigo-600">
                     <span>None</span>
                 </label>
                 <label
                     class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
-                    <input wire:model.live="imageSource" type="radio"
-                        value="{{ \App\Models\Product::IMAGE_SOURCE_UPLOAD }}"
+                    <input x-model="imageSource" type="radio" value="{{ \App\Models\Product::IMAGE_SOURCE_UPLOAD }}"
                         class="text-indigo-600 focus:ring-indigo-600">
                     <span>Upload</span>
                 </label>
                 <label
                     class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
-                    <input wire:model.live="imageSource" type="radio"
-                        value="{{ \App\Models\Product::IMAGE_SOURCE_LIBRARY }}"
+                    <input x-model="imageSource" type="radio" value="{{ \App\Models\Product::IMAGE_SOURCE_LIBRARY }}"
                         class="text-indigo-600 focus:ring-indigo-600">
                     <span>Library</span>
                 </label>
@@ -100,8 +110,9 @@
         </div>
 
         <div class="grid gap-5 lg:grid-cols-[100px_minmax(0,1fr)] items-start pt-2">
-            @if($previewUrl)
-                <img src="{{ $previewUrl }}" alt="Product preview"
+            {{-- Preview thumbnail --}}
+            @if($this->previewUrl)
+                <img src="{{ $this->previewUrl }}" alt="Product preview"
                     class="h-[100px] w-[100px] rounded-xl border border-slate-200 bg-white object-cover shadow-sm">
             @else
                 <div
@@ -115,39 +126,42 @@
             @endif
 
             <div>
-                @if ($imageSource === \App\Models\Product::IMAGE_SOURCE_UPLOAD)
-                    <div>
-                        <input wire:model.live="upload" type="file" accept="image/png,image/jpeg,image/webp"
-                            class="block w-full text-sm text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
-                        <p class="mt-2 text-xs text-slate-500">Accepted: JPG, PNG, WEBP up to 4 MB (Min: 256×256).</p>
-                        @error('upload')
-                            <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
-                        @enderror
+                {{-- Upload panel — shown/hidden by Alpine, no server round-trip --}}
+                <div x-show="isUpload" x-cloak>
+                    <input wire:model.live="upload" type="file" accept="image/png,image/jpeg,image/webp"
+                        class="block w-full text-sm text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
+                    <p class="mt-2 text-xs text-slate-500">Accepted: JPG, PNG, WEBP up to 4 MB (Min: 256×256).</p>
+                    @error('upload')
+                        <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Library panel — shown/hidden by Alpine, no server round-trip --}}
+                <div x-show="isLibrary" x-cloak>
+                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        @foreach ($this->libraryImages as $image)
+                            <button wire:click="$set('selectedLibraryImage', '{{ $image['key'] }}')" type="button"
+                                class="group relative overflow-hidden rounded-xl border-2 transition {{ $selectedLibraryImage === $image['key'] ? 'border-indigo-600 ring-2 ring-indigo-600/20' : 'border-transparent hover:border-slate-300' }}">
+                                <img src="{{ $image['url'] }}" alt="{{ $image['label'] }}" loading="lazy" width="160"
+                                    height="80"
+                                    class="h-20 w-full object-cover transition duration-300 group-hover:scale-105">
+                                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                                    <span
+                                        class="block truncate text-left text-[10px] font-medium text-white">{{ $image['label'] }}</span>
+                                </div>
+                            </button>
+                        @endforeach
                     </div>
-                @elseif ($imageSource === \App\Models\Product::IMAGE_SOURCE_LIBRARY)
-                    <div>
-                        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                            @foreach ($libraryImages as $image)
-                                <button wire:click="$set('selectedLibraryImage', '{{ $image['key'] }}')" type="button"
-                                    class="group relative overflow-hidden rounded-xl border-2 transition {{ $selectedLibraryImage === $image['key'] ? 'border-indigo-600 ring-2 ring-indigo-600/20' : 'border-transparent hover:border-slate-300' }}">
-                                    <img src="{{ $image['url'] }}" alt="{{ $image['label'] }}" loading="lazy"
-                                        class="h-20 w-full object-cover transition duration-300 group-hover:scale-105">
-                                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                                        <span
-                                            class="block truncate text-left text-[10px] font-medium text-white">{{ $image['label'] }}</span>
-                                    </div>
-                                </button>
-                            @endforeach
-                        </div>
-                        @error('selectedLibraryImage')
-                            <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
-                        @enderror
-                    </div>
-                @else
-                    <div class="flex h-full items-center">
-                        <p class="text-sm text-slate-500 italic">No image will be displayed for this product.</p>
-                    </div>
-                @endif
+                    @error('selectedLibraryImage')
+                        <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- None panel --}}
+                <div x-show="!isUpload && !isLibrary" x-cloak>
+                    <p class="flex h-full items-center text-sm text-slate-500 italic">No image will be displayed for
+                        this product.</p>
+                </div>
             </div>
         </div>
     </div>

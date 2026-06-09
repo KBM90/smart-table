@@ -8,6 +8,7 @@ use App\Services\ProductImageService;
 use App\Support\LibraryImage;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Symfony\Component\HttpFoundation\Response;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -63,6 +64,49 @@ class Form extends Component
             : null;
     }
 
+    // ── Computed (memoised per request, never re-queried on the same tick) ────
+
+    #[Computed]
+    public function categories(): \Illuminate\Support\Collection
+    {
+        return Category::all();
+    }
+
+    #[Computed]
+    public function libraryImages(): array
+    {
+        return array_map(
+            fn(array $entry) => array_merge($entry, ['url' => LibraryImage::url($entry['key'])]),
+            LibraryImage::all(),
+        );
+    }
+
+    #[Computed]
+    public function previewUrl(): string
+    {
+        if ($this->imageSource === Product::IMAGE_SOURCE_UPLOAD && $this->upload !== null) {
+            if (str_starts_with((string) $this->upload->getMimeType(), 'image/')) {
+                return $this->upload->temporaryUrl();
+            }
+            return asset('img/library/_placeholder.png');
+        }
+
+        if ($this->imageSource === Product::IMAGE_SOURCE_LIBRARY && $this->selectedLibraryImage !== null) {
+            return LibraryImage::url($this->selectedLibraryImage);
+        }
+
+        if ($this->productId !== null) {
+            $product = Product::query()->find($this->productId);
+            if ($product !== null) {
+                return $product->imageUrl();
+            }
+        }
+
+        return asset('img/library/_placeholder.png');
+    }
+
+    // ── Lifecycle hooks ───────────────────────────────────────────────────────
+
     public function updatedImageSource(string $value): void
     {
         if ($value !== Product::IMAGE_SOURCE_UPLOAD) {
@@ -72,7 +116,22 @@ class Form extends Component
         if ($value !== Product::IMAGE_SOURCE_LIBRARY) {
             $this->selectedLibraryImage = null;
         }
+
+        // Bust the computed cache so previewUrl re-evaluates
+        unset($this->previewUrl);
     }
+
+    public function updatedUpload(): void
+    {
+        unset($this->previewUrl);
+    }
+
+    public function updatedSelectedLibraryImage(): void
+    {
+        unset($this->previewUrl);
+    }
+
+    // ── Actions ───────────────────────────────────────────────────────────────
 
     public function save(ProductImageService $productImageService): void
     {
@@ -86,7 +145,9 @@ class Form extends Component
                 'string',
                 'max:255',
                 Rule::unique('products', 'name')
-                    ->where(fn($query) => $query->where('tenant_id', auth()->user()->tenant_id)->whereNull('deleted_at'))
+                    ->where(fn($query) => $query
+                        ->where('tenant_id', auth()->user()->tenant_id)
+                        ->whereNull('deleted_at'))
                     ->ignore($this->productId),
             ],
             'description' => ['nullable', 'string'],
@@ -148,41 +209,6 @@ class Form extends Component
 
     public function render()
     {
-        $existingProduct = $this->productId ? Product::query()->find($this->productId) : null;
-
-        // Enrich each library entry with a resolved display URL so the blade
-        // template never has to know how keys map to URLs.
-        $libraryImages = array_map(
-            fn(array $entry) => array_merge($entry, ['url' => LibraryImage::url($entry['key'])]),
-            LibraryImage::all(),
-        );
-
-        return view('livewire.owner.products.form', [
-            'categories' => Category::all(),
-            'libraryImages' => $libraryImages,
-            'previewUrl' => $this->previewUrl($existingProduct),
-        ]);
-    }
-
-    protected function previewUrl(?Product $existingProduct): string
-    {
-        if ($this->imageSource === Product::IMAGE_SOURCE_UPLOAD && $this->upload !== null) {
-            if (str_starts_with((string) $this->upload->getMimeType(), 'image/')) {
-                return $this->upload->temporaryUrl();
-            }
-
-            return asset('img/library/_placeholder.png');
-        }
-
-        if ($this->imageSource === Product::IMAGE_SOURCE_LIBRARY && $this->selectedLibraryImage !== null) {
-            // Resolve via LibraryImage — works for both photo IDs and legacy paths.
-            return LibraryImage::url($this->selectedLibraryImage);
-        }
-
-        if ($existingProduct !== null) {
-            return $existingProduct->imageUrl();
-        }
-
-        return asset('img/library/_placeholder.png');
+        return view('livewire.owner.products.form');
     }
 }
