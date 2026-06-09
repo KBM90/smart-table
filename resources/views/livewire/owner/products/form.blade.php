@@ -1,143 +1,163 @@
-<form wire:submit="save" class="space-y-5">
+<form wire:submit="save" class="space-y-6">
     <div class="grid gap-5">
         <div>
             <label for="product-name"
-                class="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Name</label>
+                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Name</label>
             <input wire:model.blur="name" id="product-name" type="text"
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white focus:border-amber-400 focus:outline-none focus:ring-0">
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
             @error('name')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
             @enderror
         </div>
 
         <div>
             <label for="product-category"
-                class="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Category</label>
+                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Category</label>
             <select wire:model="categoryId" id="product-category"
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white focus:border-amber-400 focus:outline-none focus:ring-0">
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
                 <option value="">— No category —</option>
                 @foreach ($categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                 @endforeach
             </select>
             @error('categoryId')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
             @enderror
         </div>
 
         <div>
             <label for="product-price"
-                class="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Price</label>
-            <input wire:model.blur="price" id="product-price" type="text" inputmode="decimal" placeholder="12.50"
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white focus:border-amber-400 focus:outline-none focus:ring-0">
+                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Price</label>
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                    <span class="text-slate-400 sm:text-sm">$</span>
+                </div>
+                <input wire:model.blur="price" id="product-price" type="text" inputmode="decimal" placeholder="12.50"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-8 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
+            </div>
             @error('price')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
             @enderror
         </div>
 
         <div>
             <label for="product-description"
-                class="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Description</label>
-            <textarea wire:model.blur="description" id="product-description" rows="4"
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white focus:border-amber-400 focus:outline-none focus:ring-0"></textarea>
+                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Description</label>
+            <textarea wire:model.blur="description" id="product-description" rows="3"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"></textarea>
             @error('description')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
             @enderror
         </div>
 
         <div class="grid gap-5 sm:grid-cols-2">
             <div>
                 <label for="sort-order"
-                    class="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Sort
-                    order</label>
+                    class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Sort order</label>
                 <input wire:model.blur="sortOrder" id="sort-order" type="number" min="0"
-                    class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white focus:border-amber-400 focus:outline-none focus:ring-0">
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
                 @error('sortOrder')
-                    <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
                 @enderror
             </div>
 
-            <label class="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3">
+            <label
+                class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition hover:bg-slate-100">
                 <input wire:model.live="isActive" type="checkbox"
-                    class="rounded border-slate-600 bg-slate-900 text-amber-500 focus:ring-amber-400">
-                <span class="text-sm font-medium text-slate-200">Active product</span>
+                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600">
+                <span class="text-sm font-semibold text-slate-700">Active product</span>
             </label>
         </div>
     </div>
 
-    <div class="space-y-4 rounded-2xl border border-slate-800 bg-slate-950 p-4">
+    <div class="space-y-4 rounded-2xl border border-slate-100 bg-slate-50 p-5 shadow-inner">
         <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Image</p>
-            <div class="mt-3 grid gap-2 sm:grid-cols-3">
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Image Source</p>
+            <div class="mt-2 grid gap-2 sm:grid-cols-3">
                 <label
-                    class="flex items-center gap-2 rounded-xl border border-slate-800 px-3 py-2 text-sm text-slate-200">
+                    class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
                     <input wire:model.live="imageSource" type="radio"
-                        value="{{ \App\Models\Product::IMAGE_SOURCE_NONE }}">
-                    <span>No image</span>
+                        value="{{ \App\Models\Product::IMAGE_SOURCE_NONE }}"
+                        class="text-indigo-600 focus:ring-indigo-600">
+                    <span>None</span>
                 </label>
                 <label
-                    class="flex items-center gap-2 rounded-xl border border-slate-800 px-3 py-2 text-sm text-slate-200">
+                    class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
                     <input wire:model.live="imageSource" type="radio"
-                        value="{{ \App\Models\Product::IMAGE_SOURCE_UPLOAD }}">
+                        value="{{ \App\Models\Product::IMAGE_SOURCE_UPLOAD }}"
+                        class="text-indigo-600 focus:ring-indigo-600">
                     <span>Upload</span>
                 </label>
                 <label
-                    class="flex items-center gap-2 rounded-xl border border-slate-800 px-3 py-2 text-sm text-slate-200">
+                    class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
                     <input wire:model.live="imageSource" type="radio"
-                        value="{{ \App\Models\Product::IMAGE_SOURCE_LIBRARY }}">
-                    <span>Pick from library</span>
+                        value="{{ \App\Models\Product::IMAGE_SOURCE_LIBRARY }}"
+                        class="text-indigo-600 focus:ring-indigo-600">
+                    <span>Library</span>
                 </label>
             </div>
             @error('imageSource')
-                <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
             @enderror
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-[120px_minmax(0,1fr)]">
-            <img src="{{ $previewUrl }}" alt="Product preview" class="h-[120px] w-[120px] rounded-2xl object-cover">
+        <div class="grid gap-5 lg:grid-cols-[100px_minmax(0,1fr)] items-start pt-2">
+            @if($previewUrl)
+                <img src="{{ $previewUrl }}" alt="Product preview"
+                    class="h-[100px] w-[100px] rounded-xl border border-slate-200 bg-white object-cover shadow-sm">
+            @else
+                <div
+                    class="flex h-[100px] w-[100px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-100">
+                    <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                </div>
+            @endif
 
             <div>
                 @if ($imageSource === \App\Models\Product::IMAGE_SOURCE_UPLOAD)
                     <div>
                         <input wire:model.live="upload" type="file" accept="image/png,image/jpeg,image/webp"
-                            class="block w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-500 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-950">
-                        <p class="mt-2 text-xs text-slate-400">Accepted: JPG, PNG, WEBP up to 4 MB and at least 256×256.</p>
+                            class="block w-full text-sm text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
+                        <p class="mt-2 text-xs text-slate-500">Accepted: JPG, PNG, WEBP up to 4 MB (Min: 256×256).</p>
                         @error('upload')
-                            <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                            <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
                         @enderror
                     </div>
                 @elseif ($imageSource === \App\Models\Product::IMAGE_SOURCE_LIBRARY)
                     <div>
                         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                             @foreach ($libraryImages as $image)
-                                {{--
-                                $image['url'] is resolved by the Livewire component via
-                                LibraryImage::url($image['key']) before being passed to the view.
-                                $image['key'] is stored in the database (Unsplash photo ID).
-                                --}}
                                 <button wire:click="$set('selectedLibraryImage', '{{ $image['key'] }}')" type="button"
-                                    class="overflow-hidden rounded-2xl border {{ $selectedLibraryImage === $image['key'] ? 'border-amber-400' : 'border-slate-800' }}">
+                                    class="group relative overflow-hidden rounded-xl border-2 transition {{ $selectedLibraryImage === $image['key'] ? 'border-indigo-600 ring-2 ring-indigo-600/20' : 'border-transparent hover:border-slate-300' }}">
                                     <img src="{{ $image['url'] }}" alt="{{ $image['label'] }}" loading="lazy"
-                                        class="h-24 w-full object-cover">
-                                    <span
-                                        class="block px-2 py-2 text-xs font-medium text-slate-200">{{ $image['label'] }}</span>
+                                        class="h-20 w-full object-cover transition duration-300 group-hover:scale-105">
+                                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                                        <span
+                                            class="block truncate text-left text-[10px] font-medium text-white">{{ $image['label'] }}</span>
+                                    </div>
                                 </button>
                             @endforeach
                         </div>
                         @error('selectedLibraryImage')
-                            <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                            <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
                         @enderror
                     </div>
                 @else
-                    <p class="rounded-xl border border-dashed border-slate-800 px-4 py-6 text-sm text-slate-400">No image
-                        will be shown for this product.</p>
+                    <div class="flex h-full items-center">
+                        <p class="text-sm text-slate-500 italic">No image will be displayed for this product.</p>
+                    </div>
                 @endif
             </div>
         </div>
     </div>
 
-    <button type="submit"
-        class="w-full rounded-xl bg-amber-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-400">
-        {{ $productId ? 'Save changes' : 'Create product' }}
-    </button>
+    <div class="pt-2">
+        <button type="submit"
+            class="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+            {{ $productId ? 'Save changes' : 'Create product' }}
+        </button>
+    </div>
 </form>
