@@ -4,6 +4,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Owner\TableQrCodeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Owner\DashboardController;
+use App\Http\Controllers\Waiter\TableAssignmentController;
 
 
 use App\Livewire\Customer\Catalog as CustomerCatalog;
@@ -14,6 +15,7 @@ use App\Livewire\Owner\Requests\Index as OwnerRequestsIndex;
 use App\Livewire\Owner\Staff\Index as OwnerStaffIndex;
 use App\Livewire\Owner\Tables\Index as OwnerTablesIndex;
 use App\Livewire\Waiter\Requests\Index as WaiterRequestsIndex;
+use App\Livewire\Waiter\Tables\Index as WaiterTablesIndex;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
