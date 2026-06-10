@@ -228,8 +228,10 @@
             <!-- Catalog Navigation Link -->
             <a href="{{ route('customer.catalog', ['qr_token' => $qrToken]) }}"
                 class="mt-6 group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300">
-                <svg class="h-5 w-5 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                <svg class="h-5 w-5 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
                 <span>View Menu & Catalog</span>
             </a>
@@ -344,7 +346,7 @@
             },
 
             formatTime(s) {
-                const total = Math.floor(s);
+                const total = Math.max(0, Math.floor(Math.abs(s)));
                 if (total < 60) return `${total}s`;
                 const m = Math.floor(total / 60);
                 return `${m}min ${String(total % 60).padStart(2, '0')}s`;

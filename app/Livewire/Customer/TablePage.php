@@ -138,9 +138,9 @@ class TablePage extends Component
     {
         $activeRequest = null;
         $requestsAhead = 0;
-        $status = $this->blocked ? 'blocked' : 'idle';
-        $requestId = null;
-        $elapsedSeconds = 0;
+        $status = $activeRequest->status; // 'pending' or 'accepted'
+        $requestId = $activeRequest->getKey();
+        $elapsedSeconds = max(0, (int) now()->diffInSeconds($activeRequest->created_at, true));
 
         if (!$this->blocked && $this->activeRequestId !== null) {
             $activeRequest = ServiceRequest::withoutGlobalScopes()

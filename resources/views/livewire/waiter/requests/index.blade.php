@@ -93,20 +93,21 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 font-mono" x-data="{
-                                                    elapsed: {{ now()->diffInSeconds($request->created_at) }},
-                                                    timer: null,
-                                                    init() {
-                                                        this.timer = setInterval(() => this.elapsed++, 1000);
-                                                    },
-                                                    destroy() {
-                                                        clearInterval(this.timer);
-                                                    },
-                                                    formatTime(seconds) {
-                                                        const m = Math.floor(seconds / 60);
-                                                        const s = seconds % 60;
-                                                        return `${m}m ${s}s`;
-                                                    }
-                                                }">
+                                                                                            elapsed: Math.abs(parseInt('{{ now()->diffInSeconds($request->created_at, true) }}')) || 0,
+                                                                                            timer: null,
+                                                                                            init() {
+                                                                                                this.timer = setInterval(() => this.elapsed++, 1000);
+                                                                                            },
+                                                                                            destroy() {
+                                                                                                clearInterval(this.timer);
+                                                                                            },
+                                                                                           formatTime(seconds) {
+                                                                                                    const total = Math.max(0, Math.floor(Math.abs(seconds)));
+                                                                                                    const m = Math.floor(total / 60);
+                                                                                                    const s = total % 60;
+                                                                                                    return `${m}m ${s}s`;
+                                                                                                 }  
+                                                                                        }">
                                 <span x-text="formatTime(elapsed)"></span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600">{{ $request->acceptedBy?->name ?? 'Unassigned' }}</td>
