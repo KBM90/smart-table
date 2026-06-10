@@ -53,6 +53,12 @@ Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix(
 Route::middleware(['auth', 'tenant', 'role:' . UserRole::Waiter->value])->prefix('waiter')->name('waiter.')->group(function () {
     Route::get('/dashboard', WaiterRequestsIndex::class)->name('dashboard');
     Route::get('/requests', WaiterRequestsIndex::class)->name('requests.index');
+    Route::get('/tables', WaiterTablesIndex::class)->name('tables.index');
+
+    // QR self-assign (auth required, but works for any logged-in waiter)
+    Route::middleware(['auth', 'tenant', 'role:' . UserRole::Waiter->value])
+        ->get('/waiter/assign/{qr_token}', TableAssignmentController::class)
+        ->name('waiter.tables.assign-via-qr');
 });
 
 Route::get('/t/{qr_token}/catalog', CustomerCatalog::class)->name('customer.catalog');
