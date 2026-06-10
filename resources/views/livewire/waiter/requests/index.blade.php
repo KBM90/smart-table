@@ -18,6 +18,27 @@
             }
         },
     }" x-on:waiter-requests-refresh.window="$wire.dispatch('refresh')" @if (config('services.supabase.url') && config('services.supabase.realtime_anon_enabled')) wire:poll.10s @else wire:poll.3s @endif class="space-y-6">
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <p class="text-sm font-medium uppercase tracking-[0.3em] text-sky-600">Waiter requests</p>
+        <h1 class="mt-3 text-3xl font-semibold text-slate-900">My Table Requests</h1>
+        <p class="mt-2 max-w-2xl text-sm text-slate-600">
+            Active service requests for your assigned tables. Updates live when Realtime is available.
+        </p>
+
+        <div class="mt-6">
+            <button type="button" x-data @click="$dispatch('open-modal', 'scan-to-assign')"
+                class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-sky-700">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 14h2m4 0h-2m-4 4h6" />
+                </svg>
+                <span>Scan to Assign</span>
+            </button>
+        </div>
+    </section>
+
+    {{-- ... rest of the existing view (no-assignment callout / table) stays unchanged ... --}}
     <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <p class="text-sm font-medium uppercase tracking-[0.3em] text-sky-600">Waiter requests</p>
         <h1 class="mt-3 text-3xl font-semibold text-slate-900">My Table Requests</h1>
@@ -72,20 +93,20 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 font-mono" x-data="{
-                                            elapsed: {{ now()->diffInSeconds($request->created_at) }},
-                                            timer: null,
-                                            init() {
-                                                this.timer = setInterval(() => this.elapsed++, 1000);
-                                            },
-                                            destroy() {
-                                                clearInterval(this.timer);
-                                            },
-                                            formatTime(seconds) {
-                                                const m = Math.floor(seconds / 60);
-                                                const s = seconds % 60;
-                                                return `${m}m ${s}s`;
-                                            }
-                                        }">
+                                                    elapsed: {{ now()->diffInSeconds($request->created_at) }},
+                                                    timer: null,
+                                                    init() {
+                                                        this.timer = setInterval(() => this.elapsed++, 1000);
+                                                    },
+                                                    destroy() {
+                                                        clearInterval(this.timer);
+                                                    },
+                                                    formatTime(seconds) {
+                                                        const m = Math.floor(seconds / 60);
+                                                        const s = seconds % 60;
+                                                        return `${m}m ${s}s`;
+                                                    }
+                                                }">
                                 <span x-text="formatTime(elapsed)"></span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600">{{ $request->acceptedBy?->name ?? 'Unassigned' }}</td>
