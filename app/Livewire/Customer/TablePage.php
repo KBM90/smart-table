@@ -140,21 +140,24 @@ class TablePage extends Component
         $requestsAhead = 0;
         $status = $activeRequest->status; // 'pending' or 'accepted'
         $requestId = $activeRequest->getKey();
-        $elapsedSeconds = max(0, (int) now()->diffInSeconds($activeRequest->created_at, true));
-
+        $elapsedSeconds = max(0, (int) abs(now()->diffInSeconds($activeRequest->created_at)));
         if (!$this->blocked && $this->activeRequestId !== null) {
-            $activeRequest = ServiceRequest::withoutGlobalScopes()
+            $found = ServiceRequest::withoutGlobalScopes()
                 ->find($this->activeRequestId);
 
             if (
-                $activeRequest !== null && in_array($activeRequest->status, [
+                $found !== null && in_array($found->status, [
                     ServiceRequest::STATUS_RESOLVED,
                     ServiceRequest::STATUS_CANCELLED,
                 ], true)
             ) {
-                $activeRequest = null;
                 $this->activeRequestId = null;
-            } elseif ($activeRequest !== null) {
+                $found = null;
+            }
+
+            if ($found !== null) {
+                $activeRequest = $found;
+
                 $requestsAhead = ServiceRequest::withoutGlobalScopes()
                     ->where('tenant_id', $activeRequest->tenant_id)
                     ->whereIn('status', [
@@ -166,7 +169,7 @@ class TablePage extends Component
 
                 $status = $activeRequest->status; // 'pending' or 'accepted'
                 $requestId = $activeRequest->getKey();
-                $elapsedSeconds = (int) now()->diffInSeconds($activeRequest->created_at);
+                $elapsedSeconds = max(0, (int) abs(now()->diffInSeconds($activeRequest->created_at)));
             }
         }
 
