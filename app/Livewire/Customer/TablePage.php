@@ -138,10 +138,13 @@ class TablePage extends Component
     {
         $activeRequest = null;
         $requestsAhead = 0;
-        $status = $activeRequest->status; // 'pending' or 'accepted'
-        $requestId = $activeRequest->getKey();
-        $elapsedSeconds = max(0, (int) abs(now()->diffInSeconds($activeRequest->created_at)));
+        $status = null;
+        $requestId = null;
+        $elapsedSeconds = 0;
         if (!$this->blocked && $this->activeRequestId !== null) {
+            $status = $activeRequest->status; // 'pending' or 'accepted'
+            $requestId = $activeRequest->getKey();
+            $elapsedSeconds = max(0, (int) abs(now()->diffInSeconds($activeRequest->created_at)));
             $found = ServiceRequest::withoutGlobalScopes()
                 ->find($this->activeRequestId);
 
