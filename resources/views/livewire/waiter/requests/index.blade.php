@@ -1,23 +1,32 @@
-<div x-data="{
-        handle: null,
-        init() {
-            if (window.AppRealtime && typeof window.AppRealtime.onRequestChange === 'function') {
-                this.handle = window.AppRealtime.onRequestChange(
-                    { tenantId: {{ auth()->user()->tenant_id }} },
-                    (payload) => {
-                        if (window.AppRealtimeFilters && typeof window.AppRealtimeFilters.shouldRefreshWaiterList === 'function' && window.AppRealtimeFilters.shouldRefreshWaiterList(payload)) {
-                            window.dispatchEvent(new CustomEvent('waiter-requests-refresh'));
-                        }
-                    },
-                );
-            }
-        },
-        destroy() {
-            if (this.handle && window.AppRealtime && typeof window.AppRealtime.unsubscribe === 'function') {
-                window.AppRealtime.unsubscribe(this.handle);
-            }
-        },
-    }" x-on:waiter-requests-refresh.window="$wire.dispatch('refresh')" @if (config('services.supabase.url') && config('services.supabase.realtime_anon_enabled')) wire:poll.10s @else wire:poll.3s @endif class="space-y-6">
+<div @if (config('services.supabase.url') && config('services.supabase.realtime_anon_enabled')) wire:poll.10s @else
+wire:poll.3s @endif class="space-y-6">
+
+    {{-- Supabase Realtime subscription lives in its own inner div so Alpine
+    does not share the same root element as wire:poll. When Alpine and
+    Livewire both own the same root element, Livewire's morphing can
+    conflict with Alpine's reactivity and prevent poll-triggered re-renders
+    from reaching the DOM correctly. --}}
+    <div x-data="{
+            handle: null,
+            init() {
+                if (window.AppRealtime && typeof window.AppRealtime.onRequestChange === 'function') {
+                    this.handle = window.AppRealtime.onRequestChange(
+                        { tenantId: {{ auth()->user()->tenant_id }} },
+                        (payload) => {
+                            if (window.AppRealtimeFilters && typeof window.AppRealtimeFilters.shouldRefreshWaiterList === 'function' && window.AppRealtimeFilters.shouldRefreshWaiterList(payload)) {
+                                window.dispatchEvent(new CustomEvent('waiter-requests-refresh'));
+                            }
+                        },
+                    );
+                }
+            },
+            destroy() {
+                if (this.handle && window.AppRealtime && typeof window.AppRealtime.unsubscribe === 'function') {
+                    window.AppRealtime.unsubscribe(this.handle);
+                }
+            },
+        }" x-on:waiter-requests-refresh.window="$wire.dispatch('refresh')">
+    </div>
 
     <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <p class="text-sm font-medium uppercase tracking-[0.3em] text-sky-600">Waiter requests</p>
@@ -36,15 +45,6 @@
                 <span>Scan to Assign</span>
             </button>
         </div>
-    </section>
-
-    {{-- ... rest of the existing view (no-assignment callout / table) stays unchanged ... --}}
-    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p class="text-sm font-medium uppercase tracking-[0.3em] text-sky-600">Waiter requests</p>
-        <h1 class="mt-3 text-3xl font-semibold text-slate-900">My Table Requests</h1>
-        <p class="mt-2 max-w-2xl text-sm text-slate-600">
-            Active service requests for your assigned tables. Updates live when Realtime is available.
-        </p>
     </section>
 
     @if (!$hasAssignedTables)
@@ -93,21 +93,21 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 font-mono" x-data="{
-                                                                                            elapsed: Math.abs(parseInt('{{ now()->diffInSeconds($request->created_at, true) }}')) || 0,
-                                                                                            timer: null,
-                                                                                            init() {
-                                                                                                this.timer = setInterval(() => this.elapsed++, 1000);
-                                                                                            },
-                                                                                            destroy() {
-                                                                                                clearInterval(this.timer);
-                                                                                            },
-                                                                                           formatTime(seconds) {
-                                                                                                    const total = Math.max(0, Math.floor(Math.abs(seconds)));
-                                                                                                    const m = Math.floor(total / 60);
-                                                                                                    const s = total % 60;
-                                                                                                    return `${m}m ${s}s`;
-                                                                                                 }  
-                                                                                        }">
+                                        elapsed: Math.abs(parseInt('{{ now()->diffInSeconds($request->created_at, true) }}')) || 0,
+                                        timer: null,
+                                        init() {
+                                            this.timer = setInterval(() => this.elapsed++, 1000);
+                                        },
+                                        destroy() {
+                                            clearInterval(this.timer);
+                                        },
+                                        formatTime(seconds) {
+                                            const total = Math.max(0, Math.floor(Math.abs(seconds)));
+                                            const m = Math.floor(total / 60);
+                                            const s = total % 60;
+                                            return `${m}m ${s}s`;
+                                        }
+                                    }">
                                 <span x-text="formatTime(elapsed)"></span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600">{{ $request->acceptedBy?->name ?? 'Unassigned' }}</td>
