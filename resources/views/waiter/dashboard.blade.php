@@ -56,8 +56,8 @@
             </div>
 
             <div x-show="result" class="mt-4 rounded-xl border px-4 py-3 text-sm font-medium" :class="result?.status === 'already_assigned'
-                        ? 'border-amber-200 bg-amber-50 text-amber-700'
-                        : 'border-emerald-200 bg-emerald-50 text-emerald-700'" x-text="result?.message">
+                            ? 'border-amber-200 bg-amber-50 text-amber-700'
+                            : 'border-emerald-200 bg-emerald-50 text-emerald-700'" x-text="result?.message">
             </div>
 
             <div class="mt-6 flex justify-end gap-2">
@@ -76,118 +76,119 @@
 
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
-@endpush
 
-<script>
-    function scanToAssign() {
-        return {
-            stream: null,
-            cameraReady: false,
-            loading: false,
-            error: null,
-            result: null,
-            _rafId: null,
 
-            init() {
-                // nothing on init — camera starts when modal opens
-            },
+    <script>
+        function scanToAssign() {
+            return {
+                stream: null,
+                cameraReady: false,
+                loading: false,
+                error: null,
+                result: null,
+                _rafId: null,
 
-            async start() {
-                this.reset();
+                init() {
+                    // nothing on init — camera starts when modal opens
+                },
 
-                if (!navigator.mediaDevices?.getUserMedia) {
-                    this.error = 'Camera access is not supported on this device.';
-                    return;
-                }
+                async start() {
+                    this.reset();
 
-                try {
-                    this.stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: 'environment' },
-                    });
-                    this.$refs.video.srcObject = this.stream;
-                    await this.$refs.video.play();
-                    this.cameraReady = true;
-                    this._scanLoop();
-                } catch (e) {
-                    this.error = 'Unable to access the camera. Please grant camera permission.';
-                }
-            },
-
-            stop() {
-                if (this._rafId) {
-                    cancelAnimationFrame(this._rafId);
-                    this._rafId = null;
-                }
-                if (this.stream) {
-                    this.stream.getTracks().forEach(track => track.stop());
-                    this.stream = null;
-                }
-                this.cameraReady = false;
-            },
-
-            reset() {
-                this.error = null;
-                this.result = null;
-                this.loading = false;
-            },
-
-            _scanLoop() {
-                if (!this.cameraReady || this.result) {
-                    return;
-                }
-
-                const video = this.$refs.video;
-                const canvas = this.$refs.canvas;
-
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = window.jsQR
-                        ? window.jsQR(imageData.data, imageData.width, imageData.height)
-                        : null;
-
-                    if (code && code.data) {
-                        this._handleCode(code.data);
-                        return;
-                    }
-                }
-
-                this._rafId = requestAnimationFrame(() => this._scanLoop());
-            },
-
-            async _handleCode(rawValue) {
-                this.stop();
-                this.loading = true;
-
-                try {
-                    const res = await fetch('{{ route('waiter.tables.assign-via-qr') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                        },
-                        body: JSON.stringify({ qr_token: rawValue }),
-                    });
-
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        this.error = data.message ?? 'Something went wrong. Please try again.';
+                    if (!navigator.mediaDevices?.getUserMedia) {
+                        this.error = 'Camera access is not supported on this device.';
                         return;
                     }
 
-                    this.result = data;
-                } catch (e) {
-                    this.error = 'Network error. Please try again.';
-                } finally {
+                    try {
+                        this.stream = await navigator.mediaDevices.getUserMedia({
+                            video: { facingMode: 'environment' },
+                        });
+                        this.$refs.video.srcObject = this.stream;
+                        await this.$refs.video.play();
+                        this.cameraReady = true;
+                        this._scanLoop();
+                    } catch (e) {
+                        this.error = 'Unable to access the camera. Please grant camera permission.';
+                    }
+                },
+
+                stop() {
+                    if (this._rafId) {
+                        cancelAnimationFrame(this._rafId);
+                        this._rafId = null;
+                    }
+                    if (this.stream) {
+                        this.stream.getTracks().forEach(track => track.stop());
+                        this.stream = null;
+                    }
+                    this.cameraReady = false;
+                },
+
+                reset() {
+                    this.error = null;
+                    this.result = null;
                     this.loading = false;
-                }
-            },
-        };
-    }
-</script>
+                },
+
+                _scanLoop() {
+                    if (!this.cameraReady || this.result) {
+                        return;
+                    }
+
+                    const video = this.$refs.video;
+                    const canvas = this.$refs.canvas;
+
+                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = window.jsQR
+                            ? window.jsQR(imageData.data, imageData.width, imageData.height)
+                            : null;
+
+                        if (code && code.data) {
+                            this._handleCode(code.data);
+                            return;
+                        }
+                    }
+
+                    this._rafId = requestAnimationFrame(() => this._scanLoop());
+                },
+
+                async _handleCode(rawValue) {
+                    this.stop();
+                    this.loading = true;
+
+                    try {
+                        const res = await fetch('{{ route('waiter.tables.assign-via-qr') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            },
+                            body: JSON.stringify({ qr_token: rawValue }),
+                        });
+
+                        const data = await res.json();
+
+                        if (!res.ok) {
+                            this.error = data.message ?? 'Something went wrong. Please try again.';
+                            return;
+                        }
+
+                        this.result = data;
+                    } catch (e) {
+                        this.error = 'Network error. Please try again.';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+            };
+        }
+    </script>
+@endpush

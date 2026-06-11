@@ -54,6 +54,8 @@
             @endisset
         </main>
     </div>
+    @stack('scripts') {{-- add this line --}}
+
     @livewireScripts
 </body>
 
