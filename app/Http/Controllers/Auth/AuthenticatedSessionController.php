@@ -33,6 +33,17 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Destroy an authenticated session.
+     *
+     * Order matters here:
+     * 1. Log the user out of the guard first (clears auth state).
+     * 2. Invalidate the session (destroys session data, issues new session ID).
+     * 3. Regenerate the CSRF token (so the new session has a valid token).
+     * 4. Redirect to the welcome page.
+     *
+     * Doing step 2 before step 1 caused a race condition where the redirect
+     * would hit routes that check auth before the guard had fully cleared,
+     * producing the loop. Regenerating the token after invalidation ensures
+     * the next request (the GET to welcome) carries a fresh, valid token.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -42,6 +53,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('welcome');
     }
 }

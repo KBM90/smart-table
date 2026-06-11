@@ -6,7 +6,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Waiter\TableAssignmentController;
 
-
 use App\Livewire\Customer\Catalog as CustomerCatalog;
 use App\Livewire\Customer\TablePage as CustomerTablePage;
 use App\Livewire\Owner\Categories\Index as OwnerCategoriesIndex;
@@ -30,7 +29,12 @@ Route::get('/dashboard', function (Request $request) {
     }
 
     if (!$user->tenant_id || $user->role === null) {
-        abort(403);
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')
+            ->withErrors(['email' => 'Your account is not fully set up. Please contact support.']);
     }
 
     return redirect()->route($user->dashboardRouteName());
@@ -60,8 +64,6 @@ Route::middleware(['auth', 'tenant', 'role:' . UserRole::Waiter->value])->prefix
     Route::get('/requests', WaiterRequestsIndex::class)->name('requests.index');
     Route::get('/tables', WaiterTablesIndex::class)->name('tables.index');
     Route::post('/tables/assign-via-qr', TableAssignmentController::class)->name('tables.assign-via-qr');
-
-
 });
 
 Route::get('/t/{qr_token}/catalog', CustomerCatalog::class)->name('customer.catalog');
