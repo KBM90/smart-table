@@ -18,6 +18,7 @@
             </button>
         </div>
     </section>
+    @yield('requests')
 
     <x-modal name="scan-to-assign" :show="false" maxWidth="md" focusable>
         <div class="p-6" x-data="scanToAssign()" x-init="init()"
@@ -56,8 +57,8 @@
             </div>
 
             <div x-show="result" class="mt-4 rounded-xl border px-4 py-3 text-sm font-medium" :class="result?.status === 'already_assigned'
-                            ? 'border-amber-200 bg-amber-50 text-amber-700'
-                            : 'border-emerald-200 bg-emerald-50 text-emerald-700'" x-text="result?.message">
+                                ? 'border-amber-200 bg-amber-50 text-amber-700'
+                                : 'border-emerald-200 bg-emerald-50 text-emerald-700'" x-text="result?.message">
             </div>
 
             <div class="mt-6 flex justify-end gap-2">

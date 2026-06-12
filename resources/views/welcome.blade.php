@@ -330,24 +330,81 @@
                     </div>
                 </section>
 
-                <section id="pricing" class="py-20 sm:py-24">
-                    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="mx-auto max-w-2xl rounded-[2rem] border border-indigo-100 bg-gradient-to-br from-indigo-600 to-sky-500 p-8 text-white shadow-2xl shadow-indigo-600/20 sm:p-10">
-                            <p class="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-100">Pricing</p>
-                            <h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Free during beta</h2>
-                            <p class="mt-4 text-base leading-7 text-indigo-50">Start onboarding your venue now, test live table calls, and shape the product with your team before billing launches.</p>
-                            <div class="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                    <p class="text-4xl font-semibold">€0</p>
-                                    <p class="mt-2 text-sm text-indigo-100">No billing setup required yet.</p>
-                                </div>
-                                <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-indigo-50">
-                                    Get started
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+               
+                <section id="pricing" class="py-24 bg-gray-900 text-white sm:py-32">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-4xl text-center">
+            <h2 class="text-base font-semibold leading-7 text-indigo-400">Pricing</h2>
+            <p class="mt-2 text-4xl font-bold tracking-tight text-white sm:text-5xl">Simple, transparent pricing</p>
+            <p class="mt-6 text-lg leading-8 text-gray-300">Choose the plan that fits your restaurant or cafe workflow. Start for free, upgrade when you are ready.</p>
+        </div>
+
+        <div class="isolate mx-auto mt-16 grid max-w-md grid-cols-1 gap-y-8 sm:mt-20 lg:mx-auto lg:max-w-none lg:grid-cols-3 lg:gap-x-8 xl:gap-x-12">
+            
+            <div class="rounded-3xl p-8 ring-1 ring-gray-700 xl:p-10 bg-gray-800 flex flex-col justify-between">
+                <div>
+                    <h3 id="tier-trial" class="text-lg font-semibold leading-8 text-white">7-Day Trial</h3>
+                    <p class="mt-4 text-sm leading-6 text-gray-300">Test drive the complete Smart Table experience.</p>
+                    <p class="mt-6 flex items-baseline gap-x-1">
+                        <span class="text-4xl font-bold tracking-tight text-white">$0</span>
+                        <span class="text-sm font-semibold leading-6 text-gray-300">/ 1 week</span>
+                    </p>
+                    <ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-gray-300">
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> Full platform access</li>
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> Unlimited QR menus</li>
+                    </ul>
+                </div>
+                <a href="/register?plan=trial" aria-describedby="tier-trial" class="mt-8 block rounded-md bg-white/10 px-3 py-2 text-center text-sm font-semibold leading-6 text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Start Free Trial</a>
+            </div>
+
+            <div class="rounded-3xl p-8 ring-1 ring-gray-700 xl:p-10 bg-gray-800 flex flex-col justify-between">
+                <div>
+                    <h3 id="tier-monthly" class="text-lg font-semibold leading-8 text-white">Monthly</h3>
+                    <p class="mt-4 text-sm leading-6 text-gray-300">Perfect for growing cafes needing flexibility.</p>
+                    <p class="mt-6 flex items-baseline gap-x-1">
+                        <span class="text-4xl font-bold tracking-tight text-white">$25</span>
+                        <span class="text-sm font-semibold leading-6 text-gray-300">/ month</span>
+                    </p>
+                    <ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-gray-300">
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> Waiter accounts</li>
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> Tenant-scoped dashboards</li>
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> Standard support</li>
+                    </ul>
+                </div>
+                <a href="/register?plan=monthly" aria-describedby="tier-monthly" class="mt-8 block rounded-md bg-indigo-500 px-3 py-2 text-center text-sm font-semibold leading-6 text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Subscribe Monthly</a>
+            </div>
+
+            <div class="rounded-3xl p-8 ring-2 ring-indigo-500 xl:p-10 bg-gray-900 flex flex-col justify-between relative">
+                <div class="absolute -top-4 right-8 rounded-full bg-indigo-500 px-3 py-1 text-xs font-semibold leading-5 text-white">Best Value</div>
+                <div>
+                    <h3 id="tier-annual" class="text-lg font-semibold leading-8 text-white">Annual</h3>
+                    <p class="mt-4 text-sm leading-6 text-gray-300">Maximize your ROI with a discounted yearly rate.</p>
+                    <p class="mt-6 flex items-baseline gap-x-1">
+                        <span class="text-4xl font-bold tracking-tight text-white">$200</span>
+                        <span class="text-sm font-semibold leading-6 text-gray-300">/ year</span>
+                    </p>
+                    <p class="mt-1 text-sm font-medium text-indigo-400">That's just ~$16 per month</p>
+                    <ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-gray-300">
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> All Monthly features</li>
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> Priority support</li>
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> Save $100 annually</li>
+                    </ul>
+                </div>
+                <a href="/register?plan=annual" aria-describedby="tier-annual" class="mt-8 block rounded-md bg-indigo-500 px-3 py-2 text-center text-sm font-semibold leading-6 text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Subscribe Annually</a>
+            </div>
+        </div>
+
+        <div class="mt-16 flex justify-center items-center space-x-6 text-gray-400">
+            <span class="text-sm font-medium">Secure payments via:</span>
+            <svg class="h-6 w-auto" fill="currentColor" viewBox="0 0 60 25"><path d="M59.64 14.28h-8.06c.19 1.93 1.6 3.17 3.51 3.17 1.64 0 2.65-.6 3.25-1.73l3.92 1.68c-1.63 2.8-4.54 3.96-7.3 3.96-4.9 0-7.7-3.32-7.7-8.24 0-5.12 3.1-8.39 7.48-8.39 4.8 0 7.23 3.48 7.23 8.16 0 .5-.05 1.01-.1 1.39zm-4.33-2.88c-.1-1.68-1.25-2.9-2.93-2.9-1.68 0-2.8 1.15-3.03 2.9h5.96zM42.27 4.97V.08h-4.32v21.05h4.32v-3.07c1.1 1.68 2.83 2.98 5.1 2.98 3.92 0 6.94-3.1 6.94-7.9 0-4.75-3.02-7.8-6.94-7.8-2.26 0-4 1.3-5.1 2.98V4.97zm.43 8.16c0-2.73 1.73-4.46 3.94-4.46 2.2 0 3.94 1.73 3.94 4.46s-1.73 4.56-3.94 4.56c-2.2 0-3.94-1.83-3.94-4.56zm-15.65-7.8c-1.54 0-2.83.67-3.56 1.73V5.35h-4.32V21h4.32v-9.65c0-2.16 1.34-3.55 3.12-3.55 1.73 0 2.83 1.05 2.83 3.02V21h4.32v-9.6c0-3.94-2.1-5.66-4.9-5.66H27.05zm-14.7 0c-4.76 0-7.55 3.3-7.55 8.25s2.74 8.26 7.55 8.26c2.4 0 4.2-1.02 5.3-2.65V21h4.32V5.4h-4.32v1.54c-1.1-1.63-2.9-2.6-5.3-2.6zm3.95 8.25c0 2.8-1.78 4.6-4 4.6-2.2 0-4-1.8-4-4.6s1.8-4.6 4-4.6c2.2 0 4 1.8 4 4.6zM2.87 21h4.32V5.35H2.87V21zM2.83.1h4.4v4.4h-4.4z"/></svg>
+            <span class="text-gray-500">|</span>
+            <span class="inline-flex items-center gap-x-1.5 rounded-md bg-gray-800 px-2 py-1 text-sm font-medium text-gray-300 ring-1 ring-inset ring-gray-700">
+                <svg class="h-4 w-4 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0a12 12 0 100 24 12 12 0 000-24zm0 18.5a6.5 6.5 0 110-13 6.5 6.5 0 010 13zm3-7h-2.5v2.5h-1V11.5H9v-1h2.5v-2.5h1v2.5H15v1z"/></svg>
+                USDT (OKX)
+            </span>
+        </div>
+    </div>
+</section>
 
                 <section id="faq" class="bg-white py-20 sm:py-24">
                     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
