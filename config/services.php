@@ -35,6 +35,11 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'price_monthly' => env('STRIPE_PRICE_MONTHLY'),
+        'price_annual'  => env('STRIPE_PRICE_ANNUAL'),
+    ],
+
     'supabase' => [
         'url' => env('SUPABASE_URL'),
         'anon_key' => env('SUPABASE_ANON_KEY'),

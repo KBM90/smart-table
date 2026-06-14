@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Http\Controllers\Owner\BillingController;
 use App\Http\Controllers\Owner\TableQrCodeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Owner\DashboardController;
@@ -54,7 +55,14 @@ Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix(
     Route::get('/staff', OwnerStaffIndex::class)->name('staff.index');
     Route::get('/tables/{table}/qr.png', TableQrCodeController::class)->name('tables.qr.download');
     Route::get('/requests', OwnerRequestsIndex::class)->name('requests.index');
+
+    // ─── Billing ────────────────────────────────────────────────────────────
+    Route::get('/billing',          [BillingController::class, 'index'])   ->name('billing.index');
+    Route::get('/billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('/billing/portal',   [BillingController::class, 'portal'])  ->name('billing.portal');
+    Route::get('/billing/success',  [BillingController::class, 'success']) ->name('billing.success');
 });
+
 
 Route::middleware(['auth', 'tenant', 'role:' . UserRole::Waiter->value])->prefix('waiter')->name('waiter.')->group(function () {
     Route::get('/dashboard', function () {
