@@ -23,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 : array_map('trim', explode(',', $trustedProxies))
             );
         }
+        $middleware->validateCsrfTokens(except: [
+            'stripe/*',
+        ]);
+
 
         $middleware->alias([
             'role' => EnsureRole::class,
