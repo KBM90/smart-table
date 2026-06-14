@@ -83,4 +83,9 @@ use App\Http\Controllers\Customers\CustomerRequestController;
 Route::post('/api/table/request', [CustomerRequestController::class, 'store'])->name('customer.request.store');
 Route::delete('/api/table/request/{id}', [CustomerRequestController::class, 'cancel'])->name('customer.request.cancel');
 
+// ─── Stripe Webhook ──────────────────────────────────────────────────────────
+// Must be outside all auth/tenant middleware groups — Stripe POSTs here as an
+// unauthenticated server-to-server request. CSRF is excluded in bootstrap/app.php.
+Route::post('/stripe/webhook', '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook');
+
 require __DIR__ . '/auth.php';
