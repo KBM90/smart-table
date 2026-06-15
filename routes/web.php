@@ -25,17 +25,17 @@ Route::view('/', 'welcome')->name('welcome');
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();
 
-    if (!$user) {
-        return redirect()->route('login');
-    }
-
-    if (!$user->tenant_id || $user->role === null) {
+    if ($user->tenant_id === null || $user->role === null) {
         Auth::guard('web')->logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')
-            ->withErrors(['email' => 'Your account is not fully set up. Please contact support.']);
+        return redirect()
+            ->route('login')
+            ->withErrors([
+                'email' => 'Your account is not fully set up. Please contact support.',
+            ]);
     }
 
     return redirect()->route($user->dashboardRouteName());
@@ -57,10 +57,10 @@ Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix(
     Route::get('/requests', OwnerRequestsIndex::class)->name('requests.index');
 
     // ─── Billing ────────────────────────────────────────────────────────────
-    Route::get('/billing',          [BillingController::class, 'index'])   ->name('billing.index');
+    Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::get('/billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
-    Route::get('/billing/portal',   [BillingController::class, 'portal'])  ->name('billing.portal');
-    Route::get('/billing/success',  [BillingController::class, 'success']) ->name('billing.success');
+    Route::get('/billing/portal', [BillingController::class, 'portal'])->name('billing.portal');
+    Route::get('/billing/success', [BillingController::class, 'success'])->name('billing.success');
 });
 
 

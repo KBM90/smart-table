@@ -42,13 +42,14 @@
                             ['label' => 'Categories', 'route' => 'owner.categories.index', 'match' => 'owner.categories.*'],
                             ['label' => 'Staff', 'route' => 'owner.staff.index', 'match' => 'owner.staff.*'],
                             ['label' => 'Requests', 'route' => 'owner.requests.index', 'match' => 'owner.requests.*'],
+                            ['label' => 'Billing', 'route' => 'owner.billing.index', 'match' => 'owner.billing.*'],
                         ];
                     @endphp
 
                     <nav class="hidden md:flex items-center gap-1 font-semibold text-sm">
                         @foreach ($navLinks as $link)
                                             <a href="{{ route($link['route']) }}" class="rounded-xl px-3 py-2 transition
-                                                          {{ request()->routeIs($link['match'])
+                                                                                                                      {{ request()->routeIs($link['match'])
                             ? 'text-indigo-600 bg-indigo-50/60 border border-indigo-100/40'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
                                                 {{ $link['label'] }}
@@ -69,7 +70,7 @@
                             class="absolute right-0 mt-2 w-44 rounded-2xl border border-slate-200 bg-white py-2 shadow-xl">
                             @foreach ($navLinks as $link)
                                                     <a href="{{ route($link['route']) }}" class="block px-4 py-2 text-sm font-semibold transition
-                                                                  {{ request()->routeIs($link['match'])
+                                                                                                                                          {{ request()->routeIs($link['match'])
                                 ? 'text-indigo-600 bg-indigo-50'
                                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                                                         {{ $link['label'] }}
