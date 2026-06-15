@@ -51,7 +51,6 @@ Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix(
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/tables', OwnerTablesIndex::class)->name('tables.index');
     Route::get('/products', OwnerProductsIndex::class)->name('products.index');
-    Route::get('/categories', OwnerCategoriesIndex::class)->name('categories.index');
     Route::get('/staff', OwnerStaffIndex::class)->name('staff.index');
     Route::get('/tables/{table}/qr.png', TableQrCodeController::class)->name('tables.qr.download');
     Route::get('/requests', OwnerRequestsIndex::class)->name('requests.index');

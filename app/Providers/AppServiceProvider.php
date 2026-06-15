@@ -8,6 +8,7 @@ use App\Models\ServiceRequest;
 use App\Models\Table;
 use App\Models\TableSession;
 use App\Models\User;
+use App\Models\Tenant;
 use App\Policies\ProductCategoryPolicy;
 use App\Policies\ProductPolicy;
 use App\Policies\ServiceRequestPolicy;
@@ -20,6 +21,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Cashier::useCustomerModel(Tenant::class);
+
         Gate::policy(Table::class, TablePolicy::class);
         Gate::policy(Product::class, ProductPolicy::class);
         Gate::policy(ProductCategory::class, ProductCategoryPolicy::class);

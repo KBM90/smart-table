@@ -11,9 +11,8 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
 
-            // Polymorphic billable — points to App\Models\Tenant
-            $table->unsignedBigInteger('billable_id');
-            $table->string('billable_type');
+            // One-to-many relationship with Tenant model
+            $table->foreignId('tenant_id');
 
             // Cashier internal subscription name (e.g. 'default')
             $table->string('type');
@@ -32,7 +31,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Index used by Cashier's billable scope queries
-            $table->index(['billable_id', 'billable_type']);
+            $table->index(['tenant_id', 'stripe_status']);
         });
 
         Schema::create('subscription_items', function (Blueprint $table) {
