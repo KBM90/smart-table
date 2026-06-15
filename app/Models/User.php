@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -32,6 +33,9 @@ class User extends Authenticatable
         'tenant_id',
         'role',
         'email_verified_at',
+        'photo',
+        'joined_at',
+        'is_active',
     ];
 
     /**
@@ -53,8 +57,10 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'role' => UserRole::class,
+            'joined_at'         => 'datetime',
+            'is_active'         => 'boolean',
+            'password'          => 'hashed',
+            'role'              => UserRole::class,
         ];
     }
 
@@ -70,6 +76,18 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Table::class, 'table_waiter', 'user_id', 'table_id')
             ->withTimestamps();
+    }
+
+    /** Service requests explicitly assigned to this waiter. */
+    public function assignedRequests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class, 'assigned_waiter_id');
+    }
+
+    /** Reviews received by this waiter. */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'waiter_id');
     }
 
     public function isOwner(): bool

@@ -7,6 +7,7 @@ use Database\Factories\ServiceRequestFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ServiceRequest extends Model
 {
@@ -28,6 +29,7 @@ class ServiceRequest extends Model
     protected $fillable = [
         'tenant_id',
         'table_session_id',
+        'assigned_waiter_id',
         'type',
         'status',
         'accepted_by',
@@ -43,6 +45,19 @@ class ServiceRequest extends Model
         ];
     }
 
+    /**
+     * Computed: seconds between request creation and resolution.
+     * Returns null if the request has not been resolved yet.
+     */
+    public function getResponseTimeSecondsAttribute(): ?int
+    {
+        if ($this->resolved_at === null || $this->created_at === null) {
+            return null;
+        }
+
+        return (int) $this->created_at->diffInSeconds($this->resolved_at);
+    }
+
     protected static function newFactory(): ServiceRequestFactory
     {
         return ServiceRequestFactory::new();
@@ -56,6 +71,18 @@ class ServiceRequest extends Model
     public function acceptedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'accepted_by');
+    }
+
+    /** The waiter explicitly assigned to handle this request. */
+    public function assignedWaiter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_waiter_id');
+    }
+
+    /** The customer review submitted after this request was resolved. */
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class, 'request_id');
     }
 
     public function accept(User $user): void
