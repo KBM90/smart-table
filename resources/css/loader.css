@@ -1,20 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* ==========================================
-   GLOBAL PAGE LOADER ANIMATIONS
-   ========================================== */
+/* Hide scrollbar while loading */
 body.loading {
     overflow: hidden;
 }
 
+/* Line drawing effect */
 .svg-draw-path {
     stroke-dasharray: 300;
     stroke-dashoffset: 300;
     animation: drawLine 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
 }
 
+/* Node pulse effect */
 .svg-node {
     opacity: 0;
     transform-origin: center;

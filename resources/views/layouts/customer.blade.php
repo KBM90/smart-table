@@ -15,6 +15,10 @@
 
 <body
     class="min-h-screen bg-gradient-to-tr from-slate-50 via-indigo-50/20 to-amber-50/30 font-sans text-slate-800 antialiased">
+    <div id="page-loader">
+        <object data="{{ asset('img/system/svg_logo.svg') }}" type="image/svg+xml" id="loader-svg">
+        </object>
+    </div>
     <div class="absolute -right-10 -top-10 h-72 w-72 rounded-full bg-amber-200/20 blur-[80px] pointer-events-none">
     </div>
     <div class="absolute -left-10 bottom-20 h-72 w-72 rounded-full bg-indigo-200/20 blur-[80px] pointer-events-none">

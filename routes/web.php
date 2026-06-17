@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('welcome');
+Route::view('/pricing', 'pricing')->name('pricing');
 
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();

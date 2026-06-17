@@ -17,6 +17,10 @@
 </head>
 
 <body class="min-h-screen bg-slate-100 font-sans text-slate-900 antialiased">
+    <div id="page-loader">
+        <object data="{{ asset('img/system/svg_logo.svg') }}" type="image/svg+xml" id="loader-svg">
+        </object>
+    </div>
     <div class="min-h-screen">
         <header class="border-b border-slate-200 bg-white/95">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">

@@ -1,4 +1,5 @@
 import './bootstrap';
+import './loader';
 
 import {
     onRequestChange,
@@ -16,5 +17,8 @@ window.AppRealtime = {
 window.AppRealtimeFilters = {
     shouldRefreshWaiterList,
 };
+
+
+
 
 

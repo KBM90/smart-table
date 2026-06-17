@@ -13,7 +13,7 @@
         @php($navLinks = [
             ['label' => 'Features', 'href' => '#features'],
             ['label' => 'How it works', 'href' => '#how-it-works'],
-            ['label' => 'Pricing', 'href' => '#pricing'],
+            ['label' => 'Pricing', 'href' => '/pricing'],
             ['label' => 'FAQ', 'href' => '#faq'],
         ])
         <div class="relative overflow-x-hidden">
@@ -25,91 +25,90 @@
                 class="sticky top-0 z-50 transition-all duration-300"
                 :class="scrolled ? 'border-b border-slate-200/80 bg-white/80 backdrop-blur-xl shadow-sm' : 'border-transparent bg-transparent'"
             >
-                <nav aria-label="Primary">
-                    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="flex h-16 md:h-20 items-center justify-between gap-4">
-                            <a href="/" class="flex items-center gap-3 transition hover:opacity-80" aria-label="Smart Table home">
-                                <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
-                                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                        <rect x="4.5" y="5.5" width="15" height="4" rx="1.5"></rect>
-                                        <path d="M7.5 9.5v9m9-9v9M5.5 18.5h13"></path>
-                                        <path d="M9 3.5v2m6-2v2"></path>
-                                    </svg>
-                                </span>
-                                <div>
-                                    <p class="text-lg font-bold tracking-tight text-slate-950">Smart Table</p>
-                                    <p class="text-[11px] font-medium uppercase tracking-wider text-slate-500">Service, simplified</p>
-                                </div>
-                            </a>
-                            <div class="hidden items-center gap-8 lg:flex">
-                                @foreach ($navLinks as $link)
-                                    <a href="{{ $link['href'] }}" class="text-sm font-medium text-slate-600 transition hover:text-indigo-600">
-                                        {{ $link['label'] }}
-                                    </a>
-                                @endforeach
-                            </div>
-                            <div class="hidden items-center gap-4 lg:flex">
-                                @auth
-                                    <a href="{{ route(auth()->user()->dashboardRouteName()) }}" class="text-sm font-semibold text-slate-700 transition hover:text-indigo-600">
-                                        Dashboard
-                                    </a>
-                                @else
-                                    <a href="{{ route('login') }}" class="text-sm font-semibold text-slate-700 transition hover:text-indigo-600">
-                                        Login
-                                    </a>
-                                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 hover:-translate-y-0.5">
-                                        Get started
-                                    </a>
-                                @endauth
-                            </div>
-                            <button
-                                type="button"
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 lg:hidden"
-                                @click="mobileOpen = !mobileOpen"
-                                :aria-expanded="mobileOpen.toString()"
-                                aria-controls="mobile-menu"
-                                aria-label="Toggle navigation menu"
-                            >
-                                <svg x-show="!mobileOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                    <path d="M4 7h16M4 12h16M4 17h16"></path>
-                                </svg>
-                                <svg x-show="mobileOpen" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                    <path d="M6 6l12 12M18 6L6 18"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div
-                            id="mobile-menu"
-                            x-show="mobileOpen"
-                            x-transition.opacity.scale.origin.top
-                            x-cloak
-                            class="pb-4 lg:hidden"
-                            @click.outside="mobileOpen = false"
-                        >
-                            <div class="space-y-1 rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-xl shadow-slate-200/60 backdrop-blur-xl">
-                                @foreach ($navLinks as $link)
-                                    <a href="{{ $link['href'] }}" class="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-600" @click="mobileOpen = false">
-                                        {{ $link['label'] }}
-                                    </a>
-                                @endforeach
-                                <div class="my-2 h-px bg-slate-100"></div>
-                                
-                                @auth
-                                    <a href="{{ route(auth()->user()->dashboardRouteName()) }}" class="block rounded-2xl px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50">
-                                        Dashboard
-                                    </a>
-                                @else
-                                    <a href="{{ route('login') }}" class="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                                        Login
-                                    </a>
-                                    <a href="{{ route('register') }}" class="mt-2 block rounded-2xl bg-indigo-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-indigo-700">
-                                        Get started
-                                    </a>
-                                @endauth
-                            </div>
-                        </div>
-                    </div>
-                </nav>
+               <nav aria-label="Primary">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 md:h-20 items-center justify-between gap-4">
+            
+            <a href="/" class="flex items-center gap-3 transition hover:opacity-80" aria-label="Smart Table home">
+                <img 
+                    src="{{ asset('img/system/logo_with_text.png') }}"
+                    alt="Smart Table"
+                    class="h-20 md:h-14 w-auto object-contain"
+                />
+            </a>
+
+            <div class="hidden items-center gap-8 lg:flex">
+                @foreach ($navLinks as $link)
+                    <a href="{{ $link['href'] }}" class="text-sm font-medium text-slate-600 transition hover:text-indigo-600">
+                        {{ $link['label'] }}
+                    </a>
+                @endforeach
+            </div>
+            
+            <div class="hidden items-center gap-4 lg:flex">
+                @auth
+                    <a href="{{ route(auth()->user()->dashboardRouteName()) }}" class="text-sm font-semibold text-slate-700 transition hover:text-indigo-600">
+                        Dashboard
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="text-sm font-semibold text-slate-700 transition hover:text-indigo-600">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 hover:-translate-y-0.5">
+                        Get started
+                    </a>
+                @endauth
+            </div>
+            
+            <button
+                type="button"
+                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 lg:hidden"
+                @click="mobileOpen = !mobileOpen"
+                :aria-expanded="mobileOpen.toString()"
+                aria-controls="mobile-menu"
+                aria-label="Toggle navigation menu"
+            >
+                <svg x-show="!mobileOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16"></path>
+                </svg>
+                <svg x-show="mobileOpen" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div
+            id="mobile-menu"
+            x-show="mobileOpen"
+            x-transition.opacity.scale.origin.top
+            x-cloak
+            class="pb-4 lg:hidden"
+            @click.outside="mobileOpen = false"
+        >
+            <div class="space-y-1 rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-xl shadow-slate-200/60 backdrop-blur-xl">
+                @foreach ($navLinks as $link)
+                    <a href="{{ $link['href'] }}" class="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-600" @click="mobileOpen = false">
+                        {{ $link['label'] }}
+                    </a>
+                @endforeach
+                <div class="my-2 h-px bg-slate-100"></div>
+                
+                @auth
+                    <a href="{{ route(auth()->user()->dashboardRouteName()) }}" class="block rounded-2xl px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50">
+                        Dashboard
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}" class="mt-2 block rounded-2xl bg-indigo-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-indigo-700">
+                        Get started
+                    </a>
+                @endauth
+            </div>
+        </div>
+    </div>
+</nav>
             </header>
             <main>
                 <section class="relative">
