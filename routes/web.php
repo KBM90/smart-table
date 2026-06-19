@@ -6,7 +6,7 @@ use App\Http\Controllers\Owner\TableQrCodeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Waiter\TableAssignmentController;
-
+use App\Http\Controllers\Owner\WaiterStatsController;
 use App\Livewire\Customer\Catalog as CustomerCatalog;
 use App\Livewire\Customer\TablePage as CustomerTablePage;
 use App\Livewire\Owner\Categories\Index as OwnerCategoriesIndex;
@@ -47,6 +47,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])
+    ->prefix('api/owner')
+    ->name('owner.api.')
+    ->group(function () {
+        Route::get('/waiters', [WaiterStatsController::class, 'index'])->name('waiters.index');
+        Route::get('/waiters/{waiter}/stats', [WaiterStatsController::class, 'show'])->name('waiters.stats');
+    });
 
 Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix('owner')->name('owner.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
