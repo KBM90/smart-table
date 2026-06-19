@@ -11,6 +11,7 @@ class Review extends Model
     use BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'waiter_id',
         'request_id',
         'rating',
@@ -20,7 +21,7 @@ class Review extends Model
     protected function casts(): array
     {
         return [
-            'rating'     => 'integer',
+            'rating' => 'integer',
             'created_at' => 'datetime',
         ];
     }
