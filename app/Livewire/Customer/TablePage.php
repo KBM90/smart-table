@@ -34,6 +34,12 @@ class TablePage extends Component
 
     public ?int $activeRequestId = null;
 
+    /**
+     * When a request transitions to resolved, we store its ID here so
+     * the frontend can prompt the customer for a review.
+     */
+    public ?int $resolvedRequestId = null;
+
     public function mount(string $qr_token, TableSessionService $tableSessionService): void
     {
         $table = Table::withoutGlobalScopes()
@@ -134,6 +140,12 @@ class TablePage extends Component
         $this->refreshRequestStatus();
     }
 
+    /** Called by the frontend when the customer dismisses the review prompt. */
+    public function dismissReview(): void
+    {
+        $this->resolvedRequestId = null;
+    }
+
     public function render()
     {
         $activeRequest = null;
@@ -152,6 +164,11 @@ class TablePage extends Component
                     ServiceRequest::STATUS_CANCELLED,
                 ], true)
             ) {
+                // If the request was resolved (not cancelled), trigger the review prompt.
+                if ($found->status === ServiceRequest::STATUS_RESOLVED && $found->accepted_by !== null) {
+                    $this->resolvedRequestId = $found->getKey();
+                }
+
                 $this->activeRequestId = null;
                 $found = null;
             }

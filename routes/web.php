@@ -93,9 +93,14 @@ Route::get('/t/{qr_token}/catalog', CustomerCatalog::class)->name('customer.cata
 Route::get('/t/{qr_token}', CustomerTablePage::class)->name('customer.table');
 
 use App\Http\Controllers\Customers\CustomerRequestController;
+use App\Http\Controllers\Customers\CustomerReviewController;
 
 Route::post('/api/table/request', [CustomerRequestController::class, 'store'])->name('customer.request.store');
 Route::delete('/api/table/request/{id}', [CustomerRequestController::class, 'cancel'])->name('customer.request.cancel');
+
+// ─── Customer Review ─────────────────────────────────────────────────────────
+// No auth required — customers are identified via the session cookie.
+Route::post('/api/reviews', [CustomerReviewController::class, 'store'])->name('customer.review.store');
 
 // ─── Stripe Webhook ──────────────────────────────────────────────────────────
 // Must be outside all auth/tenant middleware groups — Stripe POSTs here as an

@@ -1,9 +1,10 @@
 <div x-data="tablePage({
-        sessionId:      {{ $sessionId }},
-        status:         '{{ $status }}',
-        requestId:      {{ $requestId ?? 'null' }},
-        requestsAhead:  {{ $requestsAhead }},
-        elapsedSeconds: {{ $elapsedSeconds }},
+        sessionId:         {{ $sessionId }},
+        status:            '{{ $status }}',
+        requestId:         {{ $requestId ?? 'null' }},
+        requestsAhead:     {{ $requestsAhead }},
+        elapsedSeconds:    {{ $elapsedSeconds }},
+        resolvedRequestId: {{ $resolvedRequestId ?? 'null' }},
     })" class="flex min-h-[70vh] flex-col items-center justify-center space-y-10 py-8 relative z-10">
 
     {{-- ── BLOCKED ──────────────────────────────────────────────────────────── --}}
@@ -34,8 +35,86 @@
         </div>
     </template>
 
+    {{-- ── REVIEW PROMPT (shown after request is resolved) ────────────────── --}}
+    <template x-if="reviewPrompt.visible">
+        <div
+            class="w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/60 bg-white/90 p-8 shadow-2xl shadow-indigo-100/60 backdrop-blur-xl relative transition-all duration-500">
+
+            <!-- Ambient glow -->
+            <div
+                class="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-amber-200/30 blur-[60px] pointer-events-none">
+            </div>
+            <div
+                class="absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-indigo-200/20 blur-[60px] pointer-events-none">
+            </div>
+
+            <div class="relative z-10 flex flex-col items-center space-y-6 text-center">
+
+                <!-- Icon -->
+                <div
+                    class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100 shadow-md">
+                    <svg class="h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight">Request Completed!</h3>
+                    <p class="mt-1.5 text-sm text-slate-500 font-medium">How was the service? Rate your experience.</p>
+                </div>
+
+                <!-- Star Rating -->
+                <div class="flex items-center justify-center gap-2" x-data>
+                    <template x-for="star in [1,2,3,4,5]" :key="star">
+                        <button type="button" @click="reviewPrompt.rating = star"
+                            @mouseover="reviewPrompt.hoverRating = star" @mouseleave="reviewPrompt.hoverRating = 0"
+                            class="transition-transform hover:scale-110 focus:outline-none"
+                            :aria-label="'Rate ' + star + ' stars'">
+                            <svg class="h-10 w-10 transition-colors duration-150"
+                                :class="star <= (reviewPrompt.hoverRating || reviewPrompt.rating) ? 'text-amber-400' : 'text-slate-200'"
+                                viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Label under stars -->
+                <p class="text-xs font-semibold text-slate-400 -mt-2" x-text="reviewPrompt.ratingLabel()"></p>
+
+                <!-- Optional comment -->
+                <div class="w-full">
+                    <textarea x-model="reviewPrompt.comment" placeholder="Optional comment…" rows="3"
+                        class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none resize-none transition"
+                        maxlength="1000"></textarea>
+                </div>
+
+                <!-- Feedback message -->
+                <p x-show="reviewPrompt.feedbackMsg" x-text="reviewPrompt.feedbackMsg" class="text-xs font-semibold"
+                    :class="reviewPrompt.feedbackOk ? 'text-emerald-600' : 'text-red-500'"></p>
+
+                <!-- Actions -->
+                <div class="flex w-full gap-3">
+                    <button @click="reviewPrompt.submit(sessionId)"
+                        :disabled="reviewPrompt.loading || reviewPrompt.rating === 0 || reviewPrompt.submitted"
+                        type="button"
+                        class="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0">
+                        <span
+                            x-text="reviewPrompt.loading ? 'Sending…' : reviewPrompt.submitted ? 'Sent ✓' : 'Submit'"></span>
+                    </button>
+                    <button @click="reviewPrompt.dismiss()" type="button"
+                        class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-500 hover:bg-slate-100 active:scale-95 transition-all duration-200">
+                        Skip
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </template>
+
     {{-- ── ACTIVE REQUEST (pending / accepted) ─────────────────────────────── --}}
-    <template x-if="status === 'pending' || status === 'accepted'">
+    <template x-if="(status === 'pending' || status === 'accepted') && !reviewPrompt.visible">
         <div
             class="w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-8 shadow-2xl shadow-indigo-100/60 backdrop-blur-xl relative transition-all duration-500">
 
@@ -131,7 +210,7 @@
     </template>
 
     {{-- ── IDLE: golden call-waiter button ─────────────────────────────────── --}}
-    <template x-if="status === 'idle'">
+    <template x-if="status === 'idle' && !reviewPrompt.visible">
         <div class="flex flex-col items-center justify-center mt-4">
 
             <style>
@@ -241,7 +320,7 @@
 </div>
 
 <script>
-    function tablePage({ sessionId, status, requestId, requestsAhead, elapsedSeconds }) {
+    function tablePage({ sessionId, status, requestId, requestsAhead, elapsedSeconds, resolvedRequestId }) {
         return {
             status,
             requestId,
@@ -250,6 +329,76 @@
             loading: false,
             _timer: null,
             _handle: null,
+
+            // ── Review prompt state ────────────────────────────────────────────
+            reviewPrompt: {
+                visible: resolvedRequestId !== null,
+                requestId: resolvedRequestId,
+                rating: 0,
+                hoverRating: 0,
+                comment: '',
+                loading: false,
+                submitted: false,
+                feedbackMsg: '',
+                feedbackOk: false,
+
+                ratingLabel() {
+                    const labels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
+                    return labels[this.hoverRating || this.rating] || 'Tap a star to rate';
+                },
+
+                async submit(sessionId) {
+                    if (this.loading || this.submitted || this.rating === 0) return;
+                    this.loading = true;
+                    this.feedbackMsg = '';
+
+                    try {
+                        const res = await fetch('/api/reviews', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            },
+                            body: JSON.stringify({
+                                session_id: sessionId,
+                                request_id: this.requestId,
+                                rating: this.rating,
+                                comment: this.comment || null,
+                            }),
+                        });
+
+                        if (res.status === 409) {
+                            // Already reviewed
+                            this.feedbackMsg = 'You already submitted a review for this visit.';
+                            this.feedbackOk = false;
+                            this.submitted = true;
+                            setTimeout(() => { this.visible = false; }, 2500);
+                            return;
+                        }
+
+                        if (!res.ok) {
+                            const data = await res.json().catch(() => ({}));
+                            this.feedbackMsg = data.message || 'Something went wrong. Please try again.';
+                            this.feedbackOk = false;
+                            return;
+                        }
+
+                        this.submitted = true;
+                        this.feedbackMsg = 'Thank you for your feedback!';
+                        this.feedbackOk = true;
+                        setTimeout(() => { this.visible = false; }, 2000);
+                    } catch {
+                        this.feedbackMsg = 'Network error. Please try again.';
+                        this.feedbackOk = false;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                dismiss() {
+                    this.visible = false;
+                },
+            },
 
             init() {
                 if (this.status === 'pending' || this.status === 'accepted') {
@@ -271,11 +420,25 @@
                 }
             },
 
-            // ── Realtime push: mutate state directly — zero server round-trip ──
+            // ── Realtime push ──────────────────────────────────────────────────
             _handlePush(payload) {
                 const r = payload.new ?? payload;
 
-                if (r.status === 'resolved' || r.status === 'cancelled') {
+                if (r.status === 'resolved') {
+                    // Show review prompt before going idle
+                    if (r.id && r.accepted_by) {
+                        this.reviewPrompt.requestId = r.id;
+                        this.reviewPrompt.rating = 0;
+                        this.reviewPrompt.comment = '';
+                        this.reviewPrompt.submitted = false;
+                        this.reviewPrompt.feedbackMsg = '';
+                        this.reviewPrompt.visible = true;
+                    }
+                    this._resetToIdle();
+                    return;
+                }
+
+                if (r.status === 'cancelled') {
                     this._resetToIdle();
                     return;
                 }
