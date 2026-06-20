@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Waiter\TableAssignmentController;
 use App\Http\Controllers\Owner\WaiterStatsController;
+use App\Http\Controllers\Owner\WaiterPerformanceController;
 use App\Livewire\Customer\Catalog as CustomerCatalog;
 use App\Livewire\Customer\TablePage as CustomerTablePage;
 use App\Livewire\Owner\Categories\Index as OwnerCategoriesIndex;
@@ -63,6 +64,11 @@ Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix(
     Route::get('/staff', OwnerStaffIndex::class)->name('staff.index');
     Route::get('/tables/{table}/qr.png', TableQrCodeController::class)->name('tables.qr.download');
     Route::get('/requests', OwnerRequestsIndex::class)->name('requests.index');
+
+    // ─── Waiter Performance ─────────────────────────────────────────────────
+    Route::get('/waiters', [WaiterPerformanceController::class, 'index'])->name('waiters.index');
+    Route::get('/waiters/{waiter}', [WaiterPerformanceController::class, 'show'])->name('waiters.show');
+
 
     // ─── Billing ────────────────────────────────────────────────────────────
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
