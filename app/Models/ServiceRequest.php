@@ -99,31 +99,38 @@ class ServiceRequest extends Model
     }
 
     public function resolve(): void
-    {
-        if ($this->status !== self::STATUS_ACCEPTED) {
-            return;
-        }
+{
+    if ($this->status !== self::STATUS_ACCEPTED) {
+        return;
+    }
 
-        $this->forceFill([
-            'status' => self::STATUS_RESOLVED,
-            'resolved_at' => now(),
+    $this->forceFill([
+        'status' => self::STATUS_RESOLVED,
+        'resolved_at' => now(),
+    ])->save();
+
+    $session = TableSession::withoutGlobalScopes()->find($this->table_session_id);
+
+    if ($session === null) {
+        return;
+    }
+
+    $hasOtherActiveRequests = self::withoutGlobalScopes()
+        ->whereHas('tableSession', fn($q) => $q->where('table_id', $session->table_id))
+        ->whereIn('status', [self::STATUS_PENDING, self::STATUS_ACCEPTED])
+        ->exists();
+
+    if (!$hasOtherActiveRequests) {
+        // Close the session entirely so the customer cannot reuse it
+        // from their browser history after leaving the table.
+        $session->forceFill([
+            'status' => TableSession::STATUS_CLOSED,
+            'ended_at' => now(),
         ])->save();
 
-        $session = TableSession::withoutGlobalScopes()->find($this->table_session_id);
-
-        if ($session === null) {
-            return;
-        }
-
-        $hasOtherActiveRequests = self::withoutGlobalScopes()
-            ->whereHas('tableSession', fn($q) => $q->where('table_id', $session->table_id))
-            ->whereIn('status', [self::STATUS_PENDING, self::STATUS_ACCEPTED])
-            ->exists();
-
-        if (!$hasOtherActiveRequests) {
-            Table::withoutGlobalScopes()->find($session->table_id)?->markFreeKeepSession();
-        }
+        Table::withoutGlobalScopes()->find($session->table_id)?->markFreeKeepSession();
     }
+}
 
     public function cancel(): void
     {

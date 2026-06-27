@@ -1,6 +1,4 @@
-<div @if (config('services.supabase.url') && config('services.supabase.realtime_anon_enabled')) wire:poll.10s @else
-wire:poll.3s @endif class="space-y-6">
-
+<div wire:poll.3s="refreshRequests" class="space-y-6">
     {{-- Supabase Realtime subscription lives in its own inner div so Alpine
     does not share the same root element as wire:poll. When Alpine and
     Livewire both own the same root element, Livewire's morphing can
@@ -81,15 +79,62 @@ wire:poll.3s @endif class="space-y-6">
                 </thead>
                 <tbody class="divide-y divide-slate-200">
                     @forelse ($requests as $request)
-                        <tr class="align-top">
+                        <tr class="align-top transition-all duration-300"
+                            x-data="{
+                                localStatus: @js($request->status),
+                                busy: false,
+                                justChanged: false,
+                                async doAccept() {
+                                    if (this.busy) return;
+                                    this.busy = true;
+                                    this.localStatus = 'accepted';
+                                    this.flashChange();
+                                    try {
+                                        await $wire.acceptRequest({{ $request->id }});
+                                    } catch (e) {
+                                        this.localStatus = 'pending';
+                                    } finally {
+                                        this.busy = false;
+                                    }
+                                },
+                                async doResolve() {
+                                    if (this.busy) return;
+                                    this.busy = true;
+                                    this.localStatus = 'resolved';
+                                    this.flashChange();
+                                    try {
+                                        await $wire.resolveRequest({{ $request->id }});
+                                    } catch (e) {
+                                        this.localStatus = 'accepted';
+                                    } finally {
+                                        this.busy = false;
+                                    }
+                                },
+                                flashChange() {
+                                    this.justChanged = true;
+                                    setTimeout(() => this.justChanged = false, 600);
+                                }
+                            }"
+                            x-show="localStatus !== 'resolved'"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 translate-x-0"
+                            x-transition:leave-end="opacity-0 -translate-x-4"
+                        >
                             <td class="px-6 py-4">
                                 <p class="font-semibold text-slate-900">{{ $request->tableSession->table->name }}</p>
                                 <p class="mt-1 text-xs text-slate-500">{{ $request->tableSession->session_token }}</p>
                             </td>
                             <td class="px-6 py-4">
-                                <span
-                                    class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $request->status === \App\Models\ServiceRequest::STATUS_PENDING ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700' }}">
-                                    {{ ucfirst($request->status) }}
+                                {{-- Pending badge --}}
+                                <span x-show="localStatus === 'pending'" x-cloak
+                                    class="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-amber-100 text-amber-700">
+                                    Pending
+                                </span>
+                                {{-- Accepted badge --}}
+                                <span x-show="localStatus === 'accepted'" x-cloak
+                                    class="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-sky-100 text-sky-700 transition-all duration-300"
+                                    :class="{ 'ring-2 ring-sky-300 ring-offset-1 scale-105': justChanged }">
+                                    Accepted
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 font-mono" x-data="{
@@ -110,22 +155,41 @@ wire:poll.3s @endif class="space-y-6">
                                     }">
                                 <span x-text="formatTime(elapsed)"></span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-slate-600">{{ $request->acceptedBy?->name ?? 'Unassigned' }}</td>
+                            <td class="px-6 py-4 text-sm text-slate-600">
+                                <span x-show="localStatus === 'pending'">{{ $request->acceptedBy?->name ?? 'Unassigned' }}</span>
+                                <span x-show="localStatus === 'accepted'" x-cloak>{{ $request->acceptedBy?->name ?? auth()->user()->name }}</span>
+                            </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap justify-end gap-2">
-                                    @if ($request->status === \App\Models\ServiceRequest::STATUS_PENDING)
-                                        <button wire:click="acceptRequest({{ $request->id }})" type="button"
-                                            class="rounded-lg border border-sky-300 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:border-sky-400 hover:text-sky-900">
-                                            Accept
-                                        </button>
-                                    @endif
+                                    {{-- Accept button — visible only when locally pending --}}
+                                    <button x-show="localStatus === 'pending'" x-cloak
+                                        @click="doAccept()" type="button"
+                                        :disabled="busy"
+                                        class="rounded-lg border border-sky-300 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:border-sky-400 hover:text-sky-900 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <span x-show="!busy">Accept</span>
+                                        <span x-show="busy" x-cloak class="inline-flex items-center gap-1">
+                                            <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            Accepting…
+                                        </span>
+                                    </button>
 
-                                    @if ($request->status === \App\Models\ServiceRequest::STATUS_ACCEPTED)
-                                        <button wire:click="resolveRequest({{ $request->id }})" type="button"
-                                            class="rounded-lg border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 hover:text-emerald-900">
-                                            Resolved
-                                        </button>
-                                    @endif
+                                    {{-- Resolve button — visible only when locally accepted --}}
+                                    <button x-show="localStatus === 'accepted'" x-cloak
+                                        @click="doResolve()" type="button"
+                                        :disabled="busy"
+                                        class="rounded-lg border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 hover:text-emerald-900 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <span x-show="!busy">Resolved</span>
+                                        <span x-show="busy" x-cloak class="inline-flex items-center gap-1">
+                                            <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            Resolving…
+                                        </span>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

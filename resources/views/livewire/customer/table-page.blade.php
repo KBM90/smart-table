@@ -402,7 +402,7 @@
 
             init() {
                 if (this.status === 'pending' || this.status === 'accepted') {
-                    this._startTimer();
+                        this._startTimer();
                 }
 
                 if (window.AppRealtime && typeof window.AppRealtime.onSessionChange === 'function') {
@@ -413,12 +413,12 @@
                 }
             },
 
-            destroy() {
-                clearInterval(this._timer);
-                if (this._handle && window.AppRealtime?.unsubscribe) {
-                    window.AppRealtime.unsubscribe(this._handle);
-                }
-            },
+                    destroy() {
+                        clearInterval(this._timer);
+                        if (this._handle && window.AppRealtime?.unsubscribe) {
+                            window.AppRealtime.unsubscribe(this._handle);
+                        }
+                    },
 
             // ── Realtime push ──────────────────────────────────────────────────
             _handlePush(payload) {

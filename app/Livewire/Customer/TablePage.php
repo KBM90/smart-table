@@ -18,7 +18,7 @@ class TablePage extends Component
 {
     public const SESSION_COOKIE = 'st_session_token';
 
-    public const SESSION_TTL_MINUTES = 360;
+    public const SESSION_TTL_MINUTES = 60;
 
     public int $tableId;
 
@@ -125,14 +125,30 @@ class TablePage extends Component
         $this->activeRequestId = null;
     }
 
-    public function refreshRequestStatus(): void
-    {
-        if ($this->blocked) {
-            return;
-        }
-
-        $this->syncActiveRequest();
+   public function refreshRequestStatus(): void
+{
+    if ($this->blocked) {
+        return;
     }
+
+    $previousStatus = $this->computedStatus();
+    $this->syncActiveRequest();
+    $newStatus = $this->computedStatus();
+
+    // Notify Alpine if status changed so it updates the UI immediately
+    if ($previousStatus !== $newStatus) {
+        $this->dispatch('status-changed', status: $newStatus, requestId: $this->activeRequestId);
+    }
+}
+
+private function computedStatus(): string
+{
+    if ($this->blocked) return 'blocked';
+    if ($this->activeRequestId === null) return 'idle';
+
+    $request = \App\Models\ServiceRequest::withoutGlobalScopes()->find($this->activeRequestId);
+    return $request?->status ?? 'idle';
+}
 
     #[On('refresh-status')]
     public function refreshStatusFromRealtime(): void
