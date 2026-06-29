@@ -21,7 +21,7 @@
                     {{ $plan === 'annual' ? 'Annual' : 'Monthly' }}
                 </p>
                 <p class="mt-2 text-3xl font-black text-slate-900">
-                    {{ $plan === 'annual' ? '$200' : '$25' }}
+                    {{ $plan === 'annual' ? '$250' : '$28' }}
                     <span class="text-base font-semibold text-slate-400">
                         / {{ $plan === 'annual' ? 'year' : 'month' }}
                     </span>

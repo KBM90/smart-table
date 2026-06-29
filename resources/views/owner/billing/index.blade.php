@@ -49,8 +49,8 @@
                     default => 'Active',
                 };
                 $planLabel = match (true) {
-                    $subscription->hasPrice(config('services.paddle.price_annual')) => 'Annual - $200 / yr',
-                    $subscription->hasPrice(config('services.paddle.price_monthly')) => 'Monthly - $25 / mo',
+                    $subscription->hasPrice(config('services.paddle.price_annual')) => 'Annual - $250 / yr',
+                    $subscription->hasPrice(config('services.paddle.price_monthly')) => 'Monthly - $28 / mo',
                     default => 'Paddle subscription',
                 };
             @endphp
@@ -102,7 +102,7 @@
                     class="group relative flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-100 active:scale-[0.99]">
                     <p class="text-[10px] font-black uppercase tracking-widest text-indigo-500">Monthly</p>
                     <p class="text-3xl font-black text-slate-900">
-                        $25 <span class="text-base font-semibold text-slate-400">/ month</span>
+                        $28 <span class="text-base font-semibold text-slate-400">/ month</span>
                     </p>
                     <p class="text-sm text-slate-500">Full access billed monthly. Cancel any time.</p>
                     <span class="mt-2 inline-flex items-center gap-1 text-sm font-bold text-indigo-600 group-hover:underline">
@@ -119,7 +119,7 @@
                         </span>
                     </div>
                     <p class="text-3xl font-black text-slate-900">
-                        $200 <span class="text-base font-semibold text-slate-400">/ year</span>
+                        $250 <span class="text-base font-semibold text-slate-400">/ year</span>
                     </p>
                     <p class="text-sm text-slate-500">Full access billed annually. Best value.</p>
                     <span class="mt-2 inline-flex items-center gap-1 text-sm font-bold text-indigo-600 group-hover:underline">
