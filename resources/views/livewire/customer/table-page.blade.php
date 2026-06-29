@@ -1,4 +1,4 @@
-<div x-data="tablePage({
+<div wire:poll.5s="refreshRequestStatus" @status-changed.window="_handlePush({ status: $event.detail.status, id: $event.detail.requestId, accepted_by: $event.detail.accepted_by ?? true })" x-data="tablePage({
         sessionId:         {{ $sessionId }},
         status:            '{{ $status }}',
         requestId:         {{ $requestId ?? 'null' }},
@@ -322,6 +322,7 @@
 <script>
     function tablePage({ sessionId, status, requestId, requestsAhead, elapsedSeconds, resolvedRequestId }) {
         return {
+            sessionId,
             status,
             requestId,
             requestsAhead,
@@ -404,6 +405,10 @@
                 if (this.status === 'pending' || this.status === 'accepted') {
                         this._startTimer();
                 }
+                // Listen for status changes pushed from Livewire poll
+                window.addEventListener('status-changed', (e) => {
+                    this._handlePush({ status: e.detail.status, id: e.detail.requestId, accepted_by: true });
+                });
 
                 if (window.AppRealtime && typeof window.AppRealtime.onSessionChange === 'function') {
                     this._handle = window.AppRealtime.onSessionChange(

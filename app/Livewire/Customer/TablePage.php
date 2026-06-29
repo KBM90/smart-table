@@ -34,6 +34,8 @@ class TablePage extends Component
 
     public ?int $activeRequestId = null;
 
+    public string $requestStatus = 'idle';
+
     /**
      * When a request transitions to resolved, we store its ID here so
      * the frontend can prompt the customer for a review.
@@ -61,6 +63,7 @@ class TablePage extends Component
         if (!$this->blocked) {
             Cookie::queue($this->sessionCookie($session->session_token));
             $this->syncActiveRequest();
+            $this->requestStatus = $this->computedStatus();
         }
     }
 
@@ -125,21 +128,28 @@ class TablePage extends Component
         $this->activeRequestId = null;
     }
 
-   public function refreshRequestStatus(): void
+public function refreshRequestStatus(): void
 {
     if ($this->blocked) {
         return;
     }
 
-    $previousStatus = $this->computedStatus();
+    $previousStatus = $this->requestStatus;
     $this->syncActiveRequest();
     $newStatus = $this->computedStatus();
+    $this->requestStatus = $newStatus;
 
     // Notify Alpine if status changed so it updates the UI immediately
     if ($previousStatus !== $newStatus) {
-        $this->dispatch('status-changed', status: $newStatus, requestId: $this->activeRequestId);
+        $currentReq = $this->activeRequestId ? \App\Models\ServiceRequest::withoutGlobalScopes()->find($this->activeRequestId) : null;
+        $this->dispatch('status-changed', 
+            status: $newStatus, 
+            requestId: $this->activeRequestId,
+            accepted_by: $currentReq ? ($currentReq->accepted_by !== null) : false
+        );
     }
 }
+
 
 private function computedStatus(): string
 {
@@ -218,11 +228,21 @@ private function computedStatus(): string
 
     protected function syncActiveRequest(): void
     {
+        if ($this->activeRequestId !== null) {
+            $currentReq = ServiceRequest::withoutGlobalScopes()->find($this->activeRequestId);
+            if ($currentReq !== null && in_array($currentReq->status, [
+                ServiceRequest::STATUS_RESOLVED,
+                ServiceRequest::STATUS_CANCELLED,
+            ], true)) {
+                // Keep the activeRequestId so that `render()` and `computedStatus()` can process the transition.
+                return;
+            }
+        }
+
         $session = TableSession::withoutGlobalScopes()->find($this->sessionId);
 
         if ($session === null || !$session->isActive()) {
             $this->activeRequestId = null;
-            Cookie::queue(Cookie::forget(self::SESSION_COOKIE));
 
             return;
         }

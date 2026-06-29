@@ -84,21 +84,42 @@
                                 localStatus: @js($request->status),
                                 busy: false,
                                 justChanged: false,
+                                resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? max(0, 60 - now()->diffInSeconds($request->accepted_at)) : 0 }},
+                                resolveTimer: null,
+                                init() {
+                                    if (this.resolveCountdown > 0) {
+                                        this.startResolveCountdown();
+                                    }
+                                },
+                                startResolveCountdown() {
+                                    if (this.resolveTimer) clearInterval(this.resolveTimer);
+                                    this.resolveTimer = setInterval(() => {
+                                        this.resolveCountdown--;
+                                        if (this.resolveCountdown <= 0) {
+                                            clearInterval(this.resolveTimer);
+                                            this.resolveCountdown = 0;
+                                        }
+                                    }, 1000);
+                                },
                                 async doAccept() {
                                     if (this.busy) return;
                                     this.busy = true;
                                     this.localStatus = 'accepted';
+                                    this.resolveCountdown = 60;
+                                    this.startResolveCountdown();
                                     this.flashChange();
                                     try {
                                         await $wire.acceptRequest({{ $request->id }});
                                     } catch (e) {
                                         this.localStatus = 'pending';
+                                        clearInterval(this.resolveTimer);
+                                        this.resolveCountdown = 0;
                                     } finally {
                                         this.busy = false;
                                     }
                                 },
                                 async doResolve() {
-                                    if (this.busy) return;
+                                    if (this.busy || this.resolveCountdown > 0) return;
                                     this.busy = true;
                                     this.localStatus = 'resolved';
                                     this.flashChange();
@@ -179,9 +200,10 @@
                                     {{-- Resolve button — visible only when locally accepted --}}
                                     <button x-show="localStatus === 'accepted'" x-cloak
                                         @click="doResolve()" type="button"
-                                        :disabled="busy"
+                                        :disabled="busy || resolveCountdown > 0"
                                         class="rounded-lg border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 hover:text-emerald-900 disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <span x-show="!busy">Resolved</span>
+                                        <span x-show="!busy && resolveCountdown === 0">Resolved</span>
+                                        <span x-show="!busy && resolveCountdown > 0" x-text="`Wait ${resolveCountdown}s`"></span>
                                         <span x-show="busy" x-cloak class="inline-flex items-center gap-1">
                                             <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
