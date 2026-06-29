@@ -14681,7 +14681,7 @@ class User extends Authenticatable
                     <h3 id="tier-monthly" class="text-lg font-semibold leading-8 text-white">Monthly</h3>
                     <p class="mt-4 text-sm leading-6 text-gray-300">Perfect for growing cafes needing flexibility.</p>
                     <p class="mt-6 flex items-baseline gap-x-1">
-                        <span class="text-4xl font-bold tracking-tight text-white">$25</span>
+                        <span class="text-4xl font-bold tracking-tight text-white">$28</span>
                         <span class="text-sm font-semibold leading-6 text-gray-300">/ month</span>
                     </p>
                     <ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-gray-300">

@@ -336,7 +336,7 @@
                                 <h3 id="tier-monthly" class="text-lg font-bold leading-8 text-slate-900">Monthly</h3>
                                 <p class="mt-4 text-sm leading-6 text-slate-500">Perfect for growing cafes needing flexibility.</p>
                                 <p class="mt-6 flex items-baseline gap-x-1">
-                                    <span class="text-4xl font-bold tracking-tight text-slate-900">$25</span>
+                                    <span class="text-4xl font-bold tracking-tight text-slate-900">$28</span>
                                     <span class="text-sm font-semibold leading-6 text-slate-500">/ month</span>
                                 </p>
                                 <ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-slate-600">
@@ -353,10 +353,10 @@
                                 <h3 id="tier-annual" class="text-lg font-bold leading-8 text-white">Annual</h3>
                                 <p class="mt-4 text-sm leading-6 text-slate-300">Maximize your ROI with a discounted yearly rate.</p>
                                 <p class="mt-6 flex items-baseline gap-x-1">
-                                    <span class="text-4xl font-bold tracking-tight text-white">$200</span>
+                                    <span class="text-4xl font-bold tracking-tight text-white">$250</span>
                                     <span class="text-sm font-semibold leading-6 text-slate-300">/ year</span>
                                 </p>
-                                <p class="mt-1 text-sm font-medium text-indigo-400">That's just ~$16 per month</p>
+                                <p class="mt-1 text-sm font-medium text-indigo-400">That's just ~$86 per month</p>
                                 <ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-slate-300">
                                     <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> All Monthly features</li>
                                     <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-indigo-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg> Priority support</li>

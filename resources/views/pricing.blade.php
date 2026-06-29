@@ -196,7 +196,7 @@
                             <p class="mt-4 text-sm leading-6 text-slate-500">Perfect for growing restaurants needing
                                 full real-time services.</p>
                             <p class="mt-6 flex items-baseline gap-x-1">
-                                <span class="text-4xl font-extrabold tracking-tight text-slate-900">$25</span>
+                                <span class="text-4xl font-extrabold tracking-tight text-slate-900">$28</span>
                                 <span class="text-sm font-semibold leading-6 text-slate-500">/ month</span>
                             </p>
                             <ul role="list"
@@ -260,10 +260,10 @@
                             <p class="mt-4 text-sm leading-6 text-slate-300">Maximize efficiency with absolute
                                 operational access and priority updates.</p>
                             <p class="mt-6 flex items-baseline gap-x-1">
-                                <span class="text-4xl font-extrabold tracking-tight text-white">$200</span>
+                                <span class="text-4xl font-extrabold tracking-tight text-white">$250</span>
                                 <span class="text-sm font-semibold leading-6 text-slate-300">/ year</span>
                             </p>
-                            <p class="mt-1.5 text-xs font-semibold text-indigo-400">Save $100 annually (~$16.60/month)
+                            <p class="mt-1.5 text-xs font-semibold text-indigo-400">Save $86 annually (~$16.60/month)
                             </p>
                             <ul role="list"
                                 class="mt-8 space-y-3.5 text-sm leading-6 text-slate-300 border-t border-slate-800 pt-6">
