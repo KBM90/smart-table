@@ -84,7 +84,7 @@
                                 localStatus: @js($request->status),
                                 busy: false,
                                 justChanged: false,
-                                resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? max(0, 60 - now()->diffInSeconds($request->accepted_at)) : 0 }},
+                                resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? (int) ceil(max(0, 60 - $request->accepted_at->diffInSeconds(now(), true))) : 0 }},
                                 resolveTimer: null,
                                 init() {
                                     if (this.resolveCountdown > 0) {

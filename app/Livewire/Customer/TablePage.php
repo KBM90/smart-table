@@ -145,7 +145,7 @@ public function refreshRequestStatus(): void
         $this->dispatch('status-changed', 
             status: $newStatus, 
             requestId: $this->activeRequestId,
-            accepted_by: $currentReq ? ($currentReq->accepted_by !== null) : false
+            accepted_by: $currentReq?->isReviewable() ?? false
         );
     }
 }
@@ -191,7 +191,7 @@ private function computedStatus(): string
                 ], true)
             ) {
                 // If the request was resolved (not cancelled), trigger the review prompt.
-                if ($found->status === ServiceRequest::STATUS_RESOLVED && $found->accepted_by !== null) {
+                if ($found->isReviewable()) {
                     $this->resolvedRequestId = $found->getKey();
                 }
 

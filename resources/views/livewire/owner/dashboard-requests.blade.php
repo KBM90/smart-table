@@ -137,13 +137,34 @@
                                             </svg>
                                         </button>
                                     @elseif ($request->status === \App\Models\ServiceRequest::STATUS_ACCEPTED)
-                                        <button wire:click="resolveRequest({{ $request->id }})" type="button"
-                                            class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-600/10 hover:shadow-emerald-600/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+                                        <button
+                                            x-data="{
+                                                resolveCountdown: {{ $request->accepted_at ? (int) ceil(max(0, 60 - $request->accepted_at->diffInSeconds(now(), true))) : 0 }},
+                                                resolveTimer: null,
+                                                init() {
+                                                    if (this.resolveCountdown > 0) {
+                                                        this.resolveTimer = setInterval(() => {
+                                                            this.resolveCountdown--;
+                                                            if (this.resolveCountdown <= 0) {
+                                                                clearInterval(this.resolveTimer);
+                                                                this.resolveCountdown = 0;
+                                                            }
+                                                        }, 1000);
+                                                    }
+                                                },
+                                                destroy() {
+                                                    if (this.resolveTimer) clearInterval(this.resolveTimer);
+                                                },
+                                            }"
+                                            wire:click="resolveRequest({{ $request->id }})" type="button"
+                                            :disabled="resolveCountdown > 0"
+                                            class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-600/10 hover:shadow-emerald-600/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0">
                                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                                 stroke-width="2.5">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                             </svg>
-                                            <span>Resolve</span>
+                                            <span x-show="resolveCountdown === 0" x-cloak>Resolve</span>
+                                            <span x-show="resolveCountdown > 0" x-cloak x-text="`Wait ${resolveCountdown}s`"></span>
                                         </button>
                                     @endif
                                 </div>

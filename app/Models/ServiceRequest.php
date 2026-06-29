@@ -85,6 +85,21 @@ class ServiceRequest extends Model
         return $this->hasOne(Review::class, 'request_id');
     }
 
+    public function reviewWaiter(): ?User
+    {
+        $user = $this->relationLoaded('acceptedBy')
+            ? $this->acceptedBy
+            : $this->acceptedBy()->first();
+
+        return $user?->isWaiter() ? $user : null;
+    }
+
+    public function isReviewable(): bool
+    {
+        return $this->status === self::STATUS_RESOLVED
+            && $this->reviewWaiter() !== null;
+    }
+
     public function accept(User $user): void
     {
         if ($this->status !== self::STATUS_PENDING) {

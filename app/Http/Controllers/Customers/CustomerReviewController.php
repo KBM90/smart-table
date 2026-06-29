@@ -57,11 +57,11 @@ class CustomerReviewController extends Controller
             return response()->json(['message' => 'You have already reviewed this request.'], Response::HTTP_CONFLICT);
         }
 
-        // The waiter to credit is whoever accepted the request.
-        $waiterId = $serviceRequest->accepted_by;
+        // Reviews are only meaningful when the request was handled by a waiter.
+        $waiterId = $serviceRequest->reviewWaiter()?->getKey();
 
         if ($waiterId === null) {
-            return response()->json(['message' => 'No waiter was assigned to this request.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response()->json(['message' => 'This request was not handled by a waiter, so it cannot be reviewed.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $review = Review::withoutGlobalScopes()->create([
