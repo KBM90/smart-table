@@ -14,7 +14,10 @@ class RegistrationTest extends TestCase
     {
         $response = $this->get('/register');
 
-        $response->assertStatus(200);
+        $response
+            ->assertStatus(200)
+            ->assertSeeText('Terms of Service')
+            ->assertSeeText('Privacy Policy');
     }
 
     public function test_new_users_can_register(): void
@@ -25,6 +28,7 @@ class RegistrationTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => '1',
         ]);
 
         $this->assertAuthenticated();
@@ -36,6 +40,26 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'role' => UserRole::Owner->value,
+        ]);
+    }
+
+    public function test_registration_requires_terms_acceptance(): void
+    {
+        $response = $this->from('/register')->post('/register', [
+            'business_name' => 'Test Cafe',
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response
+            ->assertRedirect('/register')
+            ->assertSessionHasErrors('terms');
+
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', [
+            'email' => 'test@example.com',
         ]);
     }
 }

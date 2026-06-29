@@ -40,6 +40,9 @@ class RegisteredUserController extends Controller
             'name'          => ['required', 'string', 'max:255'],
             'email'         => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'password'      => ['required', 'confirmed', Rules\Password::defaults()],
+            'terms'         => ['accepted'],
+        ], [
+            'terms.accepted' => 'You must agree to the Terms of Service and Privacy Policy to create an account.',
         ]);
 
         // Determine the selected plan. Defaults to 'trial' when not supplied.

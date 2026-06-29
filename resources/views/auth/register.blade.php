@@ -25,7 +25,7 @@
     </nav>
 
     <div class="max-w-md mx-auto mt-10 mb-20">
-        <form method="POST" action="{{ route('register') }}"
+        <form method="POST" action="{{ route('register', request()->only('plan')) }}"
             class="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
             @csrf
 
@@ -64,6 +64,26 @@
                 <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password"
                     name="password_confirmation" required autocomplete="new-password" />
                 <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+            </div>
+
+            <div class="mt-5">
+                <label for="terms" class="flex items-start gap-3 text-sm leading-6 text-gray-600">
+                    <input id="terms" name="terms" type="checkbox" value="1" required @checked(old('terms'))
+                        class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" />
+                    <span>
+                        I agree to the
+                        <a href="{{ route('legal.terms') }}" target="_blank" rel="noopener"
+                            class="font-semibold text-indigo-600 underline-offset-4 hover:underline">
+                            Terms of Service
+                        </a>
+                        and
+                        <a href="{{ route('legal.privacy') }}" target="_blank" rel="noopener"
+                            class="font-semibold text-indigo-600 underline-offset-4 hover:underline">
+                            Privacy Policy
+                        </a>.
+                    </span>
+                </label>
+                <x-input-error :messages="$errors->get('terms')" class="mt-2" />
             </div>
 
             <div class="flex items-center justify-end mt-6">
