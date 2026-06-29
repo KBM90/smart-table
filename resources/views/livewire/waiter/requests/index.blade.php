@@ -84,34 +84,55 @@
                                 localStatus: @js($request->status),
                                 busy: false,
                                 justChanged: false,
-                                resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? (int) ceil(max(0, 60 - $request->accepted_at->diffInSeconds(now(), true))) : 0 }},
+                                resolveReadyAt: @js($request->status === 'accepted' && $request->accepted_at ? $request->accepted_at->copy()->addSeconds(60)->toIso8601String() : null),
+                                resolveCountdown: 0,
                                 resolveTimer: null,
                                 init() {
+                                    this.updateResolveCountdown();
                                     if (this.resolveCountdown > 0) {
                                         this.startResolveCountdown();
                                     }
                                 },
+                                updateResolveCountdown() {
+                                    if (!this.resolveReadyAt) {
+                                        this.resolveCountdown = 0;
+                                        return;
+                                    }
+
+                                    const readyAt = Date.parse(this.resolveReadyAt);
+
+                                    if (Number.isNaN(readyAt)) {
+                                        this.resolveCountdown = 0;
+                                        return;
+                                    }
+
+                                    this.resolveCountdown = Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
+                                },
                                 startResolveCountdown() {
                                     if (this.resolveTimer) clearInterval(this.resolveTimer);
                                     this.resolveTimer = setInterval(() => {
-                                        this.resolveCountdown--;
-                                        if (this.resolveCountdown <= 0) {
+                                        this.updateResolveCountdown();
+                                        if (this.resolveCountdown === 0) {
                                             clearInterval(this.resolveTimer);
-                                            this.resolveCountdown = 0;
                                         }
                                     }, 1000);
+                                },
+                                destroy() {
+                                    if (this.resolveTimer) clearInterval(this.resolveTimer);
                                 },
                                 async doAccept() {
                                     if (this.busy) return;
                                     this.busy = true;
                                     this.localStatus = 'accepted';
-                                    this.resolveCountdown = 60;
+                                    this.resolveReadyAt = new Date(Date.now() + 60000).toISOString();
+                                    this.updateResolveCountdown();
                                     this.startResolveCountdown();
                                     this.flashChange();
                                     try {
                                         await $wire.acceptRequest({{ $request->id }});
                                     } catch (e) {
                                         this.localStatus = 'pending';
+                                        this.resolveReadyAt = null;
                                         clearInterval(this.resolveTimer);
                                         this.resolveCountdown = 0;
                                     } finally {
@@ -202,8 +223,8 @@
                                         @click="doResolve()" type="button"
                                         :disabled="busy || resolveCountdown > 0"
                                         class="rounded-lg border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 hover:text-emerald-900 disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <span x-show="!busy && resolveCountdown === 0">Resolved</span>
-                                        <span x-show="!busy && resolveCountdown > 0" x-text="`Wait ${resolveCountdown}s`"></span>
+                                        <span x-show="!busy && resolveCountdown <= 0">Resolve</span>
+                                        <span x-show="!busy && resolveCountdown > 0" x-text="`Wait ${Math.max(1, Math.ceil(resolveCountdown))}s`"></span>
                                         <span x-show="busy" x-cloak class="inline-flex items-center gap-1">
                                             <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

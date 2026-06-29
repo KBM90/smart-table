@@ -6,6 +6,7 @@ use App\Livewire\Customer\TablePage;
 use App\Models\ServiceRequest;
 use App\Models\Table;
 use App\Models\TableSession;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -28,6 +29,28 @@ class CallWaiterTest extends TestCase
         $this->assertDatabaseHas('requests', [
             'tenant_id' => $table->tenant_id,
             'table_session_id' => $session->id,
+            'type' => ServiceRequest::TYPE_CALL_WAITER,
+            'status' => ServiceRequest::STATUS_PENDING,
+        ]);
+    }
+
+    public function test_call_waiter_assigns_request_to_tables_waiter_when_present(): void
+    {
+        $waiter = User::factory()->waiter()->create();
+        $table = Table::factory()->create(['tenant_id' => $waiter->tenant_id]);
+        $table->assignedWaiters()->attach($waiter->id);
+
+        $this->get('/t/'.$table->qr_token)->assertOk();
+        $session = TableSession::withoutGlobalScopes()->firstOrFail();
+
+        Livewire::withCookie(TablePage::SESSION_COOKIE, $session->session_token)
+            ->test(TablePage::class, ['qr_token' => $table->qr_token])
+            ->call('callWaiter');
+
+        $this->assertDatabaseHas('requests', [
+            'tenant_id' => $table->tenant_id,
+            'table_session_id' => $session->id,
+            'assigned_waiter_id' => $waiter->id,
             'type' => ServiceRequest::TYPE_CALL_WAITER,
             'status' => ServiceRequest::STATUS_PENDING,
         ]);

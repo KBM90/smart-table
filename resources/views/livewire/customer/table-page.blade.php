@@ -1,4 +1,4 @@
-<div wire:poll.5s="refreshRequestStatus" @status-changed.window="_handlePush({ status: $event.detail.status, id: $event.detail.requestId, accepted_by: $event.detail.accepted_by ?? true })" x-data="tablePage({
+<div wire:poll.5s="refreshRequestStatus" @status-changed.window="_handlePush({ status: $event.detail.status, id: $event.detail.requestId, reviewable: $event.detail.reviewable ?? false })" x-data="tablePage({
         sessionId:         {{ $sessionId }},
         status:            '{{ $status }}',
         requestId:         {{ $requestId ?? 'null' }},
@@ -407,7 +407,11 @@
                 }
                 // Listen for status changes pushed from Livewire poll
                 window.addEventListener('status-changed', (e) => {
-                    this._handlePush({ status: e.detail.status, id: e.detail.requestId, accepted_by: true });
+                    this._handlePush({
+                        status: e.detail.status,
+                        id: e.detail.requestId,
+                        reviewable: e.detail.reviewable ?? false,
+                    });
                 });
 
                 if (window.AppRealtime && typeof window.AppRealtime.onSessionChange === 'function') {
@@ -431,7 +435,7 @@
 
                 if (r.status === 'resolved') {
                     // Show review prompt before going idle
-                    if (r.id && r.accepted_by) {
+                    if (r.id && this._isReviewablePayload(r)) {
                         this.reviewPrompt.requestId = r.id;
                         this.reviewPrompt.rating = 0;
                         this.reviewPrompt.comment = '';
@@ -456,6 +460,14 @@
             },
 
             // ── Actions ────────────────────────────────────────────────────────
+            _isReviewablePayload(payload) {
+                if (typeof payload.reviewable === 'boolean') {
+                    return payload.reviewable;
+                }
+
+                return Boolean(payload.assigned_waiter_id);
+            },
+
             async callWaiter() {
                 if (this.loading) return;
                 this.loading = true;

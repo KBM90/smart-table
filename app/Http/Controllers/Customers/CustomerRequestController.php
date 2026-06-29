@@ -51,6 +51,7 @@ class CustomerRequestController extends Controller
         $serviceRequest = ServiceRequest::withoutGlobalScopes()->create([
             'tenant_id' => $session->tenant_id,
             'table_session_id' => $session->getKey(),
+            'assigned_waiter_id' => ServiceRequest::assignedWaiterIdForSession($session),
             'type' => ServiceRequest::TYPE_CALL_WAITER,
             'status' => ServiceRequest::STATUS_PENDING,
         ]);

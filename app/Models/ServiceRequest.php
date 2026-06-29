@@ -85,8 +85,34 @@ class ServiceRequest extends Model
         return $this->hasOne(Review::class, 'request_id');
     }
 
+    public static function assignedWaiterIdForSession(TableSession $session): ?int
+    {
+        $table = $session->table()->withoutGlobalScopes()->first();
+
+        if ($table === null) {
+            return null;
+        }
+
+        $waiterId = $table->assignedWaiters()
+            ->where('users.tenant_id', $session->tenant_id)
+            ->where('users.role', User::ROLE_WAITER)
+            ->orderBy('table_waiter.created_at')
+            ->orderBy('users.id')
+            ->value('users.id');
+
+        return $waiterId === null ? null : (int) $waiterId;
+    }
+
     public function reviewWaiter(): ?User
     {
+        $assignedWaiter = $this->relationLoaded('assignedWaiter')
+            ? $this->assignedWaiter
+            : $this->assignedWaiter()->first();
+
+        if ($assignedWaiter?->isWaiter()) {
+            return $assignedWaiter;
+        }
+
         $user = $this->relationLoaded('acceptedBy')
             ? $this->acceptedBy
             : $this->acceptedBy()->first();

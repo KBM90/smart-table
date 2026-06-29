@@ -101,6 +101,7 @@ class TablePage extends Component
         $request = ServiceRequest::withoutGlobalScopes()->create([
             'tenant_id' => $session->tenant_id,
             'table_session_id' => $session->getKey(),
+            'assigned_waiter_id' => ServiceRequest::assignedWaiterIdForSession($session),
             'type' => ServiceRequest::TYPE_CALL_WAITER,
             'status' => ServiceRequest::STATUS_PENDING,
         ]);
@@ -145,7 +146,7 @@ public function refreshRequestStatus(): void
         $this->dispatch('status-changed', 
             status: $newStatus, 
             requestId: $this->activeRequestId,
-            accepted_by: $currentReq?->isReviewable() ?? false
+            reviewable: $currentReq?->isReviewable() ?? false
         );
     }
 }

@@ -139,18 +139,34 @@
                                     @elseif ($request->status === \App\Models\ServiceRequest::STATUS_ACCEPTED)
                                         <button
                                             x-data="{
-                                                resolveCountdown: {{ $request->accepted_at ? (int) ceil(max(0, 60 - $request->accepted_at->diffInSeconds(now(), true))) : 0 }},
+                                                resolveReadyAt: @js($request->accepted_at ? $request->accepted_at->copy()->addSeconds(60)->toIso8601String() : null),
+                                                resolveCountdown: 0,
                                                 resolveTimer: null,
                                                 init() {
+                                                    this.updateResolveCountdown();
                                                     if (this.resolveCountdown > 0) {
                                                         this.resolveTimer = setInterval(() => {
-                                                            this.resolveCountdown--;
-                                                            if (this.resolveCountdown <= 0) {
+                                                            this.updateResolveCountdown();
+                                                            if (this.resolveCountdown === 0) {
                                                                 clearInterval(this.resolveTimer);
-                                                                this.resolveCountdown = 0;
                                                             }
                                                         }, 1000);
                                                     }
+                                                },
+                                                updateResolveCountdown() {
+                                                    if (!this.resolveReadyAt) {
+                                                        this.resolveCountdown = 0;
+                                                        return;
+                                                    }
+
+                                                    const readyAt = Date.parse(this.resolveReadyAt);
+
+                                                    if (Number.isNaN(readyAt)) {
+                                                        this.resolveCountdown = 0;
+                                                        return;
+                                                    }
+
+                                                    this.resolveCountdown = Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
                                                 },
                                                 destroy() {
                                                     if (this.resolveTimer) clearInterval(this.resolveTimer);
@@ -163,8 +179,8 @@
                                                 stroke-width="2.5">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                             </svg>
-                                            <span x-show="resolveCountdown === 0" x-cloak>Resolve</span>
-                                            <span x-show="resolveCountdown > 0" x-cloak x-text="`Wait ${resolveCountdown}s`"></span>
+                                            <span x-show="resolveCountdown <= 0" x-cloak>Resolve</span>
+                                            <span x-show="resolveCountdown > 0" x-cloak x-text="`Wait ${Math.max(1, Math.ceil(resolveCountdown))}s`"></span>
                                         </button>
                                     @endif
                                 </div>

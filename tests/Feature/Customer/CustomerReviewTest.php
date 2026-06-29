@@ -53,6 +53,49 @@ class CustomerReviewTest extends TestCase
         ]);
     }
 
+    public function test_customer_can_review_assigned_waiter_when_owner_resolves_request(): void
+    {
+        $owner = User::factory()->owner()->create();
+        $waiter = User::factory()->waiter($owner->tenant)->create();
+        $table = Table::factory()->create(['tenant_id' => $owner->tenant_id]);
+        $table->assignedWaiters()->attach($waiter->id);
+
+        $session = TableSession::withoutGlobalScopes()->create([
+            'tenant_id' => $owner->tenant_id,
+            'table_id' => $table->id,
+            'status' => TableSession::STATUS_ACTIVE,
+            'started_at' => now(),
+        ]);
+        $request = ServiceRequest::withoutGlobalScopes()->create([
+            'tenant_id' => $owner->tenant_id,
+            'table_session_id' => $session->id,
+            'assigned_waiter_id' => $waiter->id,
+            'type' => ServiceRequest::TYPE_CALL_WAITER,
+            'status' => ServiceRequest::STATUS_RESOLVED,
+            'accepted_by' => $owner->id,
+            'accepted_at' => now()->subMinute(),
+            'resolved_at' => now(),
+        ]);
+
+        $this->withCredentials()
+            ->withCookie(CustomerReviewController::SESSION_COOKIE, $session->session_token)
+            ->post('/api/reviews', [
+                'session_id' => $session->id,
+                'request_id' => $request->id,
+                'rating' => 4,
+                'comment' => 'Handled well',
+            ], ['Accept' => 'application/json'])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('reviews', [
+            'tenant_id' => $owner->tenant_id,
+            'waiter_id' => $waiter->id,
+            'request_id' => $request->id,
+            'rating' => 4,
+            'comment' => 'Handled well',
+        ]);
+    }
+
     public function test_customer_cannot_review_request_handled_by_owner_without_waiter(): void
     {
         $owner = User::factory()->owner()->create();

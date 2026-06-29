@@ -66,6 +66,7 @@ class ServiceRequestService
             $request = ServiceRequest::withoutGlobalScopes()->create([
                 'tenant_id' => $locked->tenant_id,
                 'table_session_id' => $locked->getKey(),
+                'assigned_waiter_id' => ServiceRequest::assignedWaiterIdForSession($locked),
                 'type' => ServiceRequest::TYPE_CALL_WAITER,
                 'status' => ServiceRequest::STATUS_PENDING,
             ]);
