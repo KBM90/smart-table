@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('welcome');
 Route::view('/pricing', 'pricing')->name('pricing');
+Route::view('/terms-of-service', 'legal.terms')->name('legal.terms');
+Route::view('/privacy-policy', 'legal.privacy')->name('legal.privacy');
+Route::view('/refund-policy', 'legal.refund')->name('legal.refund');
 
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();

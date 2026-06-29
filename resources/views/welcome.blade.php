@@ -453,8 +453,9 @@
                 <div class="flex flex-wrap items-center gap-6 text-sm font-semibold text-slate-600">
                     <a href="{{ route('login') }}" class="transition hover:text-indigo-600">Login</a>
                     <a href="{{ route('register') }}" class="transition hover:text-indigo-600">Register</a>
-                    <a href="#" class="transition hover:text-indigo-600">Privacy Policy</a>
-                    <a href="#" class="transition hover:text-indigo-600">Terms of Service</a>
+                    <a href="{{ route('legal.privacy') }}" class="transition hover:text-indigo-600">Privacy Policy</a>
+                    <a href="{{ route('legal.terms') }}" class="transition hover:text-indigo-600">Terms of Service</a>
+                    <a href="{{ route('legal.refund') }}" class="transition hover:text-indigo-600">Refund Policy</a>
                 </div>
             </div>
         </footer>
