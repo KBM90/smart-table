@@ -5,6 +5,7 @@
         requestsAhead:     {{ $requestsAhead }},
         elapsedSeconds:    {{ $elapsedSeconds }},
         resolvedRequestId: {{ $resolvedRequestId ?? 'null' }},
+        requestCompleted:  @js($requestCompleted),
     })" class="flex min-h-[70vh] flex-col items-center justify-center space-y-10 py-8 relative z-10">
 
     {{-- ── BLOCKED ──────────────────────────────────────────────────────────── --}}
@@ -96,14 +97,14 @@
 
                 <!-- Actions -->
                 <div class="flex w-full gap-3">
-                    <button @click="reviewPrompt.submit(sessionId)"
+                    <button @click="reviewPrompt.submit(sessionId, () => requestCompleted = true)"
                         :disabled="reviewPrompt.loading || reviewPrompt.rating === 0 || reviewPrompt.submitted"
                         type="button"
                         class="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0">
                         <span
                             x-text="reviewPrompt.loading ? 'Sending…' : reviewPrompt.submitted ? 'Sent ✓' : 'Submit'"></span>
                     </button>
-                    <button @click="reviewPrompt.dismiss()" type="button"
+                    <button @click="reviewPrompt.dismiss(() => requestCompleted = true)" type="button"
                         class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-500 hover:bg-slate-100 active:scale-95 transition-all duration-200">
                         Skip
                     </button>
@@ -210,7 +211,36 @@
     </template>
 
     {{-- ── IDLE: golden call-waiter button ─────────────────────────────────── --}}
-    <template x-if="status === 'idle' && !reviewPrompt.visible">
+    <template x-if="requestCompleted && !reviewPrompt.visible && status !== 'blocked'">
+        <div
+            class="w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/60 bg-white/90 p-8 shadow-2xl shadow-emerald-100/70 backdrop-blur-xl relative transition-all duration-500">
+            <div
+                class="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-emerald-200/30 blur-[60px] pointer-events-none">
+            </div>
+            <div
+                class="absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-sky-200/20 blur-[60px] pointer-events-none">
+            </div>
+
+            <div class="relative z-10 flex flex-col items-center space-y-5 text-center">
+                <div
+                    class="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100 shadow-md">
+                    <svg class="h-10 w-10 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Thank you!</h3>
+                    <p class="mt-2 text-sm text-slate-500 font-medium leading-relaxed">
+                        Your request has been completed. We hope you enjoy the rest of your visit.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template x-if="status === 'idle' && !reviewPrompt.visible && !requestCompleted">
         <div class="flex flex-col items-center justify-center mt-4">
 
             <style>
@@ -320,13 +350,14 @@
 </div>
 
 <script>
-    function tablePage({ sessionId, status, requestId, requestsAhead, elapsedSeconds, resolvedRequestId }) {
+    function tablePage({ sessionId, status, requestId, requestsAhead, elapsedSeconds, resolvedRequestId, requestCompleted }) {
         return {
             sessionId,
             status,
             requestId,
             requestsAhead,
             elapsed: elapsedSeconds,
+            requestCompleted,
             loading: false,
             _timer: null,
             _handle: null,
@@ -348,7 +379,7 @@
                     return labels[this.hoverRating || this.rating] || 'Tap a star to rate';
                 },
 
-                async submit(sessionId) {
+                async submit(sessionId, onDone) {
                     if (this.loading || this.submitted || this.rating === 0) return;
                     this.loading = true;
                     this.feedbackMsg = '';
@@ -373,7 +404,10 @@
                             this.feedbackMsg = 'You already submitted a review for this visit.';
                             this.feedbackOk = false;
                             this.submitted = true;
-                            setTimeout(() => { this.visible = false; }, 2500);
+                            setTimeout(() => {
+                                this.visible = false;
+                                onDone?.();
+                            }, 2500);
                             return;
                         }
 
@@ -387,7 +421,10 @@
                         this.submitted = true;
                         this.feedbackMsg = 'Thank you for your feedback!';
                         this.feedbackOk = true;
-                        setTimeout(() => { this.visible = false; }, 2000);
+                        setTimeout(() => {
+                            this.visible = false;
+                            onDone?.();
+                        }, 2000);
                     } catch {
                         this.feedbackMsg = 'Network error. Please try again.';
                         this.feedbackOk = false;
@@ -396,8 +433,9 @@
                     }
                 },
 
-                dismiss() {
+                dismiss(onDone) {
                     this.visible = false;
+                    onDone?.();
                 },
             },
 
@@ -405,15 +443,6 @@
                 if (this.status === 'pending' || this.status === 'accepted') {
                         this._startTimer();
                 }
-                // Listen for status changes pushed from Livewire poll
-                window.addEventListener('status-changed', (e) => {
-                    this._handlePush({
-                        status: e.detail.status,
-                        id: e.detail.requestId,
-                        reviewable: e.detail.reviewable ?? false,
-                    });
-                });
-
                 if (window.AppRealtime && typeof window.AppRealtime.onSessionChange === 'function') {
                     this._handle = window.AppRealtime.onSessionChange(
                         { sessionId },
@@ -443,7 +472,7 @@
                         this.reviewPrompt.feedbackMsg = '';
                         this.reviewPrompt.visible = true;
                     }
-                    this._resetToIdle();
+                    this._resetToCompleted();
                     return;
                 }
 
@@ -471,6 +500,7 @@
             async callWaiter() {
                 if (this.loading) return;
                 this.loading = true;
+                this.requestCompleted = false;
                 try {
                     const res = await fetch('/api/table/request', {
                         method: 'POST',
@@ -495,6 +525,7 @@
             async cancelRequest() {
                 if (this.loading || !this.requestId) return;
                 this.loading = true;
+                this.requestCompleted = false;
                 try {
                     const res = await fetch(`/api/table/request/${this.requestId}`, {
                         method: 'DELETE',
@@ -518,6 +549,16 @@
                 this.requestId = null;
                 this.elapsed = 0;
                 this.requestsAhead = 0;
+                this.requestCompleted = false;
+            },
+
+            _resetToCompleted() {
+                clearInterval(this._timer);
+                this.status = 'idle';
+                this.requestId = null;
+                this.elapsed = 0;
+                this.requestsAhead = 0;
+                this.requestCompleted = true;
             },
 
             _startTimer() {

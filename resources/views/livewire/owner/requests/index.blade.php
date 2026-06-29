@@ -128,13 +128,29 @@
                             <td class="px-6 py-5 align-middle text-right">
                                 <div class="flex justify-end gap-2">
                                     @if ($request->status === \App\Models\ServiceRequest::STATUS_PENDING)
-                                        <button wire:click="acceptRequest({{ $request->id }})" type="button"
-                                            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-                                            <span>Accept</span>
-                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                            </svg>
+                                        <button wire:click="acceptRequest({{ $request->id }})"
+                                            wire:loading.attr="disabled"
+                                            wire:target="acceptRequest({{ $request->id }})"
+                                            type="button"
+                                            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0">
+                                            <span wire:loading.remove wire:target="acceptRequest({{ $request->id }})"
+                                                class="inline-flex items-center gap-1.5">
+                                                <span>Accept</span>
+                                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </span>
+                                            <span wire:loading.inline-flex wire:target="acceptRequest({{ $request->id }})"
+                                                class="hidden items-center gap-1.5">
+                                                <svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                        stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                </svg>
+                                                Accepting...
+                                            </span>
                                         </button>
                                     @elseif ($request->status === \App\Models\ServiceRequest::STATUS_ACCEPTED)
                                         <button
@@ -173,14 +189,29 @@
                                                 },
                                             }"
                                             wire:click="resolveRequest({{ $request->id }})" type="button"
+                                            wire:loading.attr="disabled"
+                                            wire:target="resolveRequest({{ $request->id }})"
                                             :disabled="resolveCountdown > 0"
                                             class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-600/10 hover:shadow-emerald-600/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0">
-                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            <span x-show="resolveCountdown <= 0" x-cloak>Resolve</span>
-                                            <span x-show="resolveCountdown > 0" x-cloak x-text="`Wait ${Math.max(1, Math.ceil(resolveCountdown))}s`"></span>
+                                            <span wire:loading.remove wire:target="resolveRequest({{ $request->id }})"
+                                                class="inline-flex items-center gap-1.5">
+                                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                    stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span x-show="resolveCountdown <= 0" x-cloak>Resolve</span>
+                                                <span x-show="resolveCountdown > 0" x-cloak x-text="`Wait ${Math.max(1, Math.ceil(resolveCountdown))}s`"></span>
+                                            </span>
+                                            <span wire:loading.inline-flex wire:target="resolveRequest({{ $request->id }})"
+                                                class="hidden items-center gap-1.5">
+                                                <svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                        stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                </svg>
+                                                Resolving...
+                                            </span>
                                         </button>
                                     @endif
                                 </div>

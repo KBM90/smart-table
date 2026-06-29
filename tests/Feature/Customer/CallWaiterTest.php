@@ -56,6 +56,28 @@ class CallWaiterTest extends TestCase
         ]);
     }
 
+    public function test_resolved_request_without_assigned_waiter_shows_thank_you_instead_of_call_button(): void
+    {
+        $table = Table::factory()->create();
+        $this->get('/t/'.$table->qr_token)->assertOk();
+        $session = TableSession::withoutGlobalScopes()->firstOrFail();
+
+        $component = Livewire::withCookie(TablePage::SESSION_COOKIE, $session->session_token)
+            ->test(TablePage::class, ['qr_token' => $table->qr_token])
+            ->call('callWaiter');
+
+        $request = ServiceRequest::withoutGlobalScopes()->firstOrFail();
+        $request->forceFill([
+            'status' => ServiceRequest::STATUS_RESOLVED,
+            'resolved_at' => now(),
+        ])->save();
+
+        $component
+            ->call('refreshRequestStatus')
+            ->assertSeeText('Thank you!')
+            ->assertDontSeeText('Call Waiter');
+    }
+
     public function test_customer_can_cancel_request_and_return_to_action_view(): void
     {
         $table = Table::factory()->create();

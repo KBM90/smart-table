@@ -36,6 +36,8 @@ class TablePage extends Component
 
     public string $requestStatus = 'idle';
 
+    public bool $requestCompleted = false;
+
     /**
      * When a request transitions to resolved, we store its ID here so
      * the frontend can prompt the customer for a review.
@@ -71,6 +73,7 @@ class TablePage extends Component
     {
         $session = $this->authorizedActiveSession();
         app(ComponentRateLimiter::class)->ensureCustomerActionLimit($session->session_token);
+        $this->requestCompleted = false;
 
         $existingRequest = $this->currentOpenRequest($session);
 
@@ -113,6 +116,7 @@ class TablePage extends Component
     {
         $session = $this->authorizedActiveSession();
         app(ComponentRateLimiter::class)->ensureCustomerActionLimit($session->session_token);
+        $this->requestCompleted = false;
 
         $request = ServiceRequest::withoutGlobalScopes()
             ->whereKey($this->activeRequestId)
@@ -192,8 +196,12 @@ private function computedStatus(): string
                 ], true)
             ) {
                 // If the request was resolved (not cancelled), trigger the review prompt.
-                if ($found->isReviewable()) {
-                    $this->resolvedRequestId = $found->getKey();
+                if ($found->status === ServiceRequest::STATUS_RESOLVED) {
+                    $this->requestCompleted = true;
+
+                    if ($found->isReviewable()) {
+                        $this->resolvedRequestId = $found->getKey();
+                    }
                 }
 
                 $this->activeRequestId = null;
@@ -224,6 +232,7 @@ private function computedStatus(): string
             'status' => $status,
             'requestId' => $requestId,
             'elapsedSeconds' => $elapsedSeconds,
+            'requestCompleted' => $this->requestCompleted,
         ]);
     }
 
