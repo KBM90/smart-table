@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -34,18 +35,19 @@ class DashboardController extends Controller
 
     private function avgResponseForHumans(int $tenantId): ?string
     {
-        $avgSeconds = DB::table('requests')
+        $responseTimes = DB::table('requests')
             ->where('tenant_id', $tenantId)
             ->whereNotNull('accepted_at')
             ->whereDate('created_at', today())
-            ->selectRaw('AVG(EXTRACT(EPOCH FROM (accepted_at - created_at))) as avg_seconds')
-            ->value('avg_seconds');
+            ->get(['created_at', 'accepted_at'])
+            ->map(fn (object $request): float => Carbon::parse($request->created_at)
+                ->diffInSeconds(Carbon::parse($request->accepted_at)));
 
-        if ($avgSeconds === null) {
+        if ($responseTimes->isEmpty()) {
             return null;
         }
 
-        $total = (int) round($avgSeconds);
+        $total = (int) round($responseTimes->avg());
         $minutes = intdiv($total, 60);
         $seconds = $total % 60;
 

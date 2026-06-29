@@ -14,7 +14,7 @@
             $wire.removeWaiter(removal.tableId, removal.waiterId);
         },
     }" x-on:keydown.escape.window="closeRemovalModal()" class="space-y-6">
-    <div wire:loading.flex wire:target="removeWaiter"
+    <div wire:loading.flex wire:target="removeWaiter,createTable"
         class="fixed inset-0 z-[100] hidden items-center justify-center bg-white/60 backdrop-blur-md">
         <svg class="w-32 h-32 drop-shadow-xl" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path class="svg-draw-path"
@@ -82,7 +82,7 @@
                 <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 font-medium">Create tenant-scoped tables, preview their QR codes, manage availability, and assign waiters.</p>
             </div>
 
-            <button wire:click="createTable" type="button" class="shrink-0 group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300">
+            <button wire:click="createTable" wire:loading.attr="disabled" wire:target="createTable" type="button" class="shrink-0 group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-70">
                 <span>Create Table</span>
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />

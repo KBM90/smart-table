@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])
+Route::middleware(['auth', 'tenant', 'subscription', 'role:' . UserRole::Owner->value])
     ->prefix('api/owner')
     ->name('owner.api.')
     ->group(function () {
@@ -58,16 +58,16 @@ Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])
     });
 
 Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix('owner')->name('owner.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/tables', OwnerTablesIndex::class)->name('tables.index');
-    Route::get('/products', OwnerProductsIndex::class)->name('products.index');
-    Route::get('/staff', OwnerStaffIndex::class)->name('staff.index');
-    Route::get('/tables/{table}/qr.png', TableQrCodeController::class)->name('tables.qr.download');
-    Route::get('/requests', OwnerRequestsIndex::class)->name('requests.index');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('subscription')->name('dashboard');
+    Route::get('/tables', OwnerTablesIndex::class)->middleware('subscription')->name('tables.index');
+    Route::get('/products', OwnerProductsIndex::class)->middleware('subscription')->name('products.index');
+    Route::get('/staff', OwnerStaffIndex::class)->middleware('subscription')->name('staff.index');
+    Route::get('/tables/{table}/qr.png', TableQrCodeController::class)->middleware('subscription')->name('tables.qr.download');
+    Route::get('/requests', OwnerRequestsIndex::class)->middleware('subscription')->name('requests.index');
 
     // ─── Waiter Performance ─────────────────────────────────────────────────
-    Route::get('/waiters', [WaiterPerformanceController::class, 'index'])->name('waiters.index');
-    Route::get('/waiters/{waiter}', [WaiterPerformanceController::class, 'show'])->name('waiters.show');
+    Route::get('/waiters', [WaiterPerformanceController::class, 'index'])->middleware('subscription')->name('waiters.index');
+    Route::get('/waiters/{waiter}', [WaiterPerformanceController::class, 'show'])->middleware('subscription')->name('waiters.show');
 
 
     // ─── Billing ────────────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ Route::middleware(['auth', 'tenant', 'role:' . UserRole::Owner->value])->prefix(
 });
 
 
-Route::middleware(['auth', 'tenant', 'role:' . UserRole::Waiter->value])->prefix('waiter')->name('waiter.')->group(function () {
+Route::middleware(['auth', 'tenant', 'subscription', 'role:' . UserRole::Waiter->value])->prefix('waiter')->name('waiter.')->group(function () {
     Route::get('/dashboard', function () {
         return view('waiter.dashboard');
     })->name('dashboard');

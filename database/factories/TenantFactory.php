@@ -20,6 +20,14 @@ class TenantFactory extends Factory
         return [
             'name' => $company,
             'slug' => Str::slug($company),
+            'trial_ends_at' => now()->addWeek(),
         ];
+    }
+
+    public function expiredTrial(): static
+    {
+        return $this->state(fn () => [
+            'trial_ends_at' => now()->subDay(),
+        ]);
     }
 }
