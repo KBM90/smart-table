@@ -11,7 +11,7 @@ class VerifySubscription
 {
     /**
      * Allow the request to continue only when the tenant has an active
-     * subscription (local trial or Stripe-backed).
+     * subscription (local trial or Paddle-backed).
      *
      * - Owner with expired billing  → redirect to owner.billing.index with a flash message.
      * - Waiter with expired billing → 403 Forbidden (no redirect, keeps API-friendly).

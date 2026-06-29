@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Support\CurrentTenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Throwable;
 
 class BillingController extends Controller
 {
@@ -23,38 +25,62 @@ class BillingController extends Controller
     }
 
     /**
-     * Initiate a Stripe Checkout Session for the selected plan (monthly or annual).
+     * Show a Paddle Checkout overlay trigger for the selected plan.
      *
      * Expected query parameter: ?plan=monthly|annual
      */
-    public function checkout(Request $request): RedirectResponse
+    public function checkout(Request $request): View|RedirectResponse
     {
         $plan = $request->query('plan', 'monthly');
 
         $priceId = match ($plan) {
-            'annual'  => config('services.stripe.price_annual'),
-            default   => config('services.stripe.price_monthly'),
+            'annual' => config('services.paddle.price_annual'),
+            default => config('services.paddle.price_monthly'),
         };
+
+        if (! $priceId) {
+            return redirect()
+                ->route('owner.billing.index')
+                ->with('billing_error', 'Paddle price IDs are not configured yet.');
+        }
 
         $tenant = app(CurrentTenant::class)->tenant();
 
-        $checkoutSession = $tenant->newSubscription('default', $priceId)
-            ->checkout([
-                'success_url' => route('owner.billing.success'),
-                'cancel_url'  => route('owner.billing.index'),
+        try {
+            $checkout = $tenant
+                ->subscribe($priceId, 'default')
+                ->returnTo(route('owner.billing.success'));
+        } catch (Throwable $exception) {
+            Log::error('Unable to create Paddle checkout.', [
+                'tenant_id' => $tenant->id,
+                'plan' => $plan,
+                'exception' => $exception,
             ]);
 
-        return redirect($checkoutSession->url);
+            return redirect()
+                ->route('owner.billing.index')
+                ->with('billing_error', 'We could not start Paddle checkout. Please try again in a moment.');
+        }
+
+        return view('owner.billing.checkout', [
+            'checkout' => $checkout,
+            'plan' => $plan === 'annual' ? 'annual' : 'monthly',
+        ]);
     }
 
     /**
-     * Redirect the owner to the Stripe Customer Portal to manage their subscription.
+     * Redirect the owner to Paddle's payment-method management page.
      */
     public function portal(Request $request): RedirectResponse
     {
         $tenant = app(CurrentTenant::class)->tenant();
+        $subscription = $tenant->subscription('default');
 
-        return $tenant->redirectToBillingPortal(route('owner.billing.index'));
+        if (! $subscription) {
+            return redirect()->route('owner.billing.index');
+        }
+
+        return $subscription->redirectToUpdatePaymentMethod();
     }
 
     /**

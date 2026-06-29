@@ -102,9 +102,4 @@ Route::delete('/api/table/request/{id}', [CustomerRequestController::class, 'can
 // No auth required — customers are identified via the session cookie.
 Route::post('/api/reviews', [CustomerReviewController::class, 'store'])->name('customer.review.store');
 
-// ─── Stripe Webhook ──────────────────────────────────────────────────────────
-// Must be outside all auth/tenant middleware groups — Stripe POSTs here as an
-// unauthenticated server-to-server request. CSRF is excluded in bootstrap/app.php.
-Route::post('/stripe/webhook', '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook');
-
 require __DIR__ . '/auth.php';

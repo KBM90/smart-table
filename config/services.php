@@ -35,9 +35,9 @@ return [
         ],
     ],
 
-    'stripe' => [
-        'price_monthly' => env('STRIPE_PRICE_MONTHLY'),
-        'price_annual'  => env('STRIPE_PRICE_ANNUAL'),
+    'paddle' => [
+        'price_monthly' => env('PADDLE_PRICE_MONTHLY'),
+        'price_annual' => env('PADDLE_PRICE_ANNUAL'),
     ],
 
     'supabase' => [

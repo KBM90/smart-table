@@ -27,7 +27,7 @@ class RegisteredUserController extends Controller
      *
      * Supports optional query parameter ?plan=trial|monthly|annual
      *
-     * - trial:   Sets a 7-day local cardless trial (trial_ends_at). No Stripe interaction.
+     * - trial:   Sets a 7-day local cardless trial (trial_ends_at). No Paddle interaction.
      * - monthly: Creates the tenant, logs the user in, then redirects to the monthly checkout.
      * - annual:  Creates the tenant, logs the user in, then redirects to the annual checkout.
      *
@@ -69,7 +69,7 @@ class RegisteredUserController extends Controller
             return redirect(route('dashboard', absolute: false));
         }
 
-        // For monthly / annual plans, redirect to the Stripe Checkout flow.
+        // For monthly / annual plans, redirect to the Paddle Checkout flow.
         // The plan value is passed through so BillingController selects the right price.
         return redirect()->route('owner.billing.checkout', ['plan' => $plan]);
     }
