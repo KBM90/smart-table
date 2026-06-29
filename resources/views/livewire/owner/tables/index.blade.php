@@ -1,4 +1,77 @@
-<div class="space-y-6">
+<div x-data="{
+        pendingRemoval: null,
+        openRemovalModal(removal) {
+            this.pendingRemoval = removal;
+        },
+        closeRemovalModal() {
+            this.pendingRemoval = null;
+        },
+        confirmRemoval() {
+            if (!this.pendingRemoval) return;
+
+            const removal = this.pendingRemoval;
+            this.pendingRemoval = null;
+            $wire.removeWaiter(removal.tableId, removal.waiterId);
+        },
+    }" x-on:keydown.escape.window="closeRemovalModal()" class="space-y-6">
+    <div wire:loading.flex wire:target="removeWaiter"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-white/60 backdrop-blur-md">
+        <svg class="w-32 h-32 drop-shadow-xl" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path class="svg-draw-path"
+                d="M 85 45 L 35 45 C 20 45 20 65 35 65 L 65 65 C 80 65 80 85 65 85 L 25 85"
+                stroke="#0f766e" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+            <path class="svg-draw-path" d="M 25 85 L 35 95 L 65 95 C 85 95 90 75 75 60" stroke="#0f766e"
+                stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+            <line class="svg-draw-path" x1="65" y1="65" x2="90" y2="35" stroke="#14b8a6" stroke-width="4"
+                stroke-linecap="round" />
+            <line class="svg-draw-path" x1="65" y1="65" x2="105" y2="55" stroke="#14b8a6" stroke-width="4"
+                stroke-linecap="round" />
+            <line class="svg-draw-path" x1="65" y1="65" x2="95" y2="85" stroke="#14b8a6" stroke-width="4"
+                stroke-linecap="round" />
+            <line class="svg-draw-path" x1="65" y1="65" x2="60" y2="25" stroke="#14b8a6" stroke-width="4"
+                stroke-linecap="round" />
+            <circle class="svg-node" cx="90" cy="35" r="5" fill="#14b8a6" />
+            <circle class="svg-node" cx="105" cy="55" r="5" fill="#14b8a6" />
+            <circle class="svg-node" cx="95" cy="85" r="5" fill="#14b8a6" />
+            <circle class="svg-node" cx="60" cy="25" r="5" fill="#14b8a6" />
+        </svg>
+    </div>
+
+    <div x-show="pendingRemoval" x-cloak x-transition.opacity style="display: none;"
+        class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/30 px-4 backdrop-blur-sm"
+        aria-modal="true" role="dialog">
+        <div x-show="pendingRemoval" x-transition.scale.origin.center style="display: none;"
+            @click.outside="closeRemovalModal()"
+            class="w-full max-w-md rounded-2xl border border-white/80 bg-white p-6 shadow-2xl shadow-slate-900/20">
+            <div class="flex items-start gap-4">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M18.364 18.364A9 9 0 105.636 5.636a9 9 0 0012.728 12.728zM12 8v4m0 4h.01" />
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h2 class="text-lg font-extrabold text-slate-900">Remove waiter assignment?</h2>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                        <span x-text="pendingRemoval?.waiterName"></span> will no longer be assigned to
+                        <span class="font-semibold text-slate-800" x-text="pendingRemoval?.tableName"></span>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" @click="closeRemovalModal()"
+                    class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900">
+                    Cancel
+                </button>
+                <button type="button" @click="confirmRemoval()"
+                    class="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-sm shadow-red-600/20 transition hover:bg-red-700">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
     <section class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/60 p-6 shadow-2xl shadow-indigo-100/50 backdrop-blur-xl">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -62,10 +135,14 @@
                                                 <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-100 pl-2 pr-1 py-0.5 text-[10px] font-bold text-indigo-700">
                                                     {{ $waiter->name }}
                                                     <button
-                                                        wire:click="removeWaiter({{ $table->id }}, {{ $waiter->id }})"
-                                                        wire:confirm="Remove {{ $waiter->name }} from {{ $table->name }}?"
+                                                        @click="openRemovalModal({
+                                                            tableId: {{ $table->id }},
+                                                            waiterId: {{ $waiter->id }},
+                                                            tableName: @js($table->name),
+                                                            waiterName: @js($waiter->name),
+                                                        })"
                                                         type="button"
-                                                        class="flex h-4 w-4 items-center justify-center rounded-full hover:bg-indigo-200 transition-colors"
+                                                        class="flex h-4 w-4 items-center justify-center rounded-full hover:bg-indigo-200 transition-colors disabled:cursor-not-allowed disabled:opacity-70"
                                                         title="Remove assignment"
                                                     >
                                                         <svg class="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
@@ -95,10 +172,24 @@
                                             </select>
                                             <button
                                                 wire:click="assignWaiter({{ $table->id }})"
+                                                wire:loading.attr="disabled"
+                                                wire:target="assignWaiter({{ $table->id }})"
                                                 type="button"
-                                                class="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 transition-all"
+                                                class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                                             >
-                                                Assign
+                                                <span wire:loading.remove wire:target="assignWaiter({{ $table->id }})">
+                                                    Assign
+                                                </span>
+                                                <span wire:loading.inline-flex wire:target="assignWaiter({{ $table->id }})"
+                                                    class="items-center gap-1.5">
+                                                    <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                            stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                    </svg>
+                                                    Assigning...
+                                                </span>
                                             </button>
                                         </div>
                                     @endif
