@@ -18,6 +18,7 @@ class TenantRegistrationTest extends TestCase
             'email' => 'owner@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => '1',
         ]);
 
         $response->assertRedirect(route('dashboard', absolute: false));

@@ -22,6 +22,11 @@
 <body
     class="min-h-screen bg-gradient-to-tr from-slate-50 via-indigo-50/20 to-emerald-50/30 font-sans text-slate-800 antialiased">
     <script>document.documentElement.classList.add('loading');</script>
+    @php
+        $owner = auth()->user();
+        $needsAccountVerification = $owner?->requiresAccountVerification() ?? false;
+        $ownerNotificationCount = $needsAccountVerification ? 1 : 0;
+    @endphp
     <div id="page-loader"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-md transition-opacity duration-500">
 
@@ -73,6 +78,7 @@
                             ['label' => 'Staff', 'route' => 'owner.staff.index', 'match' => 'owner.staff.*'],
                             ['label' => 'Performance', 'route' => 'owner.waiters.index', 'match' => 'owner.waiters.*'],
                             ['label' => 'Requests', 'route' => 'owner.requests.index', 'match' => 'owner.requests.*'],
+                            ['label' => 'Settings', 'route' => 'owner.settings.edit', 'match' => 'owner.settings.*'],
                             ['label' => 'Billing', 'route' => 'owner.billing.index', 'match' => 'owner.billing.*'],
                         ];
                     @endphp
@@ -91,6 +97,44 @@
                 </div>
 
                 <div class="flex items-center gap-3">
+                    <details class="group relative">
+                        <summary
+                            class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600">
+                            <span class="sr-only">Open notifications</span>
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+                                <path
+                                    d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8a6 6 0 0 0-12 0c0 4.499-1.411 5.956-2.738 7.326" />
+                            </svg>
+                            @if ($ownerNotificationCount > 0)
+                                <span
+                                    class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-[11px] font-black text-white ring-2 ring-white">
+                                    {{ $ownerNotificationCount }}
+                                </span>
+                            @endif
+                        </summary>
+                        <div
+                            class="absolute right-0 mt-3 w-80 rounded-lg border border-slate-200 bg-white p-3 shadow-xl shadow-slate-200/70">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                <p class="text-sm font-black text-slate-900">Notifications</p>
+                                <span class="text-xs font-bold text-slate-400">{{ $ownerNotificationCount }}</span>
+                            </div>
+
+                            @if ($needsAccountVerification)
+                                <a href="{{ route('owner.account-verification.show') }}"
+                                    class="mt-3 block rounded-lg border border-amber-200 bg-amber-50 p-3 transition hover:bg-amber-100">
+                                    <span class="block text-sm font-black text-amber-900">Verify your account</span>
+                                    <span class="mt-1 block text-xs leading-5 text-amber-800">
+                                        Enter the code sent by {{ $owner->verification_method === 'whatsapp' ? 'WhatsApp' : 'email' }}.
+                                    </span>
+                                </a>
+                            @else
+                                <p class="py-6 text-center text-sm font-semibold text-slate-500">No new notifications</p>
+                            @endif
+                        </div>
+                    </details>
+
                     {{-- Mobile nav --}}
                     <div x-data="{ open: false }" class="relative md:hidden">
                         <button @click="open = !open" type="button"
@@ -122,6 +166,25 @@
         </header>
 
         <main class="mx-auto max-w-6xl px-6 py-10 relative z-10">
+            @if ($needsAccountVerification)
+                <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-amber-900 shadow-sm">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm font-black">Your account is not verified yet.</p>
+                            <p class="mt-1 text-sm leading-6">
+                                You can keep using Smart Table, but please verify your account
+                                {{ $owner->verification_code_sent_at ? 'using the code sent to' : 'by sending a code to' }}
+                                {{ $owner->verificationDestination() }}.
+                            </p>
+                        </div>
+                        <a href="{{ route('owner.account-verification.show') }}"
+                            class="inline-flex items-center justify-center rounded-lg bg-amber-900 px-4 py-2 text-sm font-black text-white transition hover:bg-amber-800">
+                            Verify now
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             @isset($slot)
                 {{ $slot }}
             @else

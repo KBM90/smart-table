@@ -18,6 +18,11 @@ class Tenant extends Model
     protected $fillable = [
         'name',
         'slug',
+        'contact_email',
+        'phone',
+        'address',
+        'city',
+        'country',
         'trial_ends_at',
     ];
 

@@ -30,6 +30,13 @@ class ProfileController extends Controller
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
+
+            if ($request->user()->verification_method === 'email') {
+                $request->user()->account_verified_at = null;
+                $request->user()->verification_code_hash = null;
+                $request->user()->verification_code_expires_at = null;
+                $request->user()->verification_code_sent_at = null;
+            }
         }
 
         $request->user()->save();

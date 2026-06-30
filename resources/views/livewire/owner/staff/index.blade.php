@@ -13,7 +13,7 @@
                 </p>
             </div>
 
-            <button wire:click="createWaiter" type="button"
+            <button wire:click="createWaiter" type="button" data-show-page-loader
                 class="shrink-0 group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300">
                 <span>Create Waiter</span>
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24"

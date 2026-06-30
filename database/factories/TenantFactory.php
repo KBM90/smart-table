@@ -20,6 +20,11 @@ class TenantFactory extends Factory
         return [
             'name' => $company,
             'slug' => Str::slug($company),
+            'contact_email' => fake()->companyEmail(),
+            'phone' => fake()->phoneNumber(),
+            'address' => fake()->streetAddress(),
+            'city' => fake()->city(),
+            'country' => fake()->country(),
             'trial_ends_at' => now()->addWeek(),
         ];
     }

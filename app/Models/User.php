@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
+use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,7 +16,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, MustVerifyEmail, Notifiable, SoftDeletes;
 
     public const ROLE_OWNER = 'owner';
 
@@ -33,6 +34,12 @@ class User extends Authenticatable
         'tenant_id',
         'role',
         'email_verified_at',
+        'phone',
+        'verification_method',
+        'account_verified_at',
+        'verification_code_hash',
+        'verification_code_expires_at',
+        'verification_code_sent_at',
         'photo',
         'joined_at',
         'is_active',
@@ -46,6 +53,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'verification_code_hash',
     ];
 
     /**
@@ -57,10 +65,13 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'joined_at'         => 'datetime',
-            'is_active'         => 'boolean',
-            'password'          => 'hashed',
-            'role'              => UserRole::class,
+            'account_verified_at' => 'datetime',
+            'verification_code_expires_at' => 'datetime',
+            'verification_code_sent_at' => 'datetime',
+            'joined_at' => 'datetime',
+            'is_active' => 'boolean',
+            'password' => 'hashed',
+            'role' => UserRole::class,
         ];
     }
 
@@ -103,5 +114,22 @@ class User extends Authenticatable
     public function dashboardRouteName(): string
     {
         return $this->isWaiter() ? 'waiter.dashboard' : 'owner.dashboard';
+    }
+
+    public function hasVerifiedAccount(): bool
+    {
+        return $this->account_verified_at !== null;
+    }
+
+    public function requiresAccountVerification(): bool
+    {
+        return ! $this->hasVerifiedAccount();
+    }
+
+    public function verificationDestination(): string
+    {
+        return $this->verification_method === 'whatsapp'
+            ? (string) $this->phone
+            : (string) $this->email;
     }
 }

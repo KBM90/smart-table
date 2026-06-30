@@ -40,6 +40,10 @@ return [
         'price_annual' => env('PADDLE_PRICE_ANNUAL'),
     ],
 
+    'whatsapp' => [
+        'verification_webhook_url' => env('WHATSAPP_VERIFICATION_WEBHOOK_URL'),
+    ],
+
     'supabase' => [
         'url' => env('SUPABASE_URL'),
         'anon_key' => env('SUPABASE_ANON_KEY'),
