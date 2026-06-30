@@ -22,6 +22,16 @@ class ConfigSanityTest extends TestCase
         $this->assertFalse((bool) config('services.supabase.realtime_anon_enabled'));
     }
 
+    public function test_env_production_example_does_not_contain_real_supabase_secrets(): void
+    {
+        $contents = file_get_contents(base_path('.env.production.example'));
+
+        $this->assertNotFalse($contents);
+        $this->assertStringContainsString('DB_PASSWORD=your-supabase-db-password', $contents);
+        $this->assertStringContainsString('SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key', $contents);
+        $this->assertDoesNotMatchRegularExpression('/^SUPABASE_(ANON_KEY|SERVICE_ROLE_KEY)=eyJ/m', $contents);
+    }
+
     public function test_app_debug_resolves_false_for_production_even_if_env_requests_true(): void
     {
         $appConfig = $this->evaluateAppConfig([

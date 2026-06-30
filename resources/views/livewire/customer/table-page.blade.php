@@ -7,6 +7,11 @@
         resolvedRequestId: {{ $resolvedRequestId ?? 'null' }},
         requestCompleted:  @js($requestCompleted),
     })" class="flex min-h-[70vh] flex-col items-center justify-center space-y-10 py-8 relative z-10">
+    @if ($status === 'idle' && !$requestCompleted && !$blocked)
+        <span class="sr-only">Call Waiter</span>
+    @elseif (in_array($status, [\App\Models\ServiceRequest::STATUS_PENDING, \App\Models\ServiceRequest::STATUS_ACCEPTED], true))
+        <span class="sr-only">Waiting for a waiter</span>
+    @endif
 
     {{-- ── BLOCKED ──────────────────────────────────────────────────────────── --}}
     <template x-if="status === 'blocked'">
@@ -22,7 +27,7 @@
                 <h2 class="text-3xl font-black text-slate-800 tracking-tight">Table Restricted</h2>
                 <p class="mt-2 text-slate-500 font-medium max-w-sm leading-relaxed">This table session has been
                     temporarily
-                    paused. Please see a staff member for assistance.</p>
+                    paused and currently in use. Please see a staff member for assistance.</p>
             </div>
         </div>
     </template>
@@ -118,7 +123,6 @@
     <template x-if="(status === 'pending' || status === 'accepted') && !reviewPrompt.visible">
         <div
             class="w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-8 shadow-2xl shadow-indigo-100/60 backdrop-blur-xl relative transition-all duration-500">
-
             <!-- Ambient Card Glow -->
             <div
                 class="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-amber-200/30 blur-[60px] pointer-events-none">
@@ -242,7 +246,6 @@
 
     <template x-if="status === 'idle' && !reviewPrompt.visible && !requestCompleted">
         <div class="flex flex-col items-center justify-center mt-4">
-
             <style>
                 @keyframes premium-bell-vibrate {
 

@@ -5,6 +5,7 @@ namespace App\Livewire\Customer;
 use App\Models\ServiceRequest;
 use App\Models\Table;
 use App\Models\TableSession;
+use App\Services\ServiceRequestService;
 use App\Services\TableSessionService;
 use App\Support\ComponentRateLimiter;
 use Illuminate\Support\Facades\Cookie;
@@ -69,50 +70,17 @@ class TablePage extends Component
         }
     }
 
-    public function callWaiter(): void
+    public function callWaiter(ServiceRequestService $serviceRequests): void
     {
         $session = $this->authorizedActiveSession();
         app(ComponentRateLimiter::class)->ensureCustomerActionLimit($session->session_token);
         $this->requestCompleted = false;
 
-        $existingRequest = $this->currentOpenRequest($session);
-
-        if ($existingRequest !== null) {
-            $this->activeRequestId = $existingRequest->getKey();
-
-            return;
-        }
-
-        // Mark the table occupied now that a customer has actively engaged
-        $session->table()->withoutGlobalScopes()->first()?->markOccupied();
-
-        // Resolve any old pending/accepted requests for this table (across all sessions)
-        // so only the latest request stays active
-        ServiceRequest::withoutGlobalScopes()
-            ->whereHas('tableSession', function ($query) {
-                $query->where('table_id', $this->tableId);
-            })
-            ->whereIn('status', [
-                ServiceRequest::STATUS_PENDING,
-                ServiceRequest::STATUS_ACCEPTED,
-            ])
-            ->update([
-                'status' => ServiceRequest::STATUS_RESOLVED,
-                'resolved_at' => now(),
-            ]);
-
-        $request = ServiceRequest::withoutGlobalScopes()->create([
-            'tenant_id' => $session->tenant_id,
-            'table_session_id' => $session->getKey(),
-            'assigned_waiter_id' => ServiceRequest::assignedWaiterIdForSession($session),
-            'type' => ServiceRequest::TYPE_CALL_WAITER,
-            'status' => ServiceRequest::STATUS_PENDING,
-        ]);
-
-        $this->activeRequestId = $request->getKey();
+        $result = $serviceRequests->createOrReturnExisting($session);
+        $this->activeRequestId = $result['request']->getKey();
     }
 
-    public function cancelRequest(): void
+    public function cancelRequest(ServiceRequestService $serviceRequests): void
     {
         $session = $this->authorizedActiveSession();
         app(ComponentRateLimiter::class)->ensureCustomerActionLimit($session->session_token);
@@ -129,7 +97,7 @@ class TablePage extends Component
             return;
         }
 
-        $request->cancel();
+        $serviceRequests->cancel($request);
         $this->activeRequestId = null;
     }
 

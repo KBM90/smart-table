@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customers;
 use App\Http\Controllers\Controller;
 use App\Models\ServiceRequest;
 use App\Models\TableSession;
+use App\Services\ServiceRequestService;
 use App\Support\ComponentRateLimiter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class CustomerRequestController extends Controller
      * POST /api/table/request
      * Body: { session_id: int }
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, ServiceRequestService $serviceRequests): JsonResponse
     {
         $request->validate(['session_id' => ['required', 'integer']]);
 
@@ -30,44 +31,21 @@ class CustomerRequestController extends Controller
         app(ComponentRateLimiter::class)->ensureCustomerActionLimit($session->session_token);
 
         // Idempotent — return existing open request if one exists
-        $existing = $this->currentOpenRequest($session);
-        if ($existing !== null) {
-            return response()->json([
-                'id' => $existing->getKey(),
-                'status' => $existing->status,
-                'requests_ahead' => $this->countAhead($existing),
-            ]);
-        }
-
-        // Mark table occupied
-        $session->table()->withoutGlobalScopes()->first()?->markOccupied();
-
-        // Resolve stale pending/accepted requests for this table across all sessions
-        ServiceRequest::withoutGlobalScopes()
-            ->whereHas('tableSession', fn($q) => $q->where('table_id', $session->table_id))
-            ->whereIn('status', [ServiceRequest::STATUS_PENDING, ServiceRequest::STATUS_ACCEPTED])
-            ->update(['status' => ServiceRequest::STATUS_RESOLVED, 'resolved_at' => now()]);
-
-        $serviceRequest = ServiceRequest::withoutGlobalScopes()->create([
-            'tenant_id' => $session->tenant_id,
-            'table_session_id' => $session->getKey(),
-            'assigned_waiter_id' => ServiceRequest::assignedWaiterIdForSession($session),
-            'type' => ServiceRequest::TYPE_CALL_WAITER,
-            'status' => ServiceRequest::STATUS_PENDING,
-        ]);
+        $result = $serviceRequests->createOrReturnExisting($session);
+        $serviceRequest = $result['request'];
 
         return response()->json([
             'id' => $serviceRequest->getKey(),
             'status' => $serviceRequest->status,
-            'requests_ahead' => 0,
-        ], Response::HTTP_CREATED);
+            'requests_ahead' => $result['requests_ahead'],
+        ], $result['created'] ? Response::HTTP_CREATED : Response::HTTP_OK);
     }
 
     /**
      * DELETE /api/table/request/{id}
      * Body: { session_id: int }
      */
-    public function cancel(Request $request, int $id): JsonResponse
+    public function cancel(Request $request, int $id, ServiceRequestService $serviceRequests): JsonResponse
     {
         $request->validate(['session_id' => ['required', 'integer']]);
 
@@ -84,7 +62,7 @@ class CustomerRequestController extends Controller
             ->first();
 
         if ($serviceRequest !== null) {
-            $serviceRequest->cancel();
+            $serviceRequests->cancel($serviceRequest);
         }
 
         return response()->json(['ok' => true]);
@@ -107,21 +85,4 @@ class CustomerRequestController extends Controller
         return $session;
     }
 
-    private function currentOpenRequest(TableSession $session): ?ServiceRequest
-    {
-        return ServiceRequest::withoutGlobalScopes()
-            ->where('table_session_id', $session->getKey())
-            ->whereIn('status', [ServiceRequest::STATUS_PENDING, ServiceRequest::STATUS_ACCEPTED])
-            ->oldest('created_at')
-            ->first();
-    }
-
-    private function countAhead(ServiceRequest $request): int
-    {
-        return ServiceRequest::withoutGlobalScopes()
-            ->where('tenant_id', $request->tenant_id)
-            ->whereIn('status', [ServiceRequest::STATUS_PENDING, ServiceRequest::STATUS_ACCEPTED])
-            ->where('created_at', '<', $request->created_at)
-            ->count();
-    }
 }

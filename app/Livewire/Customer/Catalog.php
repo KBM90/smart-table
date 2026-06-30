@@ -3,7 +3,7 @@
 namespace App\Livewire\Customer;
 
 use App\Models\Product;
-use App\Models\ProductCategory;
+use App\Models\Category;
 use App\Models\Table;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -52,9 +52,7 @@ class Catalog extends Component
     #[Computed]
     public function categories(): Collection
     {
-        return ProductCategory::withoutGlobalScopes()
-            ->where('tenant_id', $this->tenantId)
-            ->whereNull('deleted_at')
+        return Category::query()
             ->whereHas('products', fn ($q) => $q
                 ->withoutGlobalScopes()
                 ->where('tenant_id', $this->tenantId)
@@ -97,6 +95,8 @@ class Catalog extends Component
 
     public function render()
     {
-        return view('livewire.customer.catalog');
+        return view('livewire.customer.catalog', [
+            'products' => $this->productsByCategory->flatten(1)->values(),
+        ]);
     }
 }

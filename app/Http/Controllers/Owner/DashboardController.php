@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -12,12 +11,14 @@ class DashboardController extends Controller
     public function index(Request $request): \Illuminate\View\View
     {
         $tenantId = $request->user()->tenant_id;
+        $requestStats = $this->requestStats($tenantId);
+        $activeSessionsCount = $this->activeSessionsCount($tenantId);
 
         return view('owner.dashboard', [
-            'pendingCount' => $this->pendingCount($tenantId),
-            'avgResponseForHumans' => $this->avgResponseForHumans($tenantId),
-            'activeSessionsCount' => $this->activeSessionsCount($tenantId),
-            'completionRate' => $this->completionRate($tenantId),
+            'pendingCount' => (int) ($requestStats->pending_count ?? 0),
+            'avgResponseForHumans' => $this->formatSeconds($requestStats->avg_response_seconds ?? null),
+            'activeSessionsCount' => $activeSessionsCount,
+            'completionRate' => $this->completionRateFromStats($requestStats),
         ]);
     }
 
@@ -25,29 +26,55 @@ class DashboardController extends Controller
     // Stat helpers
     // ---------------------------------------------------------------------------
 
-    private function pendingCount(int $tenantId): int
+    private function requestStats(int $tenantId): object
     {
+        $since = now()->subHours(24);
+        $todayStart = today();
+        $tomorrowStart = today()->addDay();
+
+        if (DB::getDriverName() === 'pgsql') {
+            return DB::table('requests')
+                ->where('tenant_id', $tenantId)
+                ->selectRaw(
+                    <<<'SQL'
+COUNT(*) FILTER (WHERE status = ?) AS pending_count,
+COUNT(*) FILTER (WHERE created_at >= ?) AS total_24h,
+COUNT(*) FILTER (WHERE status = ? AND created_at >= ?) AS resolved_24h,
+AVG(EXTRACT(EPOCH FROM (accepted_at - created_at))) FILTER (
+    WHERE accepted_at IS NOT NULL
+      AND created_at >= ?
+      AND created_at < ?
+) AS avg_response_seconds
+SQL,
+                    ['pending', $since, 'resolved', $since, $todayStart, $tomorrowStart],
+                )
+                ->first() ?? (object) [];
+        }
+
         return DB::table('requests')
             ->where('tenant_id', $tenantId)
-            ->where('status', 'pending')
-            ->count();
+            ->selectRaw(
+                <<<'SQL'
+SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS pending_count,
+SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) AS total_24h,
+SUM(CASE WHEN status = ? AND created_at >= ? THEN 1 ELSE 0 END) AS resolved_24h,
+AVG(CASE
+    WHEN accepted_at IS NOT NULL AND created_at >= ? AND created_at < ?
+    THEN strftime('%s', accepted_at) - strftime('%s', created_at)
+END) AS avg_response_seconds
+SQL,
+                ['pending', $since, 'resolved', $since, $todayStart, $tomorrowStart],
+            )
+            ->first() ?? (object) [];
     }
 
-    private function avgResponseForHumans(int $tenantId): ?string
+    private function formatSeconds(mixed $seconds): ?string
     {
-        $responseTimes = DB::table('requests')
-            ->where('tenant_id', $tenantId)
-            ->whereNotNull('accepted_at')
-            ->whereDate('created_at', today())
-            ->get(['created_at', 'accepted_at'])
-            ->map(fn (object $request): float => Carbon::parse($request->created_at)
-                ->diffInSeconds(Carbon::parse($request->accepted_at)));
-
-        if ($responseTimes->isEmpty()) {
+        if ($seconds === null) {
             return null;
         }
 
-        $total = (int) round($responseTimes->avg());
+        $total = (int) round((float) $seconds);
         $minutes = intdiv($total, 60);
         $seconds = $total % 60;
 
@@ -62,24 +89,15 @@ class DashboardController extends Controller
             ->count();
     }
 
-    private function completionRate(int $tenantId): float
+    private function completionRateFromStats(object $requestStats): float
     {
-        $since = now()->subHours(24);
-
-        $total = DB::table('requests')
-            ->where('tenant_id', $tenantId)
-            ->where('created_at', '>=', $since)
-            ->count();
+        $total = (int) ($requestStats->total_24h ?? 0);
 
         if ($total === 0) {
             return 100.0;
         }
 
-        $resolved = DB::table('requests')
-            ->where('tenant_id', $tenantId)
-            ->where('status', 'resolved')
-            ->where('created_at', '>=', $since)
-            ->count();
+        $resolved = (int) ($requestStats->resolved_24h ?? 0);
 
         return round(($resolved / $total) * 100, 1);
     }
