@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ \App\Support\CustomerLocale::direction(app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
@@ -49,6 +49,29 @@
     </div>
 
     <main class="mx-auto min-h-screen max-w-3xl px-6 py-10 relative z-10">
+        <form method="GET" action="{{ url()->current() }}" class="mb-6 flex justify-end">
+            @foreach (request()->except('lang') as $key => $value)
+                @if (is_scalar($value))
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endif
+            @endforeach
+
+            <div class="inline-flex items-center gap-2 rounded-xl border border-white/70 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-md transition focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
+                <svg class="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c2.5-2.4 4-5.7 4-9s-1.5-6.6-4-9m0 18c-2.5-2.4-4-5.7-4-9s1.5-6.6 4-9m-8.5 9h17" />
+                </svg>
+                <label for="customer-language" class="sr-only">{{ __('customer.language.label') }}</label>
+                <select id="customer-language" name="lang" onchange="this.form.submit()"
+                    class="border-0 bg-transparent p-0 text-xs font-bold text-slate-700 shadow-none transition focus:outline-none focus:ring-0">
+                    @foreach (\App\Support\CustomerLocale::options() as $locale => $label)
+                        <option value="{{ $locale }}" @selected(app()->getLocale() === $locale)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </form>
+
         {{ $slot }}
     </main>
 </body>

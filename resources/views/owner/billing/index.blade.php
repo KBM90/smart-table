@@ -4,8 +4,8 @@
     <div class="space-y-8">
         <div class="flex items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-black text-slate-900">Subscription & Billing</h1>
-                <p class="mt-1 text-sm text-slate-500">Manage your plan, invoices, and payment method.</p>
+                <h1 class="text-2xl font-black text-slate-900">{{ __('owner.billing.title') }}</h1>
+                <p class="mt-1 text-sm text-slate-500">{{ __('owner.billing.intro') }}</p>
             </div>
 
             @if ($tenant->subscribed('default'))
@@ -17,7 +17,7 @@
                             d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Update payment method
+                    {{ __('owner.billing.update_payment') }}
                 </a>
             @endif
         </div>
@@ -29,7 +29,7 @@
         @endif
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-            <p class="mb-4 text-xs font-black uppercase tracking-widest text-slate-400">Current Status</p>
+            <p class="mb-4 text-xs font-black uppercase tracking-widest text-slate-400">{{ __('owner.billing.current_status') }}</p>
 
             @if ($tenant->subscribed('default') && $subscription)
                 @php
@@ -43,15 +43,15 @@
                         default => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                     };
                     $badgeLabel = match (true) {
-                        $isPastDue => 'Past Due',
-                        $isPaused => 'Paused',
-                        $isGrace => 'Cancelling - Grace Period',
-                        default => 'Active',
+                        $isPastDue => __('owner.billing.past_due'),
+                        $isPaused => __('owner.billing.paused'),
+                        $isGrace => __('owner.billing.grace'),
+                        default => __('owner.billing.active'),
                     };
                     $planLabel = match (true) {
-                        $subscription->hasPrice(config('services.paddle.price_annual')) => 'Annual - $250 / yr',
-                        $subscription->hasPrice(config('services.paddle.price_monthly')) => 'Monthly - $28 / mo',
-                        default => 'Paddle subscription',
+                        $subscription->hasPrice(config('services.paddle.price_annual')) => __('owner.billing.annual_plan'),
+                        $subscription->hasPrice(config('services.paddle.price_monthly')) => __('owner.billing.monthly_plan'),
+                        default => __('owner.billing.paddle_subscription'),
                     };
                 @endphp
 
@@ -62,11 +62,11 @@
                         {{ $badgeLabel }}
                     </span>
                     <p class="text-sm text-slate-700">
-                        Plan: <span class="font-semibold">{{ $planLabel }}</span>
+                        {{ __('owner.billing.plan', ['plan' => '']) }} <span class="font-semibold">{{ $planLabel }}</span>
                     </p>
                     @if ($isGrace && $subscription->ends_at)
                         <p class="text-sm text-slate-500">
-                            Access ends:
+                            {{ __('owner.billing.access_ends') }}
                             <span class="font-semibold text-amber-700">{{ $subscription->ends_at->format('M j, Y') }}</span>
                         </p>
                     @endif
@@ -77,10 +77,10 @@
                     <span
                         class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
                         <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
-                        Free Trial
+                        {{ __('owner.billing.free_trial') }}
                     </span>
                     <p class="text-sm text-slate-700">
-                        Expires: <span class="font-semibold">{{ $tenant->trial_ends_at->format('M j, Y') }}</span>
+                        {{ __('owner.billing.expires') }} <span class="font-semibold">{{ $tenant->trial_ends_at->format('M j, Y') }}</span>
                         <span class="ml-1 text-slate-400">({{ $tenant->trial_ends_at->diffForHumans() }})</span>
                     </p>
                 </div>
@@ -90,46 +90,46 @@
                     <span
                         class="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
                         <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
-                        Inactive
+                        {{ __('owner.billing.inactive') }}
                     </span>
-                    <p class="text-sm text-slate-500">No active subscription. Choose a plan below to continue.</p>
+                    <p class="text-sm text-slate-500">{{ __('owner.billing.no_subscription') }}</p>
                 </div>
             @endif
         </div>
 
         @unless ($tenant->subscribed('default') && $subscription && !$subscription->onGracePeriod())
             <div>
-                <p class="mb-4 text-xs font-black uppercase tracking-widest text-slate-400">Choose a Plan</p>
+                <p class="mb-4 text-xs font-black uppercase tracking-widest text-slate-400">{{ __('owner.billing.choose_plan') }}</p>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <a href="{{ route('owner.billing.checkout', ['plan' => 'monthly']) }}"
                         class="group relative flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-100 active:scale-[0.99]">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-indigo-500">Monthly</p>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-indigo-500">{{ __('owner.billing.monthly') }}</p>
                         <p class="text-3xl font-black text-slate-900">
-                            $28 <span class="text-base font-semibold text-slate-400">/ month</span>
+                            $28 <span class="text-base font-semibold text-slate-400">{{ __('owner.billing.per_month') }}</span>
                         </p>
-                        <p class="text-sm text-slate-500">Full access billed monthly. Cancel any time.</p>
+                        <p class="text-sm text-slate-500">{{ __('owner.billing.monthly_body') }}</p>
                         <span
                             class="mt-2 inline-flex items-center gap-1 text-sm font-bold text-indigo-600 group-hover:underline">
-                            Subscribe monthly ->
+                            {{ __('owner.billing.subscribe_monthly') }}
                         </span>
                     </a>
 
                     <a href="{{ route('owner.billing.checkout', ['plan' => 'annual']) }}"
                         class="group relative flex flex-col gap-2 rounded-2xl border-2 border-indigo-400 bg-gradient-to-br from-indigo-50 to-white p-6 shadow-md shadow-indigo-100 transition hover:border-indigo-500 hover:shadow-lg hover:shadow-indigo-200 active:scale-[0.99]">
                         <div class="flex items-center gap-2">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-indigo-500">Annual</p>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-indigo-500">{{ __('owner.billing.annual') }}</p>
                             <span
                                 class="rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white">
-                                Save 33%
+                                {{ __('owner.billing.save_33') }}
                             </span>
                         </div>
                         <p class="text-3xl font-black text-slate-900">
-                            $250 <span class="text-base font-semibold text-slate-400">/ year</span>
+                            $250 <span class="text-base font-semibold text-slate-400">{{ __('owner.billing.per_year') }}</span>
                         </p>
-                        <p class="text-sm text-slate-500">Full access billed annually. Best value.</p>
+                        <p class="text-sm text-slate-500">{{ __('owner.billing.annual_body') }}</p>
                         <span
                             class="mt-2 inline-flex items-center gap-1 text-sm font-bold text-indigo-600 group-hover:underline">
-                            Subscribe annually ->
+                            {{ __('owner.billing.subscribe_annually') }}
                         </span>
                     </a>
                 </div>

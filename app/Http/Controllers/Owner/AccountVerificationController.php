@@ -34,7 +34,7 @@ class AccountVerificationController extends Controller
             report($exception);
 
             return back()->withErrors([
-                'verification' => 'We could not send a verification code right now. Please try again shortly.',
+                'verification' => __('owner.verification.send_failed'),
             ]);
         }
 
@@ -55,6 +55,6 @@ class AccountVerificationController extends Controller
 
         return back()
             ->withInput()
-            ->withErrors(['code' => 'The verification code is invalid or has expired.']);
+            ->withErrors(['code' => __('owner.verification.invalid_code')]);
     }
 }

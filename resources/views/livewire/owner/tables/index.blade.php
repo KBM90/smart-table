@@ -51,10 +51,9 @@
                     </svg>
                 </div>
                 <div class="min-w-0">
-                    <h2 class="text-lg font-extrabold text-slate-900">Remove waiter assignment?</h2>
+                    <h2 class="text-lg font-extrabold text-slate-900">{{ __('owner.tables.remove_assignment_title') }}</h2>
                     <p class="mt-2 text-sm leading-relaxed text-slate-600">
-                        <span x-text="pendingRemoval?.waiterName"></span> will no longer be assigned to
-                        <span class="font-semibold text-slate-800" x-text="pendingRemoval?.tableName"></span>.
+                        <span x-text="@js(__('owner.tables.remove_assignment_body', ['waiter' => '__WAITER__', 'table' => '__TABLE__'])).replace('__WAITER__', pendingRemoval?.waiterName ?? '').replace('__TABLE__', pendingRemoval?.tableName ?? '')"></span>
                     </p>
                 </div>
             </div>
@@ -62,11 +61,11 @@
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" @click="closeRemovalModal()"
                     class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900">
-                    Cancel
+                    {{ __('owner.common.cancel') }}
                 </button>
                 <button type="button" @click="confirmRemoval()"
                     class="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-sm shadow-red-600/20 transition hover:bg-red-700">
-                    Confirm
+                    {{ __('owner.common.confirm') }}
                 </button>
             </div>
         </div>
@@ -76,14 +75,14 @@
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
                 <span class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 bg-indigo-50 px-2.5 py-1.5 rounded-xl border border-indigo-100 shadow-sm inline-block">
-                    Owner Tables
+                    {{ __('owner.tables.label') }}
                 </span>
-                <h1 class="mt-4 text-3xl font-black tracking-tight text-slate-900">Tables</h1>
-                <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 font-medium">Create tenant-scoped tables, preview their QR codes, manage availability, and assign waiters.</p>
+                <h1 class="mt-4 text-3xl font-black tracking-tight text-slate-900">{{ __('owner.tables.title') }}</h1>
+                <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 font-medium">{{ __('owner.tables.intro') }}</p>
             </div>
 
             <button wire:click="createTable" wire:loading.attr="disabled" wire:target="createTable" type="button" class="shrink-0 group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-70">
-                <span>Create Table</span>
+                <span>{{ __('owner.tables.create') }}</span>
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -92,14 +91,14 @@
 
         <div class="mt-6 grid gap-4 md:grid-cols-2">
             <label class="block">
-                <span class="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-slate-500">Search</span>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search table name..." class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-sm transition-all duration-200">
+                <span class="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-slate-500">{{ __('owner.common.search') }}</span>
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('owner.tables.search_placeholder') }}" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-sm transition-all duration-200">
             </label>
 
             <label class="block">
-                <span class="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-slate-500">Status</span>
+                <span class="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-slate-500">{{ __('owner.common.status') }}</span>
                 <select wire:model.live="status" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-sm transition-all duration-200">
-                    <option value="">All statuses</option>
+                    <option value="">{{ __('owner.common.all_statuses') }}</option>
                     @foreach ($statusOptions as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
@@ -114,10 +113,10 @@
                 <table class="min-w-full text-left border-collapse">
                     <thead>
                         <tr class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 bg-slate-50/40">
-                            <th class="px-6 py-4">Name & Waiters</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4">Public URL</th>
-                            <th class="px-6 py-4 text-right">Actions</th>
+                            <th class="px-6 py-4">{{ __('owner.tables.name_waiters') }}</th>
+                            <th class="px-6 py-4">{{ __('owner.common.status') }}</th>
+                            <th class="px-6 py-4">{{ __('owner.tables.public_url') }}</th>
+                            <th class="px-6 py-4 text-right">{{ __('owner.common.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -143,7 +142,7 @@
                                                         })"
                                                         type="button"
                                                         class="flex h-4 w-4 items-center justify-center rounded-full hover:bg-indigo-200 transition-colors disabled:cursor-not-allowed disabled:opacity-70"
-                                                        title="Remove assignment"
+                                                        title="{{ __('owner.tables.remove_assignment') }}"
                                                     >
                                                         <svg class="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
                                                             <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
@@ -153,7 +152,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        <p class="mt-1.5 text-[10px] text-slate-400 italic">No waiters assigned</p>
+                                        <p class="mt-1.5 text-[10px] text-slate-400 italic">{{ __('owner.tables.no_waiters_assigned') }}</p>
                                     @endif
 
                                     {{-- Assign waiter control --}}
@@ -163,7 +162,7 @@
                                                 wire:model="waiterSelectValues.{{ $table->id }}"
                                                 class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
                                             >
-                                                <option value="">Add waiter…</option>
+                                                <option value="">{{ __('owner.tables.add_waiter') }}</option>
                                                 @foreach ($waiters as $waiter)
                                                     @unless ($table->assignedWaiters->contains('id', $waiter->id))
                                                         <option value="{{ $waiter->id }}">{{ $waiter->name }}</option>
@@ -178,7 +177,7 @@
                                                 class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 <span wire:loading.remove wire:target="assignWaiter({{ $table->id }})">
-                                                    Assign
+                                                    {{ __('owner.tables.assign') }}
                                                 </span>
                                                 <span wire:loading.inline-flex wire:target="assignWaiter({{ $table->id }})"
                                                     class="items-center gap-1.5">
@@ -188,7 +187,7 @@
                                                         <path class="opacity-75" fill="currentColor"
                                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                                     </svg>
-                                                    Assigning...
+                                                    {{ __('owner.tables.assigning') }}
                                                 </span>
                                             </button>
                                         </div>
@@ -199,12 +198,12 @@
                                     @if ($table->status === \App\Models\Table::STATUS_FREE)
                                         <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm">
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                            Free
+                                            {{ __('owner.common.free') }}
                                         </span>
                                     @else
                                         <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 shadow-sm">
                                             <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            Occupied
+                                            {{ __('owner.common.occupied') }}
                                         </span>
                                     @endif
                                 </td>
@@ -216,12 +215,12 @@
                                 <td class="px-6 py-4 align-top">
                                     <div class="flex flex-wrap justify-end gap-1.5">
                                         <button wire:click="previewQr({{ $table->id }})" type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200">QR</button>
-                                        <a href="{{ route('owner.tables.qr.download', $table) }}" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200">Download QR</a>
-                                        <button wire:click="editTable({{ $table->id }})" type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200">Edit</button>
+                                        <a href="{{ route('owner.tables.qr.download', $table) }}" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200">{{ __('owner.common.download_qr') }}</a>
+                                        <button wire:click="editTable({{ $table->id }})" type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 shadow-sm transition-all duration-200">{{ __('owner.common.edit') }}</button>
                                         @if ($table->status !== \App\Models\Table::STATUS_FREE)
-                                            <button wire:click="markFree({{ $table->id }})" type="button" class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 shadow-sm transition-all duration-200">Mark Free</button>
+                                            <button wire:click="markFree({{ $table->id }})" type="button" class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 shadow-sm transition-all duration-200">{{ __('owner.common.mark_free') }}</button>
                                         @endif
-                                        <button wire:click="deleteTable({{ $table->id }})" type="button" class="rounded-xl border border-red-200 bg-red-50/50 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 hover:border-red-300 shadow-sm transition-all duration-200">Delete</button>
+                                        <button wire:click="deleteTable({{ $table->id }})" type="button" class="rounded-xl border border-red-200 bg-red-50/50 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 hover:border-red-300 shadow-sm transition-all duration-200">{{ __('owner.common.delete') }}</button>
                                     </div>
                                 </td>
                             </tr>
@@ -234,8 +233,8 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
                                         </div>
-                                        <h3 class="text-sm font-bold text-slate-800">No Tables Found</h3>
-                                        <p class="mt-1 text-xs text-slate-400 max-w-xs leading-relaxed">Try adjusting your search query or creating a new table.</p>
+                                        <h3 class="text-sm font-bold text-slate-800">{{ __('owner.tables.not_found_title') }}</h3>
+                                        <p class="mt-1 text-xs text-slate-400 max-w-xs leading-relaxed">{{ __('owner.tables.not_found_body') }}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -253,8 +252,8 @@
             @if ($showForm)
                 <div class="rounded-[2rem] border border-white/80 bg-white/60 p-6 shadow-xl backdrop-blur-md shadow-slate-200/50">
                     <div class="mb-5 flex items-center justify-between pb-3 border-b border-slate-100">
-                        <h2 class="text-lg font-extrabold text-slate-900">{{ $editingTableId ? 'Edit Table' : 'Create Table' }}</h2>
-                        <button wire:click="closePanels" type="button" class="text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1.5 rounded-lg">Close</button>
+                        <h2 class="text-lg font-extrabold text-slate-900">{{ $editingTableId ? __('owner.tables.edit') : __('owner.tables.create') }}</h2>
+                        <button wire:click="closePanels" type="button" class="text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1.5 rounded-lg">{{ __('owner.common.close') }}</button>
                     </div>
 
                     <livewire:owner.tables.form :table-id="$editingTableId" :key="'table-form-'.$editingTableId" @table-saved="handleSaved($event.detail.tableId)" />
@@ -264,8 +263,8 @@
             @if ($showQrPreview && $editingTableId)
                 <div class="rounded-[2rem] border border-white/80 bg-white/60 p-6 shadow-xl backdrop-blur-md shadow-slate-200/50">
                     <div class="mb-5 flex items-center justify-between pb-3 border-b border-slate-100">
-                        <h2 class="text-lg font-extrabold text-slate-900">QR Preview</h2>
-                        <button wire:click="closePanels" type="button" class="text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1.5 rounded-lg">Close</button>
+                        <h2 class="text-lg font-extrabold text-slate-900">{{ __('owner.tables.qr_preview') }}</h2>
+                        <button wire:click="closePanels" type="button" class="text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1.5 rounded-lg">{{ __('owner.common.close') }}</button>
                     </div>
 
                     <livewire:owner.tables.qr-preview :table-id="$editingTableId" :key="'table-qr-'.$editingTableId" />

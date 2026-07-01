@@ -5,17 +5,15 @@
             <div>
                 <span
                     class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 bg-indigo-50 px-2.5 py-1.5 rounded-xl border border-indigo-100 shadow-sm inline-block">
-                    Owner Staff
+                    {{ __('owner.staff.label') }}
                 </span>
-                <h1 class="mt-4 text-3xl font-black tracking-tight text-slate-900">Staff</h1>
-                <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 font-medium">Create tenant-scoped waiter
-                    accounts and revoke access with soft deletion when staff leave. Assign tables from the Tables page.
-                </p>
+                <h1 class="mt-4 text-3xl font-black tracking-tight text-slate-900">{{ __('owner.staff.title') }}</h1>
+                <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 font-medium">{{ __('owner.staff.intro') }}</p>
             </div>
 
             <button wire:click="createWaiter" type="button" data-show-page-loader
                 class="shrink-0 group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300">
-                <span>Create Waiter</span>
+                <span>{{ __('owner.staff.create_waiter') }}</span>
                 <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -25,8 +23,8 @@
 
         <div class="mt-6 max-w-xl">
             <label class="block">
-                <span class="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-slate-500">Search</span>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search waiter name or email..."
+                <span class="mb-2 block text-xs font-black uppercase tracking-[0.2em] text-slate-500">{{ __('owner.common.search') }}</span>
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('owner.staff.search_placeholder') }}"
                     class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-sm transition-all duration-200">
             </label>
         </div>
@@ -40,11 +38,11 @@
                     <thead>
                         <tr
                             class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 bg-slate-50/40">
-                            <th class="px-6 py-4">Name</th>
-                            <th class="px-6 py-4">Email</th>
-                            <th class="px-6 py-4">Assigned Tables</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4 text-right">Actions</th>
+                            <th class="px-6 py-4">{{ __('owner.staff.name') }}</th>
+                            <th class="px-6 py-4">{{ __('owner.staff.email') }}</th>
+                            <th class="px-6 py-4">{{ __('owner.staff.assigned_tables') }}</th>
+                            <th class="px-6 py-4">{{ __('owner.common.status') }}</th>
+                            <th class="px-6 py-4 text-right">{{ __('owner.common.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-transparent">
@@ -67,7 +65,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        <span class="text-[11px] text-slate-400 italic">None yet — assign from Tables</span>
+                                        <span class="text-[11px] text-slate-400 italic">{{ __('owner.staff.none_assigned') }}</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 align-middle">
@@ -75,20 +73,20 @@
                                         <span
                                             class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm">
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                            Provisioned
+                                            {{ __('owner.staff.provisioned') }}
                                         </span>
                                     @else
                                         <span
                                             class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 shadow-sm">
                                             <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            Pending
+                                            {{ __('owner.common.pending') }}
                                         </span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 align-middle text-right">
                                     <div class="flex justify-end">
                                         <button wire:click="deleteWaiter({{ $waiter->id }})" type="button"
-                                            class="rounded-xl border border-red-200 bg-red-50/50 px-3.5 py-2 text-xs font-bold text-red-600 hover:bg-red-50 hover:border-red-300 shadow-sm transition-all duration-200">Delete</button>
+                                            class="rounded-xl border border-red-200 bg-red-50/50 px-3.5 py-2 text-xs font-bold text-red-600 hover:bg-red-50 hover:border-red-300 shadow-sm transition-all duration-200">{{ __('owner.common.delete') }}</button>
                                     </div>
                                 </td>
                             </tr>
@@ -104,9 +102,8 @@
                                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
                                         </div>
-                                        <h3 class="text-sm font-bold text-slate-800">No Waiters Found</h3>
-                                        <p class="mt-1 text-xs text-slate-400 max-w-xs leading-relaxed">Try adjusting your
-                                            search query or creating a new waiter account.</p>
+                                        <h3 class="text-sm font-bold text-slate-800">{{ __('owner.staff.not_found_title') }}</h3>
+                                        <p class="mt-1 text-xs text-slate-400 max-w-xs leading-relaxed">{{ __('owner.staff.not_found_body') }}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -125,9 +122,9 @@
                 <div
                     class="rounded-[2rem] border border-white/80 bg-white/60 p-6 shadow-xl backdrop-blur-md shadow-slate-200/50">
                     <div class="mb-5 flex items-center justify-between pb-3 border-b border-slate-100">
-                        <h2 class="text-lg font-extrabold text-slate-900">Create Waiter</h2>
+                        <h2 class="text-lg font-extrabold text-slate-900">{{ __('owner.staff.create_waiter') }}</h2>
                         <button wire:click="closeForm" type="button"
-                            class="text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1.5 rounded-lg">Close</button>
+                            class="text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1.5 rounded-lg">{{ __('owner.common.close') }}</button>
                     </div>
 
                     <livewire:owner.staff.form :key="'staff-form-' . ($showForm ? 'open' : 'closed')"
@@ -147,13 +144,11 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-xs font-bold text-indigo-800">Assigning Tables</p>
+                            <p class="text-xs font-bold text-indigo-800">{{ __('owner.staff.assigning_tables') }}</p>
                             <p class="mt-1 text-xs text-indigo-700 leading-relaxed">
-                                Table assignments are managed from the
-                                <a href="{{ route('owner.tables.index') }}"
-                                    class="underline font-bold hover:text-indigo-900">Tables page</a>.
-                                Each table row has a dropdown to add waiters. Waiters only see requests for their assigned
-                                tables.
+                                {!! __('owner.staff.assigning_tables_body', [
+                                    'link' => '<a href="' . route('owner.tables.index') . '" class="underline font-bold hover:text-indigo-900">' . __('owner.staff.tables_page') . '</a>',
+                                ]) !!}
                             </p>
                         </div>
                     </div>

@@ -41,7 +41,7 @@ class BillingController extends Controller
         if (! $priceId) {
             return redirect()
                 ->route('owner.billing.index')
-                ->with('billing_error', 'Paddle price IDs are not configured yet.');
+                ->with('billing_error', __('owner.billing.price_missing'));
         }
 
         $tenant = app(CurrentTenant::class)->tenant();
@@ -59,7 +59,7 @@ class BillingController extends Controller
 
             return redirect()
                 ->route('owner.billing.index')
-                ->with('billing_error', 'We could not start Paddle checkout. Please try again in a moment.');
+                ->with('billing_error', __('owner.billing.checkout_failed'));
         }
 
         return view('owner.billing.checkout', [

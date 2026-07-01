@@ -6,11 +6,12 @@
         elapsedSeconds:    {{ $elapsedSeconds }},
         resolvedRequestId: {{ $resolvedRequestId ?? 'null' }},
         requestCompleted:  @js($requestCompleted),
+        copy:              @js(__('customer.table')),
     })" class="flex min-h-[70vh] flex-col items-center justify-center space-y-10 py-8 relative z-10">
     @if ($status === 'idle' && !$requestCompleted && !$blocked)
-        <span class="sr-only">Call Waiter</span>
+        <span class="sr-only">{{ __('customer.table.call_waiter') }}</span>
     @elseif (in_array($status, [\App\Models\ServiceRequest::STATUS_PENDING, \App\Models\ServiceRequest::STATUS_ACCEPTED], true))
-        <span class="sr-only">Waiting for a waiter</span>
+        <span class="sr-only">{{ __('customer.table.waiting_for_waiter') }}</span>
     @endif
 
     {{-- ── BLOCKED ──────────────────────────────────────────────────────────── --}}
@@ -24,10 +25,8 @@
                 </svg>
             </div>
             <div>
-                <h2 class="text-3xl font-black text-slate-800 tracking-tight">Table Restricted</h2>
-                <p class="mt-2 text-slate-500 font-medium max-w-sm leading-relaxed">This table session has been
-                    temporarily
-                    paused and currently in use. Please see a staff member for assistance.</p>
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight">{{ __('customer.table.restricted_title') }}</h2>
+                <p class="mt-2 text-slate-500 font-medium max-w-sm leading-relaxed">{{ __('customer.table.restricted_body') }}</p>
             </div>
         </div>
     </template>
@@ -36,7 +35,7 @@
     <template x-if="status !== 'blocked'">
         <div class="text-center space-y-2">
             <h2 class="text-indigo-500 font-bold tracking-[0.25em] uppercase text-3xl">{{ $tenantName }}</h2>
-            <h2 class="text-2xl font-black text-slate-900 tracking-tight drop-shadow-sm">Table N° : {{ $tableName }}
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight drop-shadow-sm">{{ __('customer.table.table_number', ['table' => $tableName]) }}
             </h2>
         </div>
     </template>
@@ -65,8 +64,8 @@
                 </div>
 
                 <div>
-                    <h3 class="text-xl font-black text-slate-900 tracking-tight">Request Completed!</h3>
-                    <p class="mt-1.5 text-sm text-slate-500 font-medium">How was the service? Rate your experience.</p>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight">{{ __('customer.table.request_completed') }}</h3>
+                    <p class="mt-1.5 text-sm text-slate-500 font-medium">{{ __('customer.table.rate_experience') }}</p>
                 </div>
 
                 <!-- Star Rating -->
@@ -75,7 +74,7 @@
                         <button type="button" @click="reviewPrompt.rating = star"
                             @mouseover="reviewPrompt.hoverRating = star" @mouseleave="reviewPrompt.hoverRating = 0"
                             class="transition-transform hover:scale-110 focus:outline-none"
-                            :aria-label="'Rate ' + star + ' stars'">
+                            :aria-label="copy.rateStar.replace(':stars', star)">
                             <svg class="h-10 w-10 transition-colors duration-150"
                                 :class="star <= (reviewPrompt.hoverRating || reviewPrompt.rating) ? 'text-amber-400' : 'text-slate-200'"
                                 viewBox="0 0 24 24" fill="currentColor">
@@ -91,7 +90,7 @@
 
                 <!-- Optional comment -->
                 <div class="w-full">
-                    <textarea x-model="reviewPrompt.comment" placeholder="Optional comment…" rows="3"
+                    <textarea x-model="reviewPrompt.comment" placeholder="{{ __('customer.table.optional_comment') }}" rows="3"
                         class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none resize-none transition"
                         maxlength="1000"></textarea>
                 </div>
@@ -107,11 +106,11 @@
                         type="button"
                         class="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0">
                         <span
-                            x-text="reviewPrompt.loading ? 'Sending…' : reviewPrompt.submitted ? 'Sent ✓' : 'Submit'"></span>
+                            x-text="reviewPrompt.loading ? copy.sending : reviewPrompt.submitted ? copy.sent : copy.submit"></span>
                     </button>
                     <button @click="reviewPrompt.dismiss(() => requestCompleted = true)" type="button"
                         class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-500 hover:bg-slate-100 active:scale-95 transition-all duration-200">
-                        Skip
+                        {{ __('customer.table.skip') }}
                     </button>
                 </div>
 
@@ -156,11 +155,11 @@
                                 <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                             </span>
                         </template>
-                        <span x-text="status === 'pending' ? 'Waiter Alerted' : 'Waiter Approaching'"></span>
+                        <span x-text="status === 'pending' ? copy.waiterAlerted : copy.waiterApproaching"></span>
                     </span>
                     <p class="text-slate-500 text-sm font-medium" x-text="status === 'pending'
-                            ? 'Your request has been broadcasted to the staff.'
-                            : 'A staff member is heading to your table now.'">
+                            ? copy.requestBroadcasted
+                            : copy.staffHeading">
                     </p>
                 </div>
 
@@ -176,7 +175,7 @@
                         <span class="text-sm font-medium text-slate-600">
                             <strong class="text-slate-900 text-base font-black" x-text="requestsAhead"></strong>
                             <span
-                                x-text="requestsAhead === 1 ? ' request ahead of you' : ' requests ahead of you'"></span>
+                                x-text="requestsAhead === 1 ? copy.requestAheadOne : copy.requestAheadMany"></span>
                         </span>
                     </div>
                 </template>
@@ -187,14 +186,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="text-sm font-black tracking-wide text-emerald-600 uppercase">You are next!</span>
+                        <span class="text-sm font-black tracking-wide text-emerald-600 uppercase">{{ __('customer.table.you_are_next') }}</span>
                     </div>
                 </template>
 
                 <!-- Timer -->
                 <div
                     class="w-full bg-slate-50/80 rounded-2xl p-6 border border-slate-200/60 shadow-inner flex flex-col items-center justify-center gap-2">
-                    <span class="text-slate-400 text-[10px] font-black uppercase tracking-[0.15em]">Wait Time</span>
+                    <span class="text-slate-400 text-[10px] font-black uppercase tracking-[0.15em]">{{ __('customer.table.wait_time') }}</span>
                     <span class="text-4xl font-light text-slate-800 font-mono tracking-tight drop-shadow-sm"
                         x-text="formatTime(elapsed)"></span>
                 </div>
@@ -207,7 +206,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    <span x-text="loading ? 'Cancelling…' : 'Cancel Request'"></span>
+                    <span x-text="loading ? copy.cancelling : copy.cancelRequest"></span>
                 </button>
 
             </div>
@@ -235,9 +234,9 @@
                 </div>
 
                 <div>
-                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Thank you!</h3>
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">{{ __('customer.table.thank_you') }}</h3>
                     <p class="mt-2 text-sm text-slate-500 font-medium leading-relaxed">
-                        Your request has been completed. We hope you enjoy the rest of your visit.
+                        {{ __('customer.table.request_completed_body') }}
                     </p>
                 </div>
             </div>
@@ -323,7 +322,7 @@
                                         d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                                 </svg>
                             </div>
-                            <span x-text="loading ? 'Sending…' : 'Call Waiter'"
+                            <span x-text="loading ? copy.sending : copy.callWaiter"
                                 class="text-md font-black text-amber-950 tracking-widest uppercase drop-shadow-[0_2px_2px_rgba(255,255,255,0.4)]">
                             </span>
                         </div>
@@ -334,7 +333,7 @@
 
             <p
                 class="mt-12 text-slate-500 text-sm font-medium text-center max-w-xs leading-relaxed bg-white/50 backdrop-blur-sm px-6 py-3 rounded-2xl border border-white/60 shadow-sm">
-                Tap the golden ring above to immediately notify a staff member to assist you.
+                {{ __('customer.table.tap_to_notify') }}
             </p>
 
             <!-- Catalog Navigation Link -->
@@ -345,7 +344,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
-                <span>View Menu & Catalog</span>
+                <span>{{ __('customer.table.view_menu_catalog') }}</span>
             </a>
         </div>
     </template>
@@ -353,7 +352,7 @@
 </div>
 
 <script>
-    function tablePage({ sessionId, status, requestId, requestsAhead, elapsedSeconds, resolvedRequestId, requestCompleted }) {
+    function tablePage({ sessionId, status, requestId, requestsAhead, elapsedSeconds, resolvedRequestId, requestCompleted, copy }) {
         return {
             sessionId,
             status,
@@ -378,8 +377,8 @@
                 feedbackOk: false,
 
                 ratingLabel() {
-                    const labels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
-                    return labels[this.hoverRating || this.rating] || 'Tap a star to rate';
+                    const labels = ['', copy.ratingPoor, copy.ratingFair, copy.ratingGood, copy.ratingGreat, copy.ratingExcellent];
+                    return labels[this.hoverRating || this.rating] || copy.tapStarToRate;
                 },
 
                 async submit(sessionId, onDone) {
@@ -404,7 +403,7 @@
 
                         if (res.status === 409) {
                             // Already reviewed
-                            this.feedbackMsg = 'You already submitted a review for this visit.';
+                            this.feedbackMsg = copy.alreadyReviewed;
                             this.feedbackOk = false;
                             this.submitted = true;
                             setTimeout(() => {
@@ -416,20 +415,20 @@
 
                         if (!res.ok) {
                             const data = await res.json().catch(() => ({}));
-                            this.feedbackMsg = data.message || 'Something went wrong. Please try again.';
+                            this.feedbackMsg = data.message || copy.somethingWentWrong;
                             this.feedbackOk = false;
                             return;
                         }
 
                         this.submitted = true;
-                        this.feedbackMsg = 'Thank you for your feedback!';
+                        this.feedbackMsg = copy.feedbackThanks;
                         this.feedbackOk = true;
                         setTimeout(() => {
                             this.visible = false;
                             onDone?.();
                         }, 2000);
                     } catch {
-                        this.feedbackMsg = 'Network error. Please try again.';
+                        this.feedbackMsg = copy.networkError;
                         this.feedbackOk = false;
                     } finally {
                         this.loading = false;
@@ -571,9 +570,9 @@
 
             formatTime(s) {
                 const total = Math.max(0, Math.floor(Math.abs(s)));
-                if (total < 60) return `${total}s`;
+                if (total < 60) return `${total}${copy.secondsSuffix}`;
                 const m = Math.floor(total / 60);
-                return `${m}min ${String(total % 60).padStart(2, '0')}s`;
+                return `${m}${copy.minutesSuffix} ${String(total % 60).padStart(2, '0')}${copy.secondsSuffix}`;
             },
         };
     }

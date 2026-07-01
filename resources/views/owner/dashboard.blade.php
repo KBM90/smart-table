@@ -22,7 +22,7 @@
             <div
                 class="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/60 p-6 backdrop-blur-md shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-amber-100/50">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Active Alerts</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-500">{{ __('owner.dashboard.active_alerts') }}</span>
                     <div
                         class="rounded-xl bg-amber-50 p-3 text-amber-500 border border-amber-100 shadow-inner group-hover:bg-amber-100 transition-colors">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -36,23 +36,23 @@
                     @if ($pendingCount > 0)
                         <span
                             class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">
-                            Live
+                            {{ __('owner.dashboard.live') }}
                         </span>
                     @else
                         <span
                             class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-400">
-                            All clear
+                            {{ __('owner.dashboard.all_clear') }}
                         </span>
                     @endif
                 </div>
-                <p class="mt-2 text-xs font-semibold text-slate-500">Waiting floor requests queue</p>
+                <p class="mt-2 text-xs font-semibold text-slate-500">{{ __('owner.dashboard.waiting_queue') }}</p>
             </div>
 
             {{-- Avg Response --}}
             <div
                 class="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/60 p-6 backdrop-blur-md shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-indigo-100/50">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Avg Response</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-500">{{ __('owner.dashboard.avg_response') }}</span>
                     <div
                         class="rounded-xl bg-indigo-50 p-3 text-indigo-500 border border-indigo-100 shadow-inner group-hover:bg-indigo-100 transition-colors">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -67,7 +67,7 @@
                     </span>
                 </div>
                 <p class="mt-2 text-xs font-semibold text-slate-500">
-                    {{ $avgResponseForHumans ? "Today's average response" : 'No accepted requests today' }}
+                    {{ $avgResponseForHumans ? __('owner.dashboard.todays_average') : __('owner.dashboard.no_accepted_today') }}
                 </p>
             </div>
 
@@ -75,7 +75,7 @@
             <div
                 class="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/60 p-6 backdrop-blur-md shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-emerald-100/50">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Active Tables</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-500">{{ __('owner.dashboard.active_tables') }}</span>
                     <div
                         class="rounded-xl bg-emerald-50 p-3 text-emerald-500 border border-emerald-100 shadow-inner group-hover:bg-emerald-100 transition-colors">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -87,17 +87,17 @@
                 <div class="mt-4">
                     <span class="text-4xl font-black tracking-tight text-slate-800">
                         {{ $activeSessionsCount }}
-                        {{ $activeSessionsCount === 1 ? 'Session' : 'Sessions' }}
+                        {{ $activeSessionsCount === 1 ? __('owner.dashboard.session_singular') : __('owner.dashboard.session_plural') }}
                     </span>
                 </div>
-                <p class="mt-2 text-xs font-semibold text-slate-500">Live connections verified</p>
+                <p class="mt-2 text-xs font-semibold text-slate-500">{{ __('owner.dashboard.live_connections') }}</p>
             </div>
 
             {{-- Completion Rate --}}
             <div
                 class="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/60 p-6 backdrop-blur-md shadow-lg shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-violet-100/50">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Completion Rate</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-500">{{ __('owner.dashboard.completion_rate') }}</span>
                     <div
                         class="rounded-xl bg-violet-50 p-3 text-violet-500 border border-violet-100 shadow-inner group-hover:bg-violet-100 transition-colors">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -109,7 +109,7 @@
                 <div class="mt-4">
                     <span class="text-4xl font-black tracking-tight text-slate-800">{{ $completionRate }}%</span>
                 </div>
-                <p class="mt-2 text-xs font-semibold text-slate-500">Calculated over past 24 hours</p>
+                <p class="mt-2 text-xs font-semibold text-slate-500">{{ __('owner.dashboard.calculated_24h') }}</p>
             </div>
 
         </section>
@@ -125,10 +125,10 @@
                 <div class="flex items-start justify-between">
                     <div class="space-y-3">
                         <h3 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                            Manage Requests
+                            {{ __('owner.dashboard.manage_requests') }}
                         </h3>
                         <p class="text-sm text-slate-500 leading-relaxed font-medium">
-                            Accept, track, and monitor response intervals for all floor calls in real-time.
+                            {{ __('owner.dashboard.manage_requests_body') }}
                         </p>
                     </div>
                     <div
@@ -145,10 +145,10 @@
                 <div class="flex items-start justify-between">
                     <div class="space-y-3">
                         <h3 class="text-xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">
-                            Table Setup
+                            {{ __('owner.dashboard.table_setup') }}
                         </h3>
                         <p class="text-sm text-slate-500 leading-relaxed font-medium">
-                            Generate QR tokens, manage layout names, and block or unblock sessions instantly.
+                            {{ __('owner.dashboard.table_setup_body') }}
                         </p>
                     </div>
                     <div
@@ -165,10 +165,10 @@
                 <div class="flex items-start justify-between">
                     <div class="space-y-3">
                         <h3 class="text-xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
-                            Staff &amp; Accounts
+                            {{ __('owner.dashboard.staff_accounts') }}
                         </h3>
                         <p class="text-sm text-slate-500 leading-relaxed font-medium">
-                            Assign service agents, configure operational parameters and system authorization roles.
+                            {{ __('owner.dashboard.staff_accounts_body') }}
                         </p>
                     </div>
                     <div

@@ -185,8 +185,8 @@ class Index extends Component
             'tables' => $tables,
             'waiters' => $waiters,
             'statusOptions' => [
-                Table::STATUS_FREE => 'Free',
-                Table::STATUS_OCCUPIED => 'Occupied',
+                Table::STATUS_FREE => __('owner.common.free'),
+                Table::STATUS_OCCUPIED => __('owner.common.occupied'),
             ],
         ]);
     }

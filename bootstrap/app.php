@@ -2,6 +2,8 @@
 
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\IdentifyTenant;
+use App\Http\Middleware\SetAppLocale;
+use App\Http\Middleware\SetCustomerLocale;
 use App\Http\Middleware\VerifySubscription;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -30,6 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
 
         $middleware->alias([
+            'app.locale' => SetAppLocale::class,
+            'customer.locale' => SetCustomerLocale::class,
             'role' => EnsureRole::class,
             'tenant' => IdentifyTenant::class,
             'subscription' => VerifySubscription::class,

@@ -18,6 +18,9 @@
 
 <body class="min-h-screen bg-slate-100 font-sans text-slate-900 antialiased">
     <script>document.documentElement.classList.add('loading');</script>
+    @php
+        $appLocaleOptions = \App\Support\AppLocale::options();
+    @endphp
     <div id="page-loader"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-md transition-opacity duration-500">
 
@@ -50,30 +53,47 @@
             <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
                 <div class="flex items-center gap-8">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600">Waiter</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600">{{ __('waiter.nav.role') }}</p>
                         <p class="mt-1 text-lg font-semibold">{{ auth()->user()->tenant?->name }}</p>
                     </div>
 
                     <nav class="flex items-center gap-3 text-sm">
                         <a href="{{ route('waiter.dashboard') }}"
                             class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
-                            Dashboard</a>
+                            {{ __('waiter.nav.dashboard') }}</a>
                         <a href="{{ route('waiter.requests.index') }}"
                             class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
-                            Requests</a>
+                            {{ __('waiter.nav.requests') }}</a>
                         <a href="{{ route('waiter.tables.index') }}"
-                            class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Tables</a>
+                            class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">{{ __('waiter.nav.tables') }}</a>
 
                     </nav>
                 </div>
 
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-sky-500 hover:text-sky-700">
-                        Logout
-                    </button>
-                </form>
+                <div class="flex items-center gap-3">
+                    <form method="GET" action="{{ url()->current() }}" class="hidden sm:block">
+                        @foreach (request()->except('lang') as $key => $value)
+                            @if (is_scalar($value))
+                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                            @endif
+                        @endforeach
+                        <label for="waiter-language" class="sr-only">{{ __('waiter.language') }}</label>
+                        <select id="waiter-language" name="lang" onchange="this.form.submit()"
+                            class="h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500">
+                            @foreach ($appLocaleOptions as $locale => $label)
+                                <option value="{{ $locale }}" @selected(app()->getLocale() === $locale)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-sky-500 hover:text-sky-700">
+                            {{ __('waiter.nav.logout') }}
+                        </button>
+                    </form>
+                </div>
             </div>
         </header>
 

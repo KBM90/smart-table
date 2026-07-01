@@ -29,7 +29,7 @@
     <div class="grid gap-5">
         <div>
             <label for="product-name"
-                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Name</label>
+                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('owner.products.name') }}</label>
             <input wire:model.blur="name" id="product-name" type="text"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
             @error('name')
@@ -39,10 +39,10 @@
 
         <div>
             <label for="product-category"
-                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Category</label>
+                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('owner.products.category') }}</label>
             <select wire:model="categoryId" id="product-category"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
-                <option value="">— No category —</option>
+                <option value="">{{ __('owner.products.no_category') }}</option>
                 @foreach ($this->categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                 @endforeach
@@ -54,7 +54,7 @@
 
         <div>
             <label for="product-price"
-                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Price</label>
+                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('owner.products.price') }}</label>
             <div class="relative">
                 <input wire:model.blur="price" id="product-price" type="text" inputmode="decimal" placeholder="12.50 DH"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-8 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
@@ -66,7 +66,7 @@
 
         <div>
             <label for="product-description"
-                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Description</label>
+                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('owner.products.description') }}</label>
             <textarea wire:model.blur="description" id="product-description" rows="3"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"></textarea>
             @error('description')
@@ -77,7 +77,7 @@
         <div class="grid gap-5 sm:grid-cols-2">
             <div>
                 <label for="sort-order"
-                    class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Sort order</label>
+                    class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('owner.products.sort_order') }}</label>
                 <input wire:model.blur="sortOrder" id="sort-order" type="number" min="0"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition">
                 @error('sortOrder')
@@ -93,14 +93,14 @@
                 class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition hover:bg-slate-100">
                 <input wire:model="isActive" type="checkbox"
                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600">
-                <span class="text-sm font-semibold text-slate-700">Active product</span>
+                <span class="text-sm font-semibold text-slate-700">{{ __('owner.products.active_product') }}</span>
             </label>
         </div>
     </div>
 
     <div class="space-y-4 rounded-2xl border border-slate-100 bg-slate-50 p-5 shadow-inner">
         <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Image Source</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ __('owner.products.image_source') }}</p>
             <div class="mt-2 grid gap-2 sm:grid-cols-3">
                 {{--
                 Use x-model (Alpine) on the radio group so switching panels is instant —
@@ -111,19 +111,19 @@
                     class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
                     <input x-model="imageSource" type="radio" value="{{ \App\Models\Product::IMAGE_SOURCE_NONE }}"
                         class="text-indigo-600 focus:ring-indigo-600">
-                    <span>None</span>
+                    <span>{{ __('owner.products.image_none') }}</span>
                 </label>
                 <label
                     class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
                     <input x-model="imageSource" type="radio" value="{{ \App\Models\Product::IMAGE_SOURCE_UPLOAD }}"
                         class="text-indigo-600 focus:ring-indigo-600">
-                    <span>Upload</span>
+                    <span>{{ __('owner.products.image_upload') }}</span>
                 </label>
                 <label
                     class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-indigo-300 has-[:checked]:border-indigo-600 has-[:checked]:ring-1 has-[:checked]:ring-indigo-600">
                     <input x-model="imageSource" type="radio" value="{{ \App\Models\Product::IMAGE_SOURCE_LIBRARY }}"
                         class="text-indigo-600 focus:ring-indigo-600">
-                    <span>Library</span>
+                    <span>{{ __('owner.products.image_library') }}</span>
                 </label>
             </div>
             @error('imageSource')
@@ -134,7 +134,7 @@
         <div class="grid gap-5 lg:grid-cols-[100px_minmax(0,1fr)] items-start pt-2">
             {{-- Preview thumbnail --}}
             @if($this->previewUrl)
-                <img src="{{ $this->previewUrl }}" alt="Product preview"
+                <img src="{{ $this->previewUrl }}" alt="{{ __('owner.products.preview_alt') }}"
                     class="h-[100px] w-[100px] rounded-xl border border-slate-200 bg-white object-cover shadow-sm">
             @else
                 <div
@@ -152,7 +152,7 @@
                 <div x-show="isUpload" x-cloak>
                     <input wire:model.live="upload" type="file" accept="image/png,image/jpeg,image/webp"
                         class="block w-full text-sm text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
-                    <p class="mt-2 text-xs text-slate-500">Accepted: JPG, PNG, WEBP up to 4 MB (Min: 256×256).</p>
+                    <p class="mt-2 text-xs text-slate-500">{{ __('owner.products.upload_help') }}</p>
                     @error('upload')
                         <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
                     @enderror
@@ -181,8 +181,7 @@
 
                 {{-- None panel --}}
                 <div x-show="!isUpload && !isLibrary" x-cloak>
-                    <p class="flex h-full items-center text-sm text-slate-500 italic">No image will be displayed for
-                        this product.</p>
+                    <p class="flex h-full items-center text-sm text-slate-500 italic">{{ __('owner.products.no_image') }}</p>
                 </div>
             </div>
         </div>
@@ -191,7 +190,7 @@
     <div class="pt-2">
         <button type="submit" wire:loading.attr="disabled" wire:target="save"
             class="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70">
-            {{ $productId ? 'Save changes' : 'Create product' }}
+            {{ $productId ? __('owner.products.save_changes') : __('owner.products.create') }}
         </button>
     </div>
 </form>

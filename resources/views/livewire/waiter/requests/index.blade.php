@@ -27,10 +27,10 @@
     </div>
 
     <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p class="text-sm font-medium uppercase tracking-[0.3em] text-sky-600">Waiter requests</p>
-        <h1 class="mt-3 text-3xl font-semibold text-slate-900">My Table Requests</h1>
+        <p class="text-sm font-medium uppercase tracking-[0.3em] text-sky-600">{{ __('waiter.requests.label') }}</p>
+        <h1 class="mt-3 text-3xl font-semibold text-slate-900">{{ __('waiter.requests.title') }}</h1>
         <p class="mt-2 max-w-2xl text-sm text-slate-600">
-            Active service requests for your assigned tables. Updates live when Realtime is available.
+            {{ __('waiter.requests.intro') }}
         </p>
 
         <div class="mt-6">
@@ -40,7 +40,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 14h2m4 0h-2m-4 4h6" />
                 </svg>
-                <span>Scan to Assign</span>
+                <span>{{ __('waiter.dashboard.scan_to_assign') }}</span>
             </button>
         </div>
     </section>
@@ -57,10 +57,9 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-bold text-amber-900">No Tables Assigned Yet</h2>
+                    <h2 class="text-lg font-bold text-amber-900">{{ __('waiter.requests.no_tables_title') }}</h2>
                     <p class="mt-2 text-sm text-amber-800 max-w-sm leading-relaxed">
-                        You haven't been assigned to any tables. Ask your manager to assign you from the
-                        <strong>Owner › Tables</strong> page. Once assigned, requests from those tables will appear here.
+                        {{ __('waiter.requests.no_tables_body') }}
                     </p>
                 </div>
             </div>
@@ -70,11 +69,11 @@
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
                     <tr class="text-left text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-                        <th class="px-6 py-4">Table</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4">Elapsed</th>
-                        <th class="px-6 py-4">Accepted by</th>
-                        <th class="px-6 py-4 text-right">Actions</th>
+                        <th class="px-6 py-4">{{ __('waiter.requests.table') }}</th>
+                        <th class="px-6 py-4">{{ __('waiter.requests.status') }}</th>
+                        <th class="px-6 py-4">{{ __('waiter.requests.elapsed') }}</th>
+                        <th class="px-6 py-4">{{ __('waiter.requests.accepted_by') }}</th>
+                        <th class="px-6 py-4 text-right">{{ __('waiter.requests.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200">
@@ -170,13 +169,13 @@
                                 {{-- Pending badge --}}
                                 <span x-show="localStatus === 'pending'" x-cloak
                                     class="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-amber-100 text-amber-700">
-                                    Pending
+                                    {{ __('waiter.requests.pending') }}
                                 </span>
                                 {{-- Accepted badge --}}
                                 <span x-show="localStatus === 'accepted'" x-cloak
                                     class="inline-flex rounded-full px-3 py-1 text-xs font-semibold bg-sky-100 text-sky-700 transition-all duration-300"
                                     :class="{ 'ring-2 ring-sky-300 ring-offset-1 scale-105': justChanged }">
-                                    Accepted
+                                    {{ __('waiter.requests.accepted') }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 font-mono" x-data="{
@@ -198,7 +197,7 @@
                                 <span x-text="formatTime(elapsed)"></span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600">
-                                <span x-show="localStatus === 'pending'">{{ $request->acceptedBy?->name ?? 'Unassigned' }}</span>
+                                <span x-show="localStatus === 'pending'">{{ $request->acceptedBy?->name ?? __('waiter.requests.unassigned') }}</span>
                                 <span x-show="localStatus === 'accepted'" x-cloak>{{ $request->acceptedBy?->name ?? auth()->user()->name }}</span>
                             </td>
                             <td class="px-6 py-4">
@@ -208,13 +207,13 @@
                                         @click="doAccept()" type="button"
                                         :disabled="busy"
                                         class="rounded-lg border border-sky-300 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:border-sky-400 hover:text-sky-900 disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <span x-show="!busy">Accept</span>
+                                        <span x-show="!busy">{{ __('waiter.requests.accept') }}</span>
                                         <span x-show="busy" x-cloak class="inline-flex items-center gap-1">
                                             <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
-                                            Accepting…
+                                            {{ __('waiter.requests.accepting') }}
                                         </span>
                                     </button>
 
@@ -223,14 +222,14 @@
                                         @click="doResolve()" type="button"
                                         :disabled="busy || resolveCountdown > 0"
                                         class="rounded-lg border border-emerald-300 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 hover:text-emerald-900 disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <span x-show="!busy && resolveCountdown <= 0">Resolve</span>
-                                        <span x-show="!busy && resolveCountdown > 0" x-text="`Wait ${Math.max(1, Math.ceil(resolveCountdown))}s`"></span>
+                                        <span x-show="!busy && resolveCountdown <= 0">{{ __('waiter.requests.resolve') }}</span>
+                                        <span x-show="!busy && resolveCountdown > 0" x-text="@js(__('waiter.requests.wait_seconds', ['seconds' => '__SECONDS__'])).replace('__SECONDS__', Math.max(1, Math.ceil(resolveCountdown)))"></span>
                                         <span x-show="busy" x-cloak class="inline-flex items-center gap-1">
                                             <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
-                                            Resolving…
+                                            {{ __('waiter.requests.resolving') }}
                                         </span>
                                     </button>
                                 </div>
@@ -249,8 +248,8 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-bold text-slate-800">All Clear</p>
-                                        <p class="mt-1 text-xs text-slate-400">No active requests for your tables right now.</p>
+                                        <p class="text-sm font-bold text-slate-800">{{ __('waiter.requests.all_clear') }}</p>
+                                        <p class="mt-1 text-xs text-slate-400">{{ __('waiter.requests.all_clear_body') }}</p>
                                     </div>
                                 </div>
                             </td>

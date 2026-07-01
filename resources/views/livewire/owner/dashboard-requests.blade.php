@@ -26,13 +26,13 @@
                     <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-amber-500"></span>
                 </span>
                 <div>
-                    <h2 class="text-xl font-extrabold text-slate-900">Live Table Requests</h2>
-                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Real-time floor service queue</p>
+                    <h2 class="text-xl font-extrabold text-slate-900">{{ __('owner.requests.live_title') }}</h2>
+                    <p class="text-xs font-semibold text-slate-500 mt-0.5">{{ __('owner.requests.live_subtitle') }}</p>
                 </div>
             </div>
             <a href="{{ route('owner.requests.index') }}"
                 class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors bg-indigo-50 hover:bg-indigo-100/80 px-3.5 py-2 rounded-xl border border-indigo-100/50 shadow-sm">
-                <span>View Full Queue</span>
+                <span>{{ __('owner.requests.view_full_queue') }}</span>
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
@@ -45,10 +45,10 @@
                 <thead>
                     <tr
                         class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100">
-                        <th scope="col" class="pb-3 pr-4">Table & Session</th>
-                        <th scope="col" class="pb-3 px-4">Status</th>
-                        <th scope="col" class="pb-3 px-4">Wait Time</th>
-                        <th scope="col" class="pb-3 pl-4 text-right">Actions</th>
+                        <th scope="col" class="pb-3 pr-4">{{ __('owner.common.table_session') }}</th>
+                        <th scope="col" class="pb-3 px-4">{{ __('owner.common.status') }}</th>
+                        <th scope="col" class="pb-3 px-4">{{ __('owner.common.wait_time') }}</th>
+                        <th scope="col" class="pb-3 pl-4 text-right">{{ __('owner.common.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -68,7 +68,7 @@
                                     <div>
                                         <p class="font-bold text-slate-800">{{ $request->tableSession->table->name }}</p>
                                         <p class="mt-0.5 flex items-center gap-1 text-[10px] text-slate-400 font-mono"
-                                            title="Session {{ $request->tableSession->id }}">
+                                            title="{{ __('owner.common.session') }} {{ $request->tableSession->id }}">
                                             {{ str($request->tableSession->session_token)->limit(8) }}
                                         </p>
                                     </div>
@@ -82,14 +82,14 @@
                                         <span
                                             class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 shadow-sm">
                                             <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            Pending
+                                            {{ __('owner.common.pending') }}
                                         </span>
                                     @else
                                         <span
                                             class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm"
-                                            title="Accepted by {{ $request->acceptedBy?->name ?? 'Staff' }}">
+                                            title="{{ __('owner.requests.accepted_by', ['name' => $request->acceptedBy?->name ?? __('owner.common.staff')]) }}">
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                            Accepted
+                                            {{ __('owner.common.accepted') }}
                                         </span>
                                     @endif
                                 </div>
@@ -135,7 +135,7 @@
                                             class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0">
                                             <span wire:loading.remove wire:target="acceptRequest({{ $request->id }})"
                                                 class="inline-flex items-center gap-1.5">
-                                                <span>Accept</span>
+                                                <span>{{ __('owner.common.accept') }}</span>
                                                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                                     stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -149,7 +149,7 @@
                                                     <path class="opacity-75" fill="currentColor"
                                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                                 </svg>
-                                                Accepting...
+                                                {{ __('owner.common.accepting') }}
                                             </span>
                                         </button>
                                     @elseif ($request->status === \App\Models\ServiceRequest::STATUS_ACCEPTED)
@@ -199,8 +199,8 @@
                                                     stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
-                                                <span x-show="resolveCountdown <= 0" x-cloak>Resolve</span>
-                                                <span x-show="resolveCountdown > 0" x-cloak x-text="`Wait ${Math.max(1, Math.ceil(resolveCountdown))}s`"></span>
+                                                <span x-show="resolveCountdown <= 0" x-cloak>{{ __('owner.common.resolve') }}</span>
+                                                <span x-show="resolveCountdown > 0" x-cloak x-text="@js(__('owner.common.wait_seconds', ['seconds' => '__SECONDS__'])).replace('__SECONDS__', Math.max(1, Math.ceil(resolveCountdown)))"></span>
                                             </span>
                                             <span wire:loading.inline-flex wire:target="resolveRequest({{ $request->id }})"
                                                 class="hidden items-center gap-1.5">
@@ -210,7 +210,7 @@
                                                     <path class="opacity-75" fill="currentColor"
                                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                                 </svg>
-                                                Resolving...
+                                                {{ __('owner.common.resolving') }}
                                             </span>
                                         </button>
                                     @endif
@@ -229,10 +229,9 @@
                                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
-                                    <h3 class="text-sm font-bold text-slate-800">No Active Requests</h3>
+                                    <h3 class="text-sm font-bold text-slate-800">{{ __('owner.requests.none_title') }}</h3>
                                     <p class="mt-1 text-xs text-slate-400 max-w-xs leading-relaxed">
-                                        All clean! When customers call for assistance at their tables, they will show up
-                                        here.
+                                        {{ __('owner.requests.none_body_dashboard') }}
                                     </p>
                                 </div>
                             </td>

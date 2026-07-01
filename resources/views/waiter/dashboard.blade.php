@@ -2,10 +2,9 @@
 
 @section('content')
     <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p class="text-sm font-medium uppercase tracking-[0.3em] text-sky-600">Smart Table</p>
-        <h1 class="mt-3 text-3xl font-semibold text-slate-900">Waiter Dashboard</h1>
-        <p class="mt-3 max-w-2xl text-sm text-slate-600">Waiter access is isolated by tenant and limited to waiter-only
-            routes.</p>
+        <p class="text-sm font-medium uppercase tracking-[0.3em] text-sky-600">{{ __('waiter.dashboard.label') }}</p>
+        <h1 class="mt-3 text-3xl font-semibold text-slate-900">{{ __('waiter.dashboard.title') }}</h1>
+        <p class="mt-3 max-w-2xl text-sm text-slate-600">{{ __('waiter.dashboard.intro') }}</p>
 
         <div class="mt-6">
             <button type="button" x-data @click="$dispatch('open-modal', 'scan-to-assign')"
@@ -14,7 +13,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M14 14h2m4 0h-2m-4 4h6" />
                 </svg>
-                <span>Scan to Assign</span>
+                <span>{{ __('waiter.dashboard.scan_to_assign') }}</span>
             </button>
         </div>
     </section>
@@ -25,7 +24,7 @@
             x-on:open-modal.window="$event.detail === 'scan-to-assign' && start()"
             x-on:close-modal.window="$event.detail === 'scan-to-assign' && stop()">
             <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-slate-900">Scan Table QR Code</h2>
+                <h2 class="text-lg font-semibold text-slate-900">{{ __('waiter.dashboard.scan_title') }}</h2>
                 <button type="button" @click="$dispatch('close')" class="text-slate-400 hover:text-slate-600">
                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd"
@@ -35,7 +34,7 @@
                 </button>
             </div>
 
-            <p class="mt-2 text-sm text-slate-500">Point your camera at the table's QR code.</p>
+            <p class="mt-2 text-sm text-slate-500">{{ __('waiter.dashboard.scan_body') }}</p>
 
             <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 aspect-square relative">
                 <video x-ref="video" class="h-full w-full object-cover" playsinline muted></video>
@@ -43,7 +42,7 @@
 
                 <div x-show="!cameraReady && !error"
                     class="absolute inset-0 flex items-center justify-center text-sm text-slate-300">
-                    Starting camera…
+                    {{ __('waiter.dashboard.starting_camera') }}
                 </div>
             </div>
 
@@ -53,7 +52,7 @@
 
             <div x-show="loading"
                 class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600">
-                Processing…
+                {{ __('waiter.dashboard.processing') }}
             </div>
 
             <div x-show="result" class="mt-4 rounded-xl border px-4 py-3 text-sm font-medium" :class="result?.status === 'already_assigned'
@@ -64,11 +63,11 @@
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" @click="$dispatch('close')"
                     class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                    Close
+                    {{ __('waiter.dashboard.close') }}
                 </button>
                 <button type="button" x-show="result || error" @click="reset(); start()"
                     class="rounded-xl border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-100">
-                    Scan Again
+                    {{ __('waiter.dashboard.scan_again') }}
                 </button>
             </div>
         </div>
@@ -97,7 +96,7 @@
                     this.reset();
 
                     if (!navigator.mediaDevices?.getUserMedia) {
-                        this.error = 'Camera access is not supported on this device.';
+                        this.error = @js(__('waiter.dashboard.camera_not_supported'));
                         return;
                     }
 
@@ -110,7 +109,7 @@
                         this.cameraReady = true;
                         this._scanLoop();
                     } catch (e) {
-                        this.error = 'Unable to access the camera. Please grant camera permission.';
+                        this.error = @js(__('waiter.dashboard.camera_denied'));
                     }
                 },
 
@@ -178,13 +177,13 @@
                         const data = await res.json();
 
                         if (!res.ok) {
-                            this.error = data.message ?? 'Something went wrong. Please try again.';
+                            this.error = data.message ?? @js(__('waiter.dashboard.something_wrong'));
                             return;
                         }
 
                         this.result = data;
                     } catch (e) {
-                        this.error = 'Network error. Please try again.';
+                        this.error = @js(__('waiter.dashboard.network_error'));
                     } finally {
                         this.loading = false;
                     }

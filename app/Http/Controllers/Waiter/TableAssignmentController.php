@@ -31,7 +31,7 @@ class TableAssignmentController extends Controller
         if ($table === null) {
             return response()->json([
                 'status' => 'not_found',
-                'message' => 'This QR code does not match any table for your restaurant.',
+                'message' => __('waiter.tables.qr_not_found'),
             ], 404);
         }
 
@@ -48,7 +48,7 @@ class TableAssignmentController extends Controller
                 return response()->json([
                     'status' => 'already_assigned',
                     'table' => $table->name,
-                    'message' => "You're already assigned to {$table->name}.",
+                    'message' => __('waiter.tables.already_assigned', ['table' => $table->name]),
                 ]);
             }
 
@@ -58,7 +58,7 @@ class TableAssignmentController extends Controller
             return response()->json([
                 'status' => 'assigned',
                 'table' => $table->name,
-                'message' => "{$table->name} has been assigned to you.",
+                'message' => __('waiter.tables.assigned', ['table' => $table->name]),
             ]);
         });
     }

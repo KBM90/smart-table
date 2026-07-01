@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Middleware\VerifySubscription;
+use App\Http\Middleware\SetCustomerLocale;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ServiceRequest;
@@ -45,7 +46,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ServiceRequest::class, ServiceRequestPolicy::class);
         Gate::policy(TableSession::class, TableSessionPolicy::class);
 
-        Livewire::addPersistentMiddleware(VerifySubscription::class);
+        Livewire::addPersistentMiddleware([
+            VerifySubscription::class,
+            SetCustomerLocale::class,
+        ]);
 
         RateLimiter::for('login', fn (Request $request) => Limit::perMinute(5)->by((string) $request->ip()));
         RateLimiter::for('register', fn (Request $request) => Limit::perMinute(3)->by((string) $request->ip()));

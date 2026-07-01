@@ -26,6 +26,7 @@
         $owner = auth()->user();
         $needsAccountVerification = $owner?->requiresAccountVerification() ?? false;
         $ownerNotificationCount = $needsAccountVerification ? 1 : 0;
+        $appLocaleOptions = \App\Support\AppLocale::options();
     @endphp
     <div id="page-loader"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-md transition-opacity duration-500">
@@ -63,7 +64,7 @@
                     <div>
                         <p
                             class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
-                            Owner Dashboard
+                            {{ __('owner.nav.owner_dashboard') }}
                         </p>
                         <p class="mt-1 text-lg font-black text-slate-900">
                             {{ app(\App\Support\CurrentTenant::class)->tenant()?->name }}
@@ -72,14 +73,14 @@
 
                     @php
                         $navLinks = [
-                            ['label' => 'Dashboard', 'route' => 'owner.dashboard', 'match' => 'owner.dashboard'],
-                            ['label' => 'Tables', 'route' => 'owner.tables.index', 'match' => 'owner.tables.*'],
-                            ['label' => 'Products', 'route' => 'owner.products.index', 'match' => 'owner.products.*'],
-                            ['label' => 'Staff', 'route' => 'owner.staff.index', 'match' => 'owner.staff.*'],
-                            ['label' => 'Performance', 'route' => 'owner.waiters.index', 'match' => 'owner.waiters.*'],
-                            ['label' => 'Requests', 'route' => 'owner.requests.index', 'match' => 'owner.requests.*'],
-                            ['label' => 'Settings', 'route' => 'owner.settings.edit', 'match' => 'owner.settings.*'],
-                            ['label' => 'Billing', 'route' => 'owner.billing.index', 'match' => 'owner.billing.*'],
+                            ['label' => __('owner.nav.dashboard'), 'route' => 'owner.dashboard', 'match' => 'owner.dashboard'],
+                            ['label' => __('owner.nav.tables'), 'route' => 'owner.tables.index', 'match' => 'owner.tables.*'],
+                            ['label' => __('owner.nav.products'), 'route' => 'owner.products.index', 'match' => 'owner.products.*'],
+                            ['label' => __('owner.nav.staff'), 'route' => 'owner.staff.index', 'match' => 'owner.staff.*'],
+                            ['label' => __('owner.nav.performance'), 'route' => 'owner.waiters.index', 'match' => 'owner.waiters.*'],
+                            ['label' => __('owner.nav.requests'), 'route' => 'owner.requests.index', 'match' => 'owner.requests.*'],
+                            ['label' => __('owner.nav.settings'), 'route' => 'owner.settings.edit', 'match' => 'owner.settings.*'],
+                            ['label' => __('owner.nav.billing'), 'route' => 'owner.billing.index', 'match' => 'owner.billing.*'],
                         ];
                     @endphp
 
@@ -97,10 +98,25 @@
                 </div>
 
                 <div class="flex items-center gap-3">
+                    <form method="GET" action="{{ url()->current() }}" class="hidden sm:block">
+                        @foreach (request()->except('lang') as $key => $value)
+                            @if (is_scalar($value))
+                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                            @endif
+                        @endforeach
+                        <label for="owner-language" class="sr-only">{{ __('owner.language') }}</label>
+                        <select id="owner-language" name="lang" onchange="this.form.submit()"
+                            class="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-sm shadow-slate-100 transition hover:border-indigo-200 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            @foreach ($appLocaleOptions as $locale => $label)
+                                <option value="{{ $locale }}" @selected(app()->getLocale() === $locale)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+
                     <details class="group relative">
                         <summary
                             class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600">
-                            <span class="sr-only">Open notifications</span>
+                            <span class="sr-only">{{ __('owner.notifications.open') }}</span>
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M10.268 21a2 2 0 0 0 3.464 0" />
@@ -117,20 +133,20 @@
                         <div
                             class="absolute right-0 mt-3 w-80 rounded-lg border border-slate-200 bg-white p-3 shadow-xl shadow-slate-200/70">
                             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                                <p class="text-sm font-black text-slate-900">Notifications</p>
+                                <p class="text-sm font-black text-slate-900">{{ __('owner.notifications.title') }}</p>
                                 <span class="text-xs font-bold text-slate-400">{{ $ownerNotificationCount }}</span>
                             </div>
 
                             @if ($needsAccountVerification)
                                 <a href="{{ route('owner.account-verification.show') }}"
                                     class="mt-3 block rounded-lg border border-amber-200 bg-amber-50 p-3 transition hover:bg-amber-100">
-                                    <span class="block text-sm font-black text-amber-900">Verify your account</span>
+                                    <span class="block text-sm font-black text-amber-900">{{ __('owner.notifications.verify_title') }}</span>
                                     <span class="mt-1 block text-xs leading-5 text-amber-800">
-                                        Enter the code sent by {{ $owner->verification_method === 'whatsapp' ? 'WhatsApp' : 'email' }}.
+                                        {{ __('owner.notifications.verify_body', ['method' => $owner->verification_method === 'whatsapp' ? 'WhatsApp' : 'email']) }}
                                     </span>
                                 </a>
                             @else
-                                <p class="py-6 text-center text-sm font-semibold text-slate-500">No new notifications</p>
+                                <p class="py-6 text-center text-sm font-semibold text-slate-500">{{ __('owner.notifications.none') }}</p>
                             @endif
                         </div>
                     </details>
@@ -139,7 +155,7 @@
                     <div x-data="{ open: false }" class="relative md:hidden">
                         <button @click="open = !open" type="button"
                             class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm">
-                            Menu
+                            {{ __('owner.nav.menu') }}
                         </button>
                         <div x-show="open" @click.outside="open = false" x-transition
                             class="absolute right-0 mt-2 w-44 rounded-2xl border border-slate-200 bg-white py-2 shadow-xl">
@@ -158,7 +174,7 @@
                         @csrf
                         <button type="submit"
                             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 shadow-sm shadow-slate-100">
-                            Logout
+                            {{ __('owner.nav.logout') }}
                         </button>
                     </form>
                 </div>
@@ -170,16 +186,19 @@
                 <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-amber-900 shadow-sm">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <p class="text-sm font-black">Your account is not verified yet.</p>
+                            <p class="text-sm font-black">{{ __('owner.notifications.banner_title') }}</p>
                             <p class="mt-1 text-sm leading-6">
-                                You can keep using Smart Table, but please verify your account
-                                {{ $owner->verification_code_sent_at ? 'using the code sent to' : 'by sending a code to' }}
-                                {{ $owner->verificationDestination() }}.
+                                {{ __('owner.notifications.banner_body', [
+                                    'action' => $owner->verification_code_sent_at
+                                        ? __('owner.notifications.using_code_sent_to')
+                                        : __('owner.notifications.by_sending_code_to'),
+                                    'destination' => $owner->verificationDestination(),
+                                ]) }}
                             </p>
                         </div>
                         <a href="{{ route('owner.account-verification.show') }}"
                             class="inline-flex items-center justify-center rounded-lg bg-amber-900 px-4 py-2 text-sm font-black text-white transition hover:bg-amber-800">
-                            Verify now
+                            {{ __('owner.notifications.verify_now') }}
                         </a>
                     </div>
                 </div>

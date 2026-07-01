@@ -53,7 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'tenant', 'subscription', 'role:'.UserRole::Owner->value])
+Route::middleware(['auth', 'app.locale', 'tenant', 'subscription', 'role:'.UserRole::Owner->value])
     ->prefix('api/owner')
     ->name('owner.api.')
     ->group(function () {
@@ -61,7 +61,7 @@ Route::middleware(['auth', 'tenant', 'subscription', 'role:'.UserRole::Owner->va
         Route::get('/waiters/{waiter}/stats', [WaiterStatsController::class, 'show'])->name('waiters.stats');
     });
 
-Route::middleware(['auth', 'tenant', 'role:'.UserRole::Owner->value])->prefix('owner')->name('owner.')->group(function () {
+Route::middleware(['auth', 'app.locale', 'tenant', 'role:'.UserRole::Owner->value])->prefix('owner')->name('owner.')->group(function () {
     Route::get('/account-verification', [AccountVerificationController::class, 'show'])->name('account-verification.show');
     Route::post('/account-verification/send', [AccountVerificationController::class, 'send'])
         ->middleware('throttle:6,1')
@@ -90,7 +90,7 @@ Route::middleware(['auth', 'tenant', 'role:'.UserRole::Owner->value])->prefix('o
     Route::get('/billing/success', [BillingController::class, 'success'])->name('billing.success');
 });
 
-Route::middleware(['auth', 'tenant', 'subscription', 'role:'.UserRole::Waiter->value])->prefix('waiter')->name('waiter.')->group(function () {
+Route::middleware(['auth', 'app.locale', 'tenant', 'subscription', 'role:'.UserRole::Waiter->value])->prefix('waiter')->name('waiter.')->group(function () {
     Route::get('/dashboard', function () {
         return view('waiter.dashboard');
     })->name('dashboard');
@@ -100,18 +100,18 @@ Route::middleware(['auth', 'tenant', 'subscription', 'role:'.UserRole::Waiter->v
     Route::post('/tables/assign-via-qr', TableAssignmentController::class)->name('tables.assign-via-qr');
 });
 
-Route::get('/t/{qr_token}/catalog', CustomerCatalog::class)->name('customer.catalog');
+Route::get('/t/{qr_token}/catalog', CustomerCatalog::class)->middleware('customer.locale')->name('customer.catalog');
 
-Route::get('/t/{qr_token}', CustomerTablePage::class)->name('customer.table');
+Route::get('/t/{qr_token}', CustomerTablePage::class)->middleware('customer.locale')->name('customer.table');
 
 use App\Http\Controllers\Customers\CustomerRequestController;
 use App\Http\Controllers\Customers\CustomerReviewController;
 
-Route::post('/api/table/request', [CustomerRequestController::class, 'store'])->name('customer.request.store');
-Route::delete('/api/table/request/{id}', [CustomerRequestController::class, 'cancel'])->name('customer.request.cancel');
+Route::post('/api/table/request', [CustomerRequestController::class, 'store'])->middleware('customer.locale')->name('customer.request.store');
+Route::delete('/api/table/request/{id}', [CustomerRequestController::class, 'cancel'])->middleware('customer.locale')->name('customer.request.cancel');
 
 // ─── Customer Review ─────────────────────────────────────────────────────────
 // No auth required — customers are identified via the session cookie.
-Route::post('/api/reviews', [CustomerReviewController::class, 'store'])->name('customer.review.store');
+Route::post('/api/reviews', [CustomerReviewController::class, 'store'])->middleware('customer.locale')->name('customer.review.store');
 
 require __DIR__.'/auth.php';
