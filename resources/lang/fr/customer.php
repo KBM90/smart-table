@@ -51,5 +51,7 @@ return [
         'intro' => 'Parcourez les produits disponibles pour cette table. La commande et le paiement arriveront dans une prochaine phase.',
         'back_to_table' => 'Retour a la table',
         'empty' => 'Aucun produit actif n\'est encore disponible pour cette table.',
+        'all_categories' => 'Tous',
+
     ],
 ];

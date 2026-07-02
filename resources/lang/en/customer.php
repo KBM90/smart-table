@@ -51,5 +51,7 @@ return [
         'intro' => 'Browse active products for this table. Ordering and checkout arrive in a later phase.',
         'back_to_table' => 'Back to table',
         'empty' => 'No active products are available for this table yet.',
+        'all_categories' => 'All',
+
     ],
 ];

@@ -51,5 +51,7 @@ return [
         'intro' => 'Durchsuchen Sie aktive Produkte fur diesen Tisch. Bestellung und Zahlung folgen in einer spateren Phase.',
         'back_to_table' => 'Zuruck zum Tisch',
         'empty' => 'Fur diesen Tisch sind noch keine aktiven Produkte verfugbar.',
+        'all_categories' => 'Alle',
+
     ],
 ];

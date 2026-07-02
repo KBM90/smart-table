@@ -21,6 +21,8 @@ class Catalog extends Component
 
     public string $tableName;
 
+    public int $tenantId;
+
     // ── Search / filter state (wire-bindable) ────────────────────
     #[Url(as: 'q', keep: false)]
     public string $search = '';
@@ -28,8 +30,7 @@ class Catalog extends Component
     #[Url(as: 'cat', keep: false)]
     public ?int $categoryId = null;
 
-    // ── Private context (never serialised to the browser) ───────
-    protected int $tenantId;
+
 
     public function mount(string $qr_token): void
     {
@@ -39,10 +40,14 @@ class Catalog extends Component
             ->with('tenant')
             ->firstOrFail();
 
-        $this->qrToken    = $qr_token;
-        $this->tenantId   = $table->tenant_id;
+        $this->qrToken = $qr_token;
+        $this->tenantId = $table->tenant_id;
         $this->tenantName = $table->tenant->name;
-        $this->tableName  = $table->name;
+        $this->tableName = $table->name;
+    }
+    public function selectCategory(?int $categoryId): void
+    {
+        $this->categoryId = $categoryId;
     }
 
     /**
@@ -53,11 +58,13 @@ class Catalog extends Component
     public function categories(): Collection
     {
         return Category::query()
-            ->whereHas('products', fn ($q) => $q
-                ->withoutGlobalScopes()
-                ->where('tenant_id', $this->tenantId)
-                ->where('is_active', true)
-                ->whereNull('deleted_at')
+            ->whereHas(
+                'products',
+                fn($q) => $q
+                    ->withoutGlobalScopes()
+                    ->where('tenant_id', $this->tenantId)
+                    ->where('is_active', true)
+                    ->whereNull('deleted_at')
             )
             ->orderBy('sort_order')
             ->orderBy('name')
@@ -79,17 +86,17 @@ class Catalog extends Component
             ->with('category')
             ->when(
                 $this->categoryId !== null,
-                fn ($q) => $q->where('category_id', $this->categoryId)
+                fn($q) => $q->where('category_id', $this->categoryId)
             )
             ->when(
                 $this->search !== '',
-                fn ($q) => $q->where('name', 'like', '%' . $this->search . '%')
+                fn($q) => $q->where('name', 'like', '%' . $this->search . '%')
             )
             ->orderBy('sort_order')
             ->orderBy('name');
 
         return $query->get()->groupBy(
-            fn (Product $p) => $p->category?->name ?? 'Other'
+            fn(Product $p) => $p->category?->name ?? 'Other'
         );
     }
 

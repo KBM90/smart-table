@@ -1,12 +1,38 @@
 <div class="space-y-6">
     <section class="rounded-3xl border border-slate-800 bg-slate-900 p-8 shadow-2xl shadow-slate-950/50">
         <p class="text-sm font-medium uppercase tracking-[0.3em] text-amber-400">{{ __('customer.catalog.label') }}</p>
-        <h1 class="mt-4 text-3xl font-semibold text-white">{{ __('customer.catalog.heading', ['tenant' => $tenantName, 'table' => $tableName]) }}</h1>
+        <h1 class="mt-4 text-3xl font-semibold text-white">
+            {{ __('customer.catalog.heading', ['tenant' => $tenantName, 'table' => $tableName]) }}</h1>
         <p class="mt-3 text-sm text-slate-300">{{ __('customer.catalog.intro') }}</p>
-        <a href="{{ route('customer.table', ['qr_token' => $qrToken]) }}" class="mt-6 inline-flex rounded-xl border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-amber-400 hover:text-amber-300">
+        <a href="{{ route('customer.table', ['qr_token' => $qrToken]) }}"
+            class="mt-6 inline-flex rounded-xl border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-amber-400 hover:text-amber-300">
             {{ __('customer.catalog.back_to_table') }}
         </a>
     </section>
+
+    {{-- Category filter pills --}}
+    @if ($this->categories->isNotEmpty())
+        <section class="flex flex-wrap gap-2" role="tablist"
+            aria-label="{{ __('customer.catalog.category') ?? 'Categories' }}">
+            <button type="button" wire:click="selectCategory(null)" wire:loading.attr="disabled"
+                wire:target="selectCategory" aria-pressed="{{ $categoryId === null ? 'true' : 'false' }}"
+                class="rounded-full px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 {{ $categoryId === null
+            ? 'bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20'
+            : 'border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-400 hover:text-amber-300' }}">
+                {{ __('customer.catalog.all_categories') ?? 'All' }}
+            </button>
+
+            @foreach ($this->categories as $category)
+                <button type="button" wire:click="selectCategory({{ $category->id }})" wire:loading.attr="disabled"
+                    wire:target="selectCategory" aria-pressed="{{ $categoryId === $category->id ? 'true' : 'false' }}"
+                    class="rounded-full px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 {{ $categoryId === $category->id
+                    ? 'bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20'
+                    : 'border border-slate-700 bg-slate-900 text-slate-300 hover:border-amber-400 hover:text-amber-300' }}">
+                    {{ $category->name }}
+                </button>
+            @endforeach
+        </section>
+    @endif
 
     <section class="grid gap-4 sm:grid-cols-2">
         @forelse ($products as $product)
@@ -23,7 +49,8 @@
                 </div>
             </article>
         @empty
-            <div class="rounded-3xl border border-dashed border-slate-700 bg-slate-900/60 p-8 text-sm text-slate-400 sm:col-span-2">
+            <div
+                class="rounded-3xl border border-dashed border-slate-700 bg-slate-900/60 p-8 text-sm text-slate-400 sm:col-span-2">
                 {{ __('customer.catalog.empty') }}
             </div>
         @endforelse

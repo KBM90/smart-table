@@ -51,5 +51,7 @@ return [
         'intro' => 'Explora los productos activos para esta mesa. Los pedidos y el pago llegaran en una fase posterior.',
         'back_to_table' => 'Volver a la mesa',
         'empty' => 'Todavia no hay productos activos disponibles para esta mesa.',
+        'all_categories' => 'Todos',
+
     ],
 ];
