@@ -50,7 +50,7 @@ class Index extends Component
 
         $requests = $hasAssignedTables
             ? ServiceRequest::query()
-                ->with(['tableSession.table', 'acceptedBy'])
+                ->with(['tableSession.table', 'acceptedBy', 'order.items'])
                 ->whereHas(
                     'tableSession',
                     fn($q) => $q->whereIn('table_id', $assignedTableIds)

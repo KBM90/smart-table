@@ -62,6 +62,11 @@ class TableSession extends Model
         return $this->hasMany(ServiceRequest::class, 'table_session_id');
     }
 
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'table_session_id');
+    }
+
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
@@ -69,7 +74,7 @@ class TableSession extends Model
 
     public function close(): void
     {
-        if (! $this->isActive()) {
+        if (!$this->isActive()) {
             return;
         }
 

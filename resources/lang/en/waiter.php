@@ -46,6 +46,8 @@ return [
         'wait_seconds' => 'Wait :seconds s',
         'all_clear' => 'All Clear',
         'all_clear_body' => 'No active requests for your tables right now.',
+        'order_label' => 'Order',
+        'order_total' => 'Total',
     ],
     'tables' => [
         'label' => 'Waiter',
@@ -65,4 +67,5 @@ return [
         'already_assigned' => "You're already assigned to :table.",
         'qr_not_found' => 'This QR code does not match any table for your restaurant.',
     ],
+
 ];

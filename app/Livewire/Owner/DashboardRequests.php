@@ -39,7 +39,7 @@ class DashboardRequests extends Component
     {
         return view('livewire.owner.dashboard-requests', [
             'requests' => ServiceRequest::query()
-                ->with(['tableSession.table', 'acceptedBy'])
+                ->with(['tableSession.table', 'acceptedBy', 'order.items'])
                 ->whereIn('status', [
                     ServiceRequest::STATUS_PENDING,
                     ServiceRequest::STATUS_ACCEPTED,

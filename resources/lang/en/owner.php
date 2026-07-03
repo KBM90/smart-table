@@ -95,6 +95,8 @@ return [
         'none_body_dashboard' => 'All clean! When customers call for assistance at their tables, they will show up here.',
         'none_body' => "You're all caught up! New requests will appear here instantly.",
         'accepted_by' => 'Accepted by :name',
+        'order_label' => 'Order',
+        'order_total' => 'Total',
     ],
     'tables' => [
         'label' => 'Owner Tables',
@@ -270,4 +272,6 @@ return [
         'no_reviews_title' => 'No reviews yet',
         'no_reviews_body' => 'Reviews will appear here once customers leave feedback after their requests are resolved.',
     ],
+
+
 ];

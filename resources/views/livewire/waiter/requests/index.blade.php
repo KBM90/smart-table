@@ -165,6 +165,31 @@
                                 <p class="font-semibold text-slate-900">{{ $request->tableSession->table->name }}</p>
                                 <p class="mt-1 text-xs text-slate-500">{{ $request->tableSession->session_token }}</p>
                             </td>
+                            @if ($request->order)
+    <div class="mt-2 max-w-xs rounded-lg border border-indigo-100 bg-indigo-50/60 px-2.5 py-2">
+        <p class="flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-indigo-600">
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+            </svg>
+            {{ __('owner.requests.order_label') }}
+        </p>
+        <ul class="mt-1 space-y-0.5 text-[11px] text-slate-600">
+            @foreach ($request->order->items as $item)
+                <li class="flex justify-between gap-2">
+                    <span class="truncate">{{ $item->quantity }}x {{ $item->product_name }}</span>
+                    <span class="shrink-0 font-semibold text-slate-700">${{ $item->subtotalFormatted() }}</span>
+                </li>
+            @endforeach
+        </ul>
+        <p class="mt-1 flex justify-between border-t border-indigo-100 pt-1 text-[11px] font-black text-indigo-700">
+            <span>{{ __('owner.requests.order_total') }}</span>
+            <span>${{ $request->order->totalFormatted() }}</span>
+        </p>
+        @if ($request->order->note)
+            <p class="mt-1 text-[10px] italic text-slate-500">&ldquo;{{ $request->order->note }}&rdquo;</p>
+        @endif
+    </div>
+@endif
                             <td class="px-6 py-4">
                                 {{-- Pending badge --}}
                                 <span x-show="localStatus === 'pending'" x-cloak
