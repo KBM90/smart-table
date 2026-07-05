@@ -163,8 +163,6 @@
                         >
                             <td class="px-6 py-4">
                                 <p class="font-semibold text-slate-900">{{ $request->tableSession->table->name }}</p>
-                                <p class="mt-1 text-xs text-slate-500">{{ $request->tableSession->session_token }}</p>
-                            </td>
                             @if ($request->order)
     <div class="mt-2 max-w-xs rounded-lg border border-indigo-100 bg-indigo-50/60 px-2.5 py-2">
         <p class="flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-indigo-600">
@@ -190,6 +188,8 @@
         @endif
     </div>
 @endif
+                            </td>
+                           
                             <td class="px-6 py-4">
                                 {{-- Pending badge --}}
                                 <span x-show="localStatus === 'pending'" x-cloak
