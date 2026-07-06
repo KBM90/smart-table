@@ -58,7 +58,7 @@
     <div class="min-h-screen relative overflow-hidden">
 
         <header class="border-b border-slate-200/80 bg-white/70 backdrop-blur-md sticky top-0 z-50">
-            <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <div class="flex items-center justify-between px-6 py-4">
                 <div class="flex items-center gap-8">
 
                     <div>
@@ -181,7 +181,7 @@
             </div>
         </header>
 
-        <main class="mx-auto max-w-6xl px-6 py-10 relative z-10">
+        <main class="w-full relative z-10 {{ request()->routeIs('owner.dashboard') ? '' : 'px-6 py-10' }}">
             @if ($needsAccountVerification)
                 <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-amber-900 shadow-sm">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
