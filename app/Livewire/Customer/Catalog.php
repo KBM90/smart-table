@@ -9,7 +9,6 @@ use App\Models\TableSession;
 use App\Services\OrderService;
 use App\Services\TableSessionService;
 use App\Support\ComponentRateLimiter;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Validation\ValidationException;
@@ -152,7 +151,7 @@ class Catalog extends Component
         return (int) $this->cartProducts->sum('subtotal_cents');
     }
 
-    public function submitOrder(OrderService $orderService, ComponentRateLimiter $rateLimiter): ?RedirectResponse
+    public function submitOrder(OrderService $orderService, ComponentRateLimiter $rateLimiter): mixed
     {
         abort_if($this->blocked, Response::HTTP_FORBIDDEN);
 

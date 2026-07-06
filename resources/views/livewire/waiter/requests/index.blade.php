@@ -78,47 +78,22 @@
                 </thead>
                 <tbody class="divide-y divide-slate-200">
                     @forelse ($requests as $request)
-                        <tr class="align-top transition-all duration-300"
+                        <tr wire:key="request-{{ $request->id }}" class="align-top transition-all duration-300"
                             x-data="{
                                 localStatus: @js($request->status),
                                 busy: false,
                                 justChanged: false,
-                                resolveReadyAt: @js($request->status === 'accepted' && $request->accepted_at ? $request->accepted_at->copy()->addSeconds(60)->toIso8601String() : null),
-                                resolveCountdown: 0,
-                                resolveTimer: null,
-                                init() {
-                                    this.updateResolveCountdown();
-                                    if (this.resolveCountdown > 0) {
-                                        this.startResolveCountdown();
-                                    }
-                                },
-                                updateResolveCountdown() {
-                                    if (!this.resolveReadyAt) {
-                                        this.resolveCountdown = 0;
-                                        return;
-                                    }
-
-                                    const readyAt = Date.parse(this.resolveReadyAt);
-
-                                    if (Number.isNaN(readyAt)) {
-                                        this.resolveCountdown = 0;
-                                        return;
-                                    }
-
-                                    this.resolveCountdown = Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
-                                },
-                                startResolveCountdown() {
-                                    if (this.resolveTimer) clearInterval(this.resolveTimer);
-                                    this.resolveTimer = setInterval(() => {
-                                        this.updateResolveCountdown();
-                                        if (this.resolveCountdown === 0) {
-                                            clearInterval(this.resolveTimer);
-                                        }
-                                    }, 1000);
-                                },
-                                destroy() {
-                                    if (this.resolveTimer) clearInterval(this.resolveTimer);
-                                },
+                               resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? max(0, 60 - now()->diffInSeconds($request->accepted_at)) : 0 }},
+resolveTimer: null,
+init() {
+    if (this.resolveCountdown > 0) {
+        this.resolveTimer = setInterval(() => {
+            this.resolveCountdown = Math.max(0, this.resolveCountdown - 1);
+            if (this.resolveCountdown === 0) clearInterval(this.resolveTimer);
+        }, 1000);
+    }
+},
+destroy() { if (this.resolveTimer) clearInterval(this.resolveTimer); },
                                 async doAccept() {
                                     if (this.busy) return;
                                     this.busy = true;
