@@ -83,36 +83,41 @@
                                 localStatus: @js($request->status),
                                 busy: false,
                                 justChanged: false,
-                               resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? max(0, 60 - now()->diffInSeconds($request->accepted_at)) : 0 }},
-resolveTimer: null,
-init() {
-    if (this.resolveCountdown > 0) {
-        this.resolveTimer = setInterval(() => {
-            this.resolveCountdown = Math.max(0, this.resolveCountdown - 1);
-            if (this.resolveCountdown === 0) clearInterval(this.resolveTimer);
-        }, 1000);
-    }
-},
-destroy() { if (this.resolveTimer) clearInterval(this.resolveTimer); },
-                                async doAccept() {
-                                    if (this.busy) return;
-                                    this.busy = true;
-                                    this.localStatus = 'accepted';
-                                    this.resolveReadyAt = new Date(Date.now() + 60000).toISOString();
-                                    this.updateResolveCountdown();
-                                    this.startResolveCountdown();
-                                    this.flashChange();
-                                    try {
-                                        await $wire.acceptRequest({{ $request->id }});
-                                    } catch (e) {
-                                        this.localStatus = 'pending';
-                                        this.resolveReadyAt = null;
-                                        clearInterval(this.resolveTimer);
-                                        this.resolveCountdown = 0;
-                                    } finally {
-                                        this.busy = false;
+                                resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? max(0, min(60, 60 - (int) now()->diffInSeconds($request->accepted_at, false))) : 0 }},
+                                resolveTimer: null,
+                                init() {
+                                    if (this.resolveCountdown > 0) {
+                                        this.resolveTimer = setInterval(() => {
+                                            this.resolveCountdown = Math.max(0, this.resolveCountdown - 1);
+                                            if (this.resolveCountdown === 0) clearInterval(this.resolveTimer);
+                                        }, 1000);
                                     }
                                 },
+                                destroy() { if (this.resolveTimer) clearInterval(this.resolveTimer); },
+                                async doAccept() {
+                                        if (this.busy) return;
+                                        this.busy = true;
+                                        this.localStatus = 'accepted';
+
+                                        // Start the 60s resolve countdown directly (no separate helper methods exist).
+                                        if (this.resolveTimer) clearInterval(this.resolveTimer);
+                                        this.resolveCountdown = 60;
+                                        this.resolveTimer = setInterval(() => {
+                                            this.resolveCountdown = Math.max(0, this.resolveCountdown - 1);
+                                            if (this.resolveCountdown === 0) clearInterval(this.resolveTimer);
+                                        }, 1000);
+
+                                        this.flashChange();
+                                        try {
+                                            await $wire.acceptRequest({{ $request->id }});
+                                        } catch (e) {
+                                            this.localStatus = 'pending';
+                                            clearInterval(this.resolveTimer);
+                                            this.resolveCountdown = 0;
+                                        } finally {
+                                            this.busy = false;
+                                        }
+                                    },
                                 async doResolve() {
                                     if (this.busy || this.resolveCountdown > 0) return;
                                     this.busy = true;

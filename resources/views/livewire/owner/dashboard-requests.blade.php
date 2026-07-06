@@ -185,7 +185,7 @@
                                         </button>
                                     @elseif ($request->status === \App\Models\ServiceRequest::STATUS_ACCEPTED)
                                                                         <button x-data="{
-                                                                                                                       resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? max(0, 60 - now()->diffInSeconds($request->accepted_at)) : 0 }},
+                                                                                                                       resolveCountdown: {{ $request->status === 'accepted' && $request->accepted_at ? max(0, min(60, 60 - (int) now()->diffInSeconds($request->accepted_at, false))) : 0 }},
                                         resolveTimer: null,
                                         init() {
                                             if (this.resolveCountdown > 0) {
